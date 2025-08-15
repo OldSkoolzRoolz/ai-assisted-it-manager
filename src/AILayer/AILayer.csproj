@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>AILayer</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.ML" Version="3.0.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Models\ModelMetadata.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <!-- Add ONNX models here and mark as Content if needed -->
+  </ItemGroup>
+</Project>
