@@ -2,6 +2,7 @@
   <PropertyGroup>
     <AssemblyName>EnterpriseDashboard</AssemblyName>
     <RazorLangVersion>8.0</RazorLangVersion>
+    <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
