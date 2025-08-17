@@ -3,6 +3,13 @@ Enterprise level AI assisted policy and system monitor
 🛡 Roadmap: Enterprise Policy Manager + AI‑Assisted IT Companion
 Combines a custom ADMX/Group Policy toolkit with an AI intelligence layer for monitoring, automating, and self‑healing IT environments.
 
+> [!IMPORTANT]
+***This project is intended to be a pay-per-license software package after Phase 1.
+ Phase 1 will be a for single machine teaser release. I am looking for contributors
+ of all skill levels. Those who stick it out with me will be offered paid positions
+ for the release of the paid version. Great opportunity to learn and grow.***
+
+
 
 Phase 1 — Foundation & Core Policy Manager
 🎯 Goal: Build the baseline policy editor/manager with strong admin tools.
