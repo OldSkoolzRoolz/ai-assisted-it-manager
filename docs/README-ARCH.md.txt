@@ -1,4 +1,4 @@
-Perfect — I’ll reframe it so a developer can read it like a blueprint and start coding immediately. Here’s the **Developer Reference Architecture** breakdown:  
+
 
 ---
 

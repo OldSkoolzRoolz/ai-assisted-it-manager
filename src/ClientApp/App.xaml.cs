@@ -1,20 +1,33 @@
+using System;
+using System.Windows;
+using ClientApp.ViewModels;
 using ClientApp.Views;
-
-using Microsoft.UI.Xaml;
+using CorePolicyEngine.Parsing;
+using Microsoft.Extensions.DependencyInjection;
+using Shared;
 
 namespace ClientApp;
 
-// Change base class from MediaTypeNames.Application to Microsoft.UI.Xaml.Application
 public partial class App : Application
 {
-    public App()
+    public ServiceProvider Services { get; private set; } = null!;
+
+    protected override void OnStartup(StartupEventArgs e)
     {
-        InitializeComponent();
+        base.OnStartup(e);
+        Services = ConfigureServices();
+        var window = new MainWindow
+        {
+            DataContext = Services.GetService(typeof(PolicyEditorViewModel))
+        };
+        window.Show();
     }
 
-    // Use Microsoft.UI.Xaml.LaunchActivatedEventArgs
-    protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
+    private ServiceProvider ConfigureServices()
     {
-        new MainWindow().Activate();
+        var sc = new ServiceCollection();
+        sc.AddSingleton<IAdmxCatalogLoader, AdmxAdmlParser>();
+        sc.AddSingleton<PolicyEditorViewModel>();
+        return sc.BuildServiceProvider();
     }
 }
