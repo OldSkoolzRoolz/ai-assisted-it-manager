@@ -44,6 +44,7 @@
 - Maintain separation of concerns; create directories to separate functional areas (e.g., Core.Engine, Core.Validation, Core.Deployment, Core.Parsing). Namespaces to follow directory patterns.
 - Use explicit interfaces for all services; no direct instantiation of concrete classes; Abstract factories for service creation.
 - Localization: Use resource files for all user-visible strings; no hardcoded strings in code.
+- Import statements should be outside of namespace
 
 ## Architecture Constraints
 - UI must NOT access registry or COM directly; route via services / broker.
