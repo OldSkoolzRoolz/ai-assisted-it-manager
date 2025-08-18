@@ -3,55 +3,46 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:views="clr-namespace:ClientApp.Views"
+             xmlns:vm="clr-namespace:ClientApp.ViewModels"
              mc:Ignorable="d">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="250" />
+            <ColumnDefinition Width="280" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <TreeView Grid.Column="0"
-                  ItemsSource="{Binding Categories}"
-                  SelectedItemChanged="CategoryTree_SelectedItemChanged">
-            <TreeView.ItemTemplate>
-                <DataTemplate>
-                    <TextBlock Text="{Binding Name}" />
-                </DataTemplate>
-            </TreeView.ItemTemplate>
-        </TreeView>
-        <ScrollViewer Grid.Column="1" Padding="12">
-            <StackPanel>
-                <TextBlock Text="{Binding SelectedPolicy.Name}" FontSize="20" />
-                <ItemsControl ItemsSource="{Binding CurrentSettings}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <StackPanel Margin="0,8,0,8">
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,4" VerticalAlignment="Center" >
-                                    <CheckBox Content="Enabled" IsChecked="{Binding Enabled}" />
-                                    <TextBox Width="220" Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}">
-                                        <TextBox.Style>
-                                            <Style TargetType="TextBox">
-                                                <Setter Property="Visibility" Value="Visible" />
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding ValueType}" Value="Boolean">
-                                                        <Setter Property="Visibility" Value="Collapsed" />
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBox.Style>
-                                    </TextBox>
-                                </StackPanel>
-                                <ItemsControl ItemsSource="{Binding Errors}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Foreground="Red" Text="{Binding}" />
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </StackPanel>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
+        <!-- Category + Policy Tree -->
+        <DockPanel Grid.Column="0">
+            <StackPanel Orientation="Horizontal" Margin="4" DockPanel.Dock="Top">
+                <Button Content="Load" Command="{Binding LoadPoliciesCommand}" Margin="0,0,6,0" />
+                <TextBox Width="150" Margin="0,0,6,0" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+                <Button Content="Search" Command="{Binding SearchLocalPoliciesCommand}" />
             </StackPanel>
-        </ScrollViewer>
+            <TreeView ItemsSource="{Binding CategoryTree}" SelectedItemChanged="CategoryTree_SelectedItemChanged" Margin="4" >
+                <TreeView.ItemContainerStyle>
+                    <Style TargetType="TreeViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="VerticalContentAlignment" Value="Top" />
+                    </Style>
+                </TreeView.ItemContainerStyle>
+                <TreeView.Resources>
+                    <HierarchicalDataTemplate DataType="{x:Type vm:CategoryTreeItem}" ItemsSource="{Binding Children}">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" VerticalAlignment="Top">
+                            <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                    </HierarchicalDataTemplate>
+                </TreeView.Resources>
+            </TreeView>
+        </DockPanel>
+
+        <!-- Right side policy settings -->
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <TextBlock Text="{Binding SelectedPolicy.Name}" FontSize="20" Margin="12,8,12,4" />
+            <views:PolicySettingsPanel Grid.Row="1" Margin="4" />
+        </Grid>
     </Grid>
 </UserControl>

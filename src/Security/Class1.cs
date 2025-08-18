@@ -1,6 +1,14 @@
-﻿namespace Security;
+﻿// Project Name: Security
+// File Name: Class1.cs
+// Author: Kyle Crowder
+// Github:  OldSkoolzRoolz
+// License: MIT
+// Do not remove file headers
+
+
+namespace Security;
+
 
 public class Class1
 {
-
 }

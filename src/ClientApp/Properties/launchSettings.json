@@ -3,17 +3,8 @@
     "ClientApp (Package)": {
       "commandName": "MsixPackage"
     },
-    "ClientApp (Unpackaged)": {
-      "commandName": "Project",
-      "environmentVariables": {
-        "dotnet_Debug": "TRUE"
-      },
-      "hotReloadEnabled": false
-    },
-    "Debug Client": {
-      "commandName": "Project",
-      "commandLineArgs": "arg=1",
-      "workingDirectory": ".\\"
+    "Profile 1": {
+      "commandName": "Project"
     }
   }
 }

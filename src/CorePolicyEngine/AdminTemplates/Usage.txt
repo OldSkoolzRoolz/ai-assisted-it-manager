@@ -1,0 +1,55 @@
+// Build a simple boolean policy with registry effects
+var ns = new NamespaceBinding("MSFT", new Uri("urn:schemas-microsoft-com:admx:windows"));
+var catId = new CategoryId("WindowsComponents");
+var category = new Category(catId, new LocalizedRef(new ResourceId("WindowsComponents_DisplayName")), null,
+    new DocumentLineage(new Uri("file:///C:/PolicyDefinitions/Windows.admx"), "sha256:...", DateTimeOffset.UtcNow, "/policy/categories", 42));
+
+var policy = new Policy(
+    new PolicyKey(ns.Uri, "DisableTelemetry"),
+    PolicyClass.Machine,
+    new LocalizedRef(new ResourceId("Policy_DisableTelemetry")),
+    new LocalizedRef(new ResourceId("Policy_DisableTelemetry_Explain")),
+    new CategoryRef(catId),
+    new SupportId("SUPPORTED_Win10"),
+    new PresentationRef("DisableTelemetry_Presentation"),
+    new[]
+    {
+        new BooleanElement(
+            new ElementId("DisableTelemetry_Bool"),
+            new LocalizedRef(new ResourceId("DisableTelemetry_Label")),
+            WhenTrue: new []
+            {
+                new RegistryAction(
+                    new RegistryPath(RegistryHive.HKEY_LOCAL_MACHINE, @"Software\Policies\MyVendor\Telemetry"),
+                    "Enabled",
+                    RegistryValueType.RegDword,
+                    0,
+                    RegistryOperation.SetValue)
+            },
+            WhenFalse: new []
+            {
+                new RegistryAction(
+                    new RegistryPath(RegistryHive.HKEY_LOCAL_MACHINE, @"Software\Policies\MyVendor\Telemetry"),
+                    "Enabled",
+                    RegistryValueType.RegDword,
+                    1,
+                    RegistryOperation.SetValue)
+            })
+    },
+    new PolicyStateBehavior(
+        PolicyDefaultState.NotConfigured,
+        OnEnable: Array.Empty<RegistryAction>(),
+        OnDisable: Array.Empty<RegistryAction>(),
+        OnNotConfigured: new []
+        {
+            new RegistryAction(
+                new RegistryPath(RegistryHive.HKEY_LOCAL_MACHINE, @"Software\Policies\MyVendor\Telemetry"),
+                "Enabled",
+                RegistryValueType.RegDword,
+                null,
+                RegistryOperation.DeleteValue)
+        }),
+    Tags: Array.Empty<Tags>(),
+    new PolicyVersion(1,0),
+    new DocumentLineage(new Uri("file:///C:/PolicyDefinitions/Windows.admx"), "sha256:...", DateTimeOffset.UtcNow, "/policy/policies/policy[@name='DisableTelemetry']", 200)
+);

@@ -1,25 +1,28 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+﻿// Project Name: CorePolicyEngine
+// File Name: DeploymentService.cs
+// Author: Kyle Crowder
+// Github:  OldSkoolzRoolz
+// License: MIT
+// Do not remove file headers
+
+
 using Shared;
 
 
 namespace CorePolicyEngine;
 
 
-public sealed class DeploymentService : IDeploymentService
+public sealed class DeploymentService
 {
-    public Task<Result<string>> DryRunAsync(PolicySet policySet, CancellationToken cancellationToken)
+    public Task<Result<string>> DryRunAsync(object desiredState, CancellationToken cancellationToken)
     {
-        // TODO: compute diff vs current system state
-        var diffJson = "{ \"changes\": [] }";
-        return Task.FromResult(Result<string>.Ok(diffJson));
+        // TODO: map desired state (policies + element values + states) to registry actions using Evaluator.
+        return Task.FromResult(Result<string>.Ok("{ }"));
     }
 
-    public Task<Result> ApplyAsync(PolicySet policySet, CancellationToken cancellationToken)
+    public Task<Result> ApplyAsync(object desiredState, CancellationToken cancellationToken)
     {
-        // TODO: write to registry via abstraction + record snapshot
+        // TODO: evaluate and execute registry actions via abstraction.
         return Task.FromResult(Result.Ok());
     }
 }

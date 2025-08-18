@@ -5,7 +5,6 @@
     </PropertyGroup>
     <PropertyGroup>
         <TargetFramework>net8.0-windows</TargetFramework>
-        
         <OutputType>WinExe</OutputType>
 		<UseWpf>true</UseWpf>
 
@@ -14,19 +13,14 @@
         <LangVersion>latest</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <RootNamespace>ClientApp</RootNamespace>
-        <Configurations>Debug;Release;Debug2</Configurations>
+        <RepositoryUrl>https://github.com/OldSkoolzRoolz/ai-assisted-it-manager.git</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>AI;IT;enterprise;group-policy;policy-manager</PackageTags>
+        <PackageReleaseNotes>RELEASE.md</PackageReleaseNotes>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <AnalysisLevel>latest</AnalysisLevel>
     </PropertyGroup>
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-      <DefineConstants>$(DefineConstants);DEBUG</DefineConstants>
-      <IsPublishable>False</IsPublishable>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-      <Optimize>False</Optimize>
-      <IsPublishable>False</IsPublishable>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug2|AnyCPU'">
-      <IsPublishable>False</IsPublishable>
-    </PropertyGroup>
+
 
     <ItemGroup>
         <Content Include="Assets\SplashScreen.scale-200.png" />
@@ -42,10 +36,16 @@
         <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.*" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
 
-        <Manifest Include="$(ApplicationManifest)" />
+     
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="README.md">
+        <Pack>True</Pack>
+        <PackagePath>\</PackagePath>
+      </None>
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\CorePolicyEngine\CorePolicyEngine.csproj" />
-        <ProjectReference Include="..\Shared\Shared.csproj" />
     </ItemGroup>
 </Project>

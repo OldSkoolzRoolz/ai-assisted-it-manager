@@ -1,21 +1,11 @@
-﻿using System.Collections.Generic;
-using Shared;
-
+﻿// Project Name: CorePolicyEngine
+// File Name: TypeValidationRule.cs (removed contents after model migration)
+// Author: Kyle Crowder
+// Github:  OldSkoolzRoolz
+// License: MIT
+// Do not remove file headers
 
 namespace CorePolicyEngine;
 
-
-public sealed class TypeValidationRule : IValidationRule
-{
-    public string Id => "Type";
-    public IEnumerable<ValidationMessage> Evaluate(PolicySet policySet, AdmxCatalog catalog, ValidationContext context)
-    {
-        foreach (var setting in policySet.Settings)
-        {
-            if (setting.ValueType == PolicyValueType.Numeric && setting.Value != null && !decimal.TryParse(setting.Value, out _))
-            {
-                yield return new ValidationMessage(setting.PolicyId, setting.PartId, ValidationSeverity.Error, "Value is not a valid number");
-            }
-        }
-    }
-}
+// Legacy TypeValidationRule removed. Will be reimplemented for new AdminTemplates element model.
+public static class TypeValidationRuleMarker { }

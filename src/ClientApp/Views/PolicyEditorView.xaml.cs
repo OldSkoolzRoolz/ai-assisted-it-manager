@@ -1,39 +1,61 @@
-using System;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using ClientApp.ViewModels;
+// Project Name: ClientApp
+// File Name: PolicyEditorView.xaml.cs
+// Author: Kyle Crowder
+// Github:  OldSkoolzRoolz
+// License: MIT
+// Do not remove file headers
 
 namespace ClientApp.Views;
 
+
 public partial class PolicyEditorView : UserControl
 {
-    public PolicyEditorViewModel ViewModel { get; }
-
     public PolicyEditorView()
     {
         InitializeComponent();
-        ViewModel = ((App)Application.Current).Services.GetService(typeof(PolicyEditorViewModel)) as PolicyEditorViewModel ?? throw new InvalidOperationException();
+        ViewModel =
+            ((App)Application.Current).Services.GetService(typeof(PolicyEditorViewModel)) as PolicyEditorViewModel ??
+            throw new InvalidOperationException();
         Loaded += OnLoaded;
         DataContext = ViewModel;
     }
 
+
+
+
+
+    public PolicyEditorViewModel ViewModel { get; }
+
+
+
+
+
     private async void OnLoaded(object sender, RoutedEventArgs e)
     {
-        var winDir = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
-        var policyDef = Path.Combine(winDir, "PolicyDefinitions");
-        if (Directory.Exists(policyDef))
+        if (!ViewModel.Policies.Any())
         {
-            var admxFiles = Directory.GetFiles(policyDef, "*.admx").Take(5).ToList();
-            await ViewModel.LoadCatalogAsync(admxFiles, "en-US", CancellationToken.None);
+            await ViewModel.SearchLocalPoliciesAsync(null, CancellationToken.None).ConfigureAwait(false); // initial load
         }
     }
 
+
+
+
+
     private void CategoryTree_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
     {
-        ViewModel.SelectedPolicy = e.NewValue as Shared.AdmxPolicy;
+        if (e.NewValue is CategoryTreeItem item)
+        {
+            if (item.IsPolicy && item.Policy != null)
+            {
+                ViewModel.SelectedCategory = null; // clear category selection
+                ViewModel.SelectedPolicy = null;   // force change notification even if same
+                ViewModel.SelectedPolicy = item.Policy;
+            }
+            else if (!item.IsPolicy && item.Category != null)
+            {
+                ViewModel.SelectedCategory = item.Category;
+            }
+        }
     }
 }
