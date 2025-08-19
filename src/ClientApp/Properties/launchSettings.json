@@ -3,7 +3,7 @@
     "ClientApp (Package)": {
       "commandName": "MsixPackage"
     },
-    "Profile 1": {
+    "Client": {
       "commandName": "Project"
     }
   }

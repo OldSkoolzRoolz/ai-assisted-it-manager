@@ -16,16 +16,21 @@
             <StackPanel Orientation="Horizontal" Margin="4" DockPanel.Dock="Top">
                 <Button Content="Load" Command="{Binding LoadPoliciesCommand}" Margin="0,0,6,0" />
                 <TextBox Width="150" Margin="0,0,6,0" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
-                <Button Content="Search" Command="{Binding SearchLocalPoliciesCommand}" />
+                <Button Content="Search" Command="{Binding SearchLocalPoliciesCommand}" Margin="0,0,6,0" />
+                <Button Content="Logs" Click="OnOpenLogs" Margin="0,0,6,0" />
+                <Button Content="DevDiag" Click="OnOpenDevDiag" />
             </StackPanel>
-            <TreeView ItemsSource="{Binding CategoryTree}" SelectedItemChanged="CategoryTree_SelectedItemChanged" Margin="4" >
-                <TreeView.ItemContainerStyle>
-                    <Style TargetType="TreeViewItem">
+            <TreeView x:Name="CategoryTreeView"
+                      ItemsSource="{Binding CategoryTree}"
+                      SelectedItemChanged="CategoryTree_SelectedItemChanged"
+                      TreeViewItem.Expanded="TreeViewItem_Expanded"
+                      Margin="4"
+                      ItemContainerStyle="{StaticResource CleanTreeViewItemStyle}">
+                <TreeView.Resources>
+                    <Style TargetType="TreeViewItem" >
                         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                         <Setter Property="VerticalContentAlignment" Value="Top" />
                     </Style>
-                </TreeView.ItemContainerStyle>
-                <TreeView.Resources>
                     <HierarchicalDataTemplate DataType="{x:Type vm:CategoryTreeItem}" ItemsSource="{Binding Children}">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" VerticalAlignment="Top">
                             <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />

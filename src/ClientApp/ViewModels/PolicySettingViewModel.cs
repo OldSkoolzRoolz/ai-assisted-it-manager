@@ -5,112 +5,60 @@
 // License: MIT
 // Do not remove file headers
 
-
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-
+using CorePolicyEngine.AdminTemplates;
 
 namespace ClientApp.ViewModels;
 
-
+// Placeholder per-policy element editing (will be expanded for element-specific controls)
 public class PolicySettingViewModel : INotifyPropertyChanged
 {
-    public string PolicyId { get; }
-    public string? PartId { get; }
-    public PolicyValueType ValueType { get; }
-    public string? EnumId { get; }
-    public ObservableCollection<PolicyEnumItem>? EnumItems { get; }
+    private readonly PolicyElement _element; // retain original element for future expansion
+
+    public PolicyKey PolicyKey { get; }
+    public ElementId ElementId { get; }
+    public string ElementKind { get; }
+
+    // Bindable aliases expected by XAML template
+    public string PartId => ElementId.Value;
+    public string ValueType => ElementKind switch
+    {
+        nameof(BooleanElement) => "Boolean",
+        nameof(DecimalElement) => "Numeric",
+        nameof(TextElement) => "Text",
+        nameof(MultiTextElement) => "Text",
+        nameof(EnumElement) => "Enum",
+        _ => "Text"
+    };
+
+    // Enum options (simple name/value pair) for EnumElement
+    public IReadOnlyList<EnumOption> EnumItems { get; } = Array.Empty<EnumOption>();
 
     private bool _enabled;
-    public bool Enabled
-    {
-        get => _enabled;
-        set
-        {
-            if (_enabled != value)
-            {
-                _enabled = value;
-                OnPropertyChanged();
-                Validate();
-            }
-        }
-    }
+    public bool Enabled { get => _enabled; set { if (_enabled != value) { _enabled = value; OnPropertyChanged(); } } }
 
     private string? _value;
-    public string? Value
-    {
-        get => _value;
-        set
-        {
-            if (_value != value)
-            {
-                _value = value;
-                OnPropertyChanged();
-                Validate();
-            }
-        }
-    }
+    public string? Value { get => _value; set { if (_value != value) { _value = value; OnPropertyChanged(); } } }
 
     public ObservableCollection<string> Errors { get; } = [];
 
-
-    // Existing constructor (fallback / boolean simple cases)
-    public PolicySettingViewModel(PolicySetting setting)
+    public PolicySettingViewModel(Policy policy, PolicyElement element)
     {
-        PolicyId = setting.PolicyId;
-        PartId = setting.PartId;
-        ValueType = setting.ValueType;
-        _enabled = setting.Enabled;
-        _value = setting.Value;
-    }
+        PolicyKey = policy.Key;
+        _element = element;
+        ElementId = element.Id;
+        ElementKind = element.GetType().Name;
 
-    // New constructor from part definition + catalog (for enum population)
-    public PolicySettingViewModel(string policyId, PolicyPartDefinition part, AdmxCatalog catalog)
-    {
-        PolicyId = policyId;
-        PartId = part.Id;
-        ValueType = part.ValueType;
-        EnumId = part.EnumId;
-        _enabled = false;
-        _value = null;
-        if (part.ValueType == PolicyValueType.Enum && part.EnumId is not null)
+        if (element is EnumElement ee)
         {
-            PolicyEnum? match = catalog.Enums.FirstOrDefault(e => e.Id == part.EnumId);
-            if (match != null)
-            {
-                EnumItems = new ObservableCollection<PolicyEnumItem>(match.Items);
-            }
-        }
-    }
-
-    public PolicySetting ToModel()
-    {
-        return new(PolicyId, PartId, Enabled, Value, ValueType);
-    }
-
-    private void Validate()
-    {
-        Errors.Clear();
-        if (Enabled && ValueType != PolicyValueType.Boolean && string.IsNullOrWhiteSpace(Value))
-        {
-            Errors.Add("Value required when enabled");
-        }
-
-        if (ValueType == PolicyValueType.Numeric && Value is not null && !decimal.TryParse(Value, out _))
-        {
-            Errors.Add("Invalid number");
-        }
-
-        if (ValueType == PolicyValueType.Enum && Enabled && string.IsNullOrWhiteSpace(Value))
-        {
-            Errors.Add("Select an option");
+            EnumItems = ee.Items.Select(i => new EnumOption(i.Label?.Id.Value ?? i.Name, i.Name)).ToList();
         }
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
-    private void OnPropertyChanged([CallerMemberName] string? name = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-    }
+    private void OnPropertyChanged([CallerMemberName] string? name = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 }
+
+public sealed record EnumOption(string Name, string Value);

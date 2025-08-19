@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="PolicyEditor.Initialized" xml:space="preserve"><value>Policy editor initialized</value></data>
+  <data name="PolicyEditor.CatalogLoaded" xml:space="preserve"><value>Catalog '{LanguageTag}' loaded with {PolicyCount} policies in {ElapsedMs} ms</value></data>
+  <data name="PolicyEditor.CatalogLoadFailed" xml:space="preserve"><value>Catalog load failed for language '{LanguageTag}'</value></data>
+  <data name="PolicyEditor.SearchFilterApplied" xml:space="preserve"><value>Search filter applied: '{Query}'</value></data>
+  <data name="PolicyEditor.SearchExecuted" xml:space="preserve"><value>Search executed for '{Query}' returning {ResultCount} items</value></data>
+  <data name="PolicyEditor.CategoryExpanded" xml:space="preserve"><value>Category expanded: {CategoryId} (ChildCategories={ChildCategoryCount}, Policies={PolicyCount})</value></data>
+  <data name="PolicyEditor.PolicySelected" xml:space="preserve"><value>Policy selected: {PolicyKey} ({SettingCount} settings)</value></data>
+  <data name="PolicyEditor.UnexpectedCatalogException" xml:space="preserve"><value>Unexpected exception loading catalog for language {LanguageTag}</value></data>
+  <data name="PolicyEditor.PolicyNotFound" xml:space="preserve"><value>Selected policy key {PolicyKey} not found in catalog documents</value></data>
+  <data name="App.StartupBanner" xml:space="preserve"><value>ClientApp starting at {StartTimeUtc}</value></data>
+</root>

@@ -1,0 +1,8 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Override default TreeViewItem style to eliminate ancestor alignment binding warnings by setting explicit values -->
+    <Style x:Key="CleanTreeViewItemStyle" TargetType="TreeViewItem">
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Top" />
+    </Style>
+</ResourceDictionary>

@@ -1,11 +1,15 @@
 // Project Name: CorePolicyEngine
-// File Name: EnumMembershipRule.cs (deprecated)
+// File Name: EnumMembershipRule.cs
 // Author: Kyle Crowder
 // Github:  OldSkoolzRoolz
 // License: MIT
 // Do not remove file headers
 
+
 namespace CorePolicyEngine.Validation.Rules;
 
+
 // Legacy rule removed pending new validation system for AdminTemplates models.
-public static class EnumMembershipRuleMarker { }
+public static class EnumMembershipRuleMarker
+{
+}

@@ -6,9 +6,3 @@
 // Do not remove file headers
 
 
-namespace Security;
-
-
-public class Class1
-{
-}

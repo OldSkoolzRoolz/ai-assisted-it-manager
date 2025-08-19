@@ -5,6 +5,7 @@
 // License: MIT
 // Do not remove file headers
 
+
 namespace CorePolicyEngine.AdminTemplates;
 
 
@@ -30,6 +31,8 @@ public sealed record AdmxHeader(
 
 public sealed record NamespaceBinding(string Prefix, Uri Uri);
 
+
+
 public readonly record struct PolicyKey(Uri NamespaceUri, string Name); // stable, non-meaningful surrogate for identity
 
 
@@ -43,6 +46,8 @@ public sealed record Category(
 
 
 public readonly record struct CategoryId(string Value);
+
+
 
 public readonly record struct CategoryRef(CategoryId Id);
 
@@ -95,7 +100,11 @@ public sealed record Policy(
 
 public sealed record PolicyVersion(int Major, int Minor);
 
+
+
 public sealed record Tags(string Name, string? Value);
+
+
 
 public sealed record PresentationRef(string Id);
 
@@ -169,6 +178,8 @@ public enum RegistryOperation
 // Discriminated union for policy elements (typed constraints & data)
 public abstract record PolicyElement(ElementId Id);
 
+
+
 public readonly record struct ElementId(string Value);
 
 
@@ -234,7 +245,11 @@ public sealed record RegistryActionTemplate<TValue>(
 
 public abstract record TemplateExpression<TValue>;
 
+
+
 public sealed record LiteralExpression<TValue>(TValue Value) : TemplateExpression<TValue>;
+
+
 
 public sealed record FormatExpression<TValue>(string Format, Func<TValue, object> Project) : TemplateExpression<TValue>;
 
@@ -242,6 +257,8 @@ public sealed record FormatExpression<TValue>(string Format, Func<TValue, object
 
 // Reference to ADML string id
 public sealed record LocalizedRef(ResourceId Id);
+
+
 
 public readonly record struct ResourceId(string Value);
 

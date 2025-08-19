@@ -1,20 +1,24 @@
 ﻿// Project Name: CorePolicyEngine
-// File Name: AdmxCatalogLoader.cs (legacy name — now acts as AdminTemplateLoader)
+// File Name: AdmxCatalogLoader.cs
 // Author: Kyle Crowder
 // Github:  OldSkoolzRoolz
 // License: MIT
 // Do not remove file headers
 
-using Shared;
-
 namespace CorePolicyEngine.Parsing;
 
-// Backwards compatibility shim (UI will be updated later). For now exposes same shape to avoid compile errors.
-// Will be removed when UI migrates to new AdminTemplates models directly.
+// Backwards compatibility shim (scheduled for removal). Now returns raw pair without Result wrapper.
+[Obsolete("Use IAdminTemplateLoader directly. This shim will be removed.")]
 public sealed class AdmxCatalogLoader
 {
     private readonly IAdminTemplateLoader _inner = new AdmxAdmlParser();
 
-    public async Task<Result<AdminTemplatePair>> LoadSingleAsync(string admxPath, string languageTag, CancellationToken ct)
-        => await _inner.LoadAsync(admxPath, languageTag, ct);
+    public Task<AdminTemplatePair?> LoadSingleAsync(string admxPath, string languageTag, CancellationToken ct)
+        => LoadInternalAsync(admxPath, languageTag, ct);
+
+    private async Task<AdminTemplatePair?> LoadInternalAsync(string path, string lang, CancellationToken ct)
+    {
+        var r = await _inner.LoadAsync(path, lang, ct);
+        return r.Success ? r.Value : null;
+    }
 }

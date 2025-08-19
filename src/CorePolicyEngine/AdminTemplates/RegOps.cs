@@ -1,21 +1,30 @@
+// Project Name: CorePolicyEngine
+// File Name: RegOps.cs
+// Author: Kyle Crowder
+// Github:  OldSkoolzRoolz
+// License: MIT
+// Do not remove file headers
 
 
-using System.Collections.Generic;
-
-
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
 namespace CorePolicyEngine.AdminTemplates;
+
 
 public sealed record PolicyEvaluationInput(
     Policy Policy,
-    PolicyState State,                    // Enabled/Disabled/NotConfigured
-    IReadOnlyDictionary<ElementId, object?> ElementValues // user-specified values for typed elements
+    PolicyState State,
+    IReadOnlyDictionary<ElementId, object?> ElementValues
 );
 
-public enum PolicyState { Enabled, Disabled, NotConfigured }
+
+
+public enum PolicyState
+{
+    Enabled,
+    Disabled,
+    NotConfigured
+}
+
+
 
 public static class Evaluator
 {
@@ -23,7 +32,6 @@ public static class Evaluator
     {
         var actions = new List<RegistryAction>();
 
-        // State-level actions
         actions.AddRange(input.State switch
         {
             PolicyState.Enabled => input.Policy.StateBehavior.OnEnable,
@@ -32,10 +40,9 @@ public static class Evaluator
             _ => []
         });
 
-        // Element-level actions (only when Enabled)
         if (input.State == PolicyState.Enabled)
         {
-            foreach (var el in input.Policy.Elements)
+            foreach (PolicyElement el in input.Policy.Elements)
             {
                 if (el is BooleanElement b)
                 {
@@ -59,8 +66,8 @@ public static class Evaluator
                 }
                 else if (el is EnumElement ee)
                 {
-                    var v = Get<string>(input.ElementValues, el.Id); // item name
-                    var item = ee.Items.Find(i => i.Name == v);
+                    var v = Get<string>(input.ElementValues, el.Id);
+                    var item = ee.Items.FirstOrDefault(i => i.Name == v);
                     if (item is not null) actions.AddRange(item.Writes);
                 }
             }
@@ -70,14 +77,18 @@ public static class Evaluator
     }
 
     private static T Get<T>(IReadOnlyDictionary<ElementId, object?> values, ElementId id)
-        => values.TryGetValue(id, out var v) && v is T t ? t :
-           throw new KeyNotFoundException($"Missing or invalid value for element {id.Value}");
+        => values.TryGetValue(id, out var v) && v is T t
+            ? t
+            : throw new KeyNotFoundException($"Missing or invalid value for element {id.Value}");
 
     private static RegistryAction Realize<T>(RegistryActionTemplate<T> t, T value)
-        => t.Expression switch
+    {
+        object? resolved = t.Expression switch
         {
-            LiteralExpression<T> lit => t with { Value = lit.Value },
-            FormatExpression<T> fmt => t with { Value = fmt.Project(value) },
-            _ => t with { Value = value }
+            LiteralExpression<T> lit => lit.Value,
+            FormatExpression<T> fmt => fmt.Project(value),
+            _ => value
         };
+        return new RegistryAction(t.Path, t.ValueName, t.ValueType, resolved, t.Operation);
+    }
 }
