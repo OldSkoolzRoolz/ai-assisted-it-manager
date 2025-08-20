@@ -8,4 +8,4 @@
     <Grid Margin="8">
         <TextBlock Text="Diagnostics (placeholder)" FontSize="18" />
     </Grid>
-</Window>g
+</Window>
