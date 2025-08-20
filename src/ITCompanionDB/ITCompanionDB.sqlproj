@@ -7,7 +7,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectVersion>4.1</ProjectVersion>
     <ProjectGuid>{37e5eddf-6e13-4477-8563-5145d0267c82}</ProjectGuid>
-    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql160DatabaseSchemaProvider</DSP>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql150DatabaseSchemaProvider</DSP>
     <OutputType>Database</OutputType>
     <RootPath>
     </RootPath>
@@ -60,7 +60,7 @@
     <Folder Include="Snapshots" />
     <Folder Include="SchemaVer1" />
     <Folder Include="Scripts\" />
-<PostDeploy Include="Scripts\PostDeployment.sql" />
+    <PostDeploy Include="Scripts\PostDeployment.sql" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="SchemaVer1\02_BehaviorPolicyLayer.sql" />

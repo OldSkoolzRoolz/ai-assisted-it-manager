@@ -13,7 +13,7 @@ public sealed record AdmlDocument(
     NamespaceBinding Namespace,
     string LanguageTag, // e.g., "en-US"
     IReadOnlyDictionary<ResourceId, string> StringTable,
-    IReadOnlyDictionary<string, PresentationTemplate> PresentationTable,
+    IReadOnlyDictionary<string, AdmlPresentation> Presentations,
     DocumentLineage Lineage);
 
 
@@ -24,32 +24,38 @@ public sealed record AdmlHeader(
 
 
 
-public abstract record PresentationTemplate(string Id);
+// A single <presentation id="..."> grouping containing multiple visual element parts
+public sealed record AdmlPresentation(
+    string Id,
+    IReadOnlyList<PresentationElement> Elements);
 
 
 
-// Concrete presentation fragments that map to PolicyElement layouts.
-// You can extend as you discover templates in the wild; keep them additive.
-public sealed record BooleanPresentation(string Id, ResourceId? Label) : PresentationTemplate(Id);
+public enum PresentationElementKind
+{
+    Text, // literal text block (no refId in schema; we ignore since not bound to element)
+    DecimalTextBox,
+    TextBox,
+    CheckBox,
+    ComboBox,
+    DropdownList,
+    ListBox,
+    LongDecimalTextBox,
+    MultiTextBox
+}
 
 
 
-public sealed record TextPresentation(string Id, ResourceId? Label, int? MaxLength) : PresentationTemplate(Id);
-
-
-
-public sealed record DecimalPresentation(string Id, ResourceId? Label, long? Min, long? Max) : PresentationTemplate(Id);
-
-
-
-public sealed record MultiTextPresentation(string Id, ResourceId? Label, int? MaxItems, int? MaxItemLength)
-    : PresentationTemplate(Id);
-
-
-
-public sealed record EnumPresentation(string Id, ResourceId? Label, IReadOnlyList<EnumPresentationItem> Items)
-    : PresentationTemplate(Id);
-
-
-
-public sealed record EnumPresentationItem(string Name, ResourceId? Label);
+public sealed record PresentationElement(
+    PresentationElementKind Kind,
+    string RefId, // maps to policy element id (refId attr in ADML)
+    string? Label, // optional label text (resolved later via string table if token)
+    string? DefaultValue,
+    bool? DefaultChecked,
+    bool? NoSort,
+    uint? DefaultItem,
+    bool? Spin,
+    uint? SpinStep,
+    bool? ShowAsDialog,
+    uint? DefaultHeight,
+    IReadOnlyList<string>? Suggestions);

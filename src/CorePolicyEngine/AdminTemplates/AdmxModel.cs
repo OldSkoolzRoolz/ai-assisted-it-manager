@@ -55,7 +55,8 @@ public sealed record SupportProduct(
 public enum PolicyClass
 {
     Machine,
-    User
+    User,
+    Both // Added to align with official ADMX schema PolicyClass enumeration
 }
 
 public sealed record Policy(

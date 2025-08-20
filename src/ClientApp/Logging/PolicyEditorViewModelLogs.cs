@@ -6,7 +6,7 @@
 // Do not remove file headers
 
 using Microsoft.Extensions.Logging;
-using ClientApp.Resources;
+using KC.ITCompanion.ClientApp.Resources;
 
 namespace KC.ITCompanion.ClientApp.Logging;
 
