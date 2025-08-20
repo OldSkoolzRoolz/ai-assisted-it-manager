@@ -5,10 +5,10 @@
 // License: MIT
 // Do not remove file headers
 
-using CorePolicyEngine.Models;
-using CorePolicyEngine.Storage;
+using KC.ITCompanion.CorePolicyEngine.Models;
+using KC.ITCompanion.CorePolicyEngine.Storage;
 
-namespace CorePolicyEngine.Behavior;
+namespace KC.ITCompanion.CorePolicyEngine.Behavior;
 
 public interface IBehaviorPolicyProvider
 {

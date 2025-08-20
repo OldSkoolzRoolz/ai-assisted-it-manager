@@ -5,7 +5,7 @@
 // License: MIT
 // Do not remove file headers
 
-namespace CorePolicyEngine.Models;
+namespace KC.ITCompanion.CorePolicyEngine.Models;
 
 /// <summary>
 /// Captures the merged effective policy and underlying layer hashes for change detection.

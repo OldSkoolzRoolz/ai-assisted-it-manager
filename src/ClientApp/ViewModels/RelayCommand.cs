@@ -9,7 +9,7 @@
 using System.Windows.Input;
 
 
-namespace ClientApp.ViewModels;
+namespace KC.ITCompanion.ClientApp.ViewModels;
 
 
 public class RelayCommand : ICommand

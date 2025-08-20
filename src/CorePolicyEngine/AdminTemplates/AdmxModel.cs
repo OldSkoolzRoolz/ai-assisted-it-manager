@@ -5,9 +5,7 @@
 // License: MIT
 // Do not remove file headers
 
-
-namespace CorePolicyEngine.AdminTemplates;
-
+namespace KC.ITCompanion.CorePolicyEngine.AdminTemplates;
 
 public sealed record AdmxDocument(
     AdmxHeader Header,
@@ -18,8 +16,6 @@ public sealed record AdmxDocument(
     IReadOnlyList<Policy> Policies,
     DocumentLineage Lineage);
 
-
-
 public sealed record AdmxHeader(
     string SchemaVersion, // e.g., "1.0"
     string? Revision, // optional revision string
@@ -27,15 +23,9 @@ public sealed record AdmxHeader(
     DateTimeOffset? LastModifiedUtc // optional modification time
 );
 
-
-
 public sealed record NamespaceBinding(string Prefix, Uri Uri);
 
-
-
 public readonly record struct PolicyKey(Uri NamespaceUri, string Name); // stable, non-meaningful surrogate for identity
-
-
 
 public sealed record Category(
     CategoryId Id,
@@ -43,15 +33,9 @@ public sealed record Category(
     CategoryRef? Parent, // null if root
     DocumentLineage Lineage);
 
-
-
 public readonly record struct CategoryId(string Value);
 
-
-
 public readonly record struct CategoryRef(CategoryId Id);
-
-
 
 public sealed record SupportDefinition(
     SupportId Id,
@@ -59,11 +43,7 @@ public sealed record SupportDefinition(
     IReadOnlyList<SupportProduct> Products,
     DocumentLineage Lineage);
 
-
-
 public readonly record struct SupportId(string Value);
-
-
 
 public sealed record SupportProduct(
     string Name, // e.g., "Windows 11"
@@ -72,15 +52,11 @@ public sealed record SupportProduct(
     bool? InclusiveMin,
     bool? InclusiveMax);
 
-
-
 public enum PolicyClass
 {
     Machine,
     User
 }
-
-
 
 public sealed record Policy(
     PolicyKey Key,
@@ -96,19 +72,11 @@ public sealed record Policy(
     PolicyVersion Version,
     DocumentLineage Lineage);
 
-
-
 public sealed record PolicyVersion(int Major, int Minor);
-
-
 
 public sealed record Tags(string Name, string? Value);
 
-
-
 public sealed record PresentationRef(string Id);
-
-
 
 // What to do when policy is Enabled/Disabled/NotConfigured
 public sealed record PolicyStateBehavior(
@@ -117,16 +85,12 @@ public sealed record PolicyStateBehavior(
     IReadOnlyList<RegistryAction> OnDisable,
     IReadOnlyList<RegistryAction> OnNotConfigured);
 
-
-
 public enum PolicyDefaultState
 {
     NotConfigured,
     Enabled,
     Disabled
 }
-
-
 
 // Registry mapping primitives
 public enum RegistryHive
@@ -137,8 +101,6 @@ public enum RegistryHive
     HKEY_USERS,
     HKEY_CURRENT_CONFIG
 }
-
-
 
 public enum RegistryValueType
 {
@@ -151,11 +113,7 @@ public enum RegistryValueType
     RegBinary
 }
 
-
-
 public sealed record RegistryPath(RegistryHive Hive, string KeyPath); // e.g., HKLM\Software\Policies\...
-
-
 
 public sealed record RegistryAction(
     RegistryPath Path,
@@ -164,8 +122,6 @@ public sealed record RegistryAction(
     object? Value, // typed at runtime; null => delete value/key depending on Operation
     RegistryOperation Operation);
 
-
-
 public enum RegistryOperation
 {
     SetValue,
@@ -173,24 +129,16 @@ public enum RegistryOperation
     DeleteTree
 }
 
-
-
 // Discriminated union for policy elements (typed constraints & data)
 public abstract record PolicyElement(ElementId Id);
 
-
-
 public readonly record struct ElementId(string Value);
-
-
 
 public sealed record BooleanElement(
     ElementId Id,
     LocalizedRef? Label,
     IReadOnlyList<RegistryAction> WhenTrue,
     IReadOnlyList<RegistryAction> WhenFalse) : PolicyElement(Id);
-
-
 
 public sealed record DecimalElement(
     ElementId Id,
@@ -199,16 +147,12 @@ public sealed record DecimalElement(
     long? MaxInclusive,
     IReadOnlyList<RegistryActionTemplate<long>> Writes) : PolicyElement(Id);
 
-
-
 public sealed record TextElement(
     ElementId Id,
     LocalizedRef? Label,
     int? MinLength,
     int? MaxLength,
     IReadOnlyList<RegistryActionTemplate<string>> Writes) : PolicyElement(Id);
-
-
 
 public sealed record MultiTextElement(
     ElementId Id,
@@ -217,21 +161,15 @@ public sealed record MultiTextElement(
     int? MaxItemLength,
     IReadOnlyList<RegistryActionTemplate<IReadOnlyList<string>>> Writes) : PolicyElement(Id);
 
-
-
 public sealed record EnumElement(
     ElementId Id,
     LocalizedRef? Label,
     IReadOnlyList<EnumItem> Items) : PolicyElement(Id);
 
-
-
 public sealed record EnumItem(
     string Name, // internal item name
     LocalizedRef? Label,
     IReadOnlyList<RegistryAction> Writes);
-
-
 
 // Registry action templates allow element values to flow into the registry write
 public sealed record RegistryActionTemplate<TValue>(
@@ -241,28 +179,16 @@ public sealed record RegistryActionTemplate<TValue>(
     TemplateExpression<TValue> Expression,
     RegistryOperation Operation);
 
-
-
 public abstract record TemplateExpression<TValue>;
-
-
 
 public sealed record LiteralExpression<TValue>(TValue Value) : TemplateExpression<TValue>;
 
-
-
 public sealed record FormatExpression<TValue>(string Format, Func<TValue, object> Project) : TemplateExpression<TValue>;
-
-
 
 // Reference to ADML string id
 public sealed record LocalizedRef(ResourceId Id);
 
-
-
 public readonly record struct ResourceId(string Value);
-
-
 
 // Cross-cutting lineage for traceability
 public sealed record DocumentLineage(

@@ -8,9 +8,9 @@
 using Microsoft.Extensions.Logging;
 using ClientApp.Resources;
 
-namespace ClientApp.Logging;
+namespace KC.ITCompanion.ClientApp.Logging;
 
-// Source?generator based logging (Microsoft.Extensions.Logging built-in) with resource indirection.
+// Source–generator based logging (Microsoft.Extensions.Logging built-in) with resource indirection.
 internal static partial class PolicyEditorViewModelLogs
 {
     [LoggerMessage(EventId = 1000, Level = LogLevel.Information, Message = "{Message}")]

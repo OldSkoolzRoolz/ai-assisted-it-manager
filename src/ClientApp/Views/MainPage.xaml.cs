@@ -5,9 +5,7 @@
 // License: MIT
 // Do not remove file headers
 
-
-namespace ClientApp.Views;
-
+namespace KC.ITCompanion.ClientApp.Views;
 
 public partial class MainPage : UserControl
 {

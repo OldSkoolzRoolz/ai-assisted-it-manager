@@ -5,9 +5,7 @@
 // License: MIT
 // Do not remove file headers
 
-
-namespace CorePolicyEngine.AdminTemplates;
-
+namespace KC.ITCompanion.CorePolicyEngine.AdminTemplates;
 
 public sealed record PolicyEvaluationInput(
     Policy Policy,
@@ -15,16 +13,12 @@ public sealed record PolicyEvaluationInput(
     IReadOnlyDictionary<ElementId, object?> ElementValues
 );
 
-
-
 public enum PolicyState
 {
     Enabled,
     Disabled,
     NotConfigured
 }
-
-
 
 public static class Evaluator
 {

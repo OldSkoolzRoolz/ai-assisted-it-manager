@@ -11,10 +11,10 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Windows.Input;
-using ClientApp.Logging;
+using KC.ITCompanion.ClientApp.Logging;
 using Microsoft.Extensions.Logging;
 
-namespace ClientApp.ViewModels;
+namespace KC.ITCompanion.ClientApp.ViewModels;
 
 public class LogViewerEntry
 {

@@ -5,16 +5,20 @@
 // License: MIT
 // Do not remove file headers
 
-namespace ClientApp.Views;
+using System.Windows;
+using System.Windows.Controls;
+using KC.ITCompanion.ClientApp.ViewModels;
+
+namespace KC.ITCompanion.ClientApp.Views;
 
 public partial class PolicyEditorView : UserControl
 {
     public PolicyEditorView()
     {
         InitializeComponent();
-        ViewModel =
-            ((App)Application.Current).Services.GetService(typeof(PolicyEditorViewModel)) as PolicyEditorViewModel ??
-            throw new InvalidOperationException();
+        var app = Application.Current as App;
+        ViewModel = app?.Services.GetService(typeof(PolicyEditorViewModel)) as PolicyEditorViewModel ??
+            throw new InvalidOperationException("PolicyEditorViewModel not registered");
         Loaded += OnLoaded;
         DataContext = ViewModel;
     }
@@ -50,14 +54,14 @@ public partial class PolicyEditorView : UserControl
         if (e.OriginalSource is TreeViewItem tvi && tvi.DataContext is CategoryTreeItem node)
         {
             ViewModel.EnsureCategoryChildren(node);
-            // Force refresh of Items to realize newly loaded children
             tvi.Items.Refresh();
         }
     }
 
     private void OnOpenDevDiag(object sender, RoutedEventArgs e)
     {
-        var devVm = ((App)Application.Current).Services.GetService(typeof(DevDiagnosticsViewModel)) as DevDiagnosticsViewModel;
+        var app = Application.Current as App;
+        var devVm = app?.Services.GetService(typeof(DevDiagnosticsViewModel)) as DevDiagnosticsViewModel;
         if (devVm != null)
         {
             var win = new DevDiagnosticsWindow { DataContext = devVm };
@@ -67,16 +71,16 @@ public partial class PolicyEditorView : UserControl
 
     private void OnOpenLogs(object sender, RoutedEventArgs e)
     {
-        var logVm = ((App)Application.Current).Services.GetService(typeof(LogViewerViewModel)) as LogViewerViewModel;
+        var app = Application.Current as App;
+        var logVm = app?.Services.GetService(typeof(LogViewerViewModel)) as LogViewerViewModel;
         if (logVm != null)
         {
-            // Simple on-demand window container
             var win = new Window
             {
                 Title = "Logs",
                 Width = 1000,
                 Height = 600,
-                Content = new Views.LogViewerView { DataContext = logVm }
+                Content = new LogViewerView { DataContext = logVm }
             };
             win.Show();
         }

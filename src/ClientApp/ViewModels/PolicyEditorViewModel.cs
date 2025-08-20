@@ -9,25 +9,28 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
-using CorePolicyEngine.Parsing;
-using CorePolicyEngine.AdminTemplates;
-using CorePolicyEngine; // for Result
+using KC.ITCompanion.CorePolicyEngine.Parsing;
+using KC.ITCompanion.CorePolicyEngine.AdminTemplates;
+using KC.ITCompanion.CorePolicyEngine; // for Result
 using Microsoft.Extensions.Logging;
-using ClientApp.Logging; // for source-generated logging extension methods
-using CorePolicyEngine.Storage;
+using KC.ITCompanion.ClientApp.Logging; // for source-generated logging extension methods
+using KC.ITCompanion.CorePolicyEngine.Storage;
+using KC.ITCompanion.CorePersistence.Sql;
 
-namespace ClientApp.ViewModels;
+namespace KC.ITCompanion.ClientApp.ViewModels;
 
 public class PolicyEditorViewModel : INotifyPropertyChanged
 {
     private readonly IAdminTemplateLoader _loader;
     private readonly ILogger<PolicyEditorViewModel> _logger;
     private readonly IAuditWriter _audit;
+    private readonly IPolicyGroupRepository? _policyGroups;
 
     public ObservableCollection<CategoryTreeItem> CategoryTree { get; } = [];
     public ObservableCollection<PolicySummary> Policies { get; } = [];
     public ObservableCollection<PolicySummary> FilteredPolicies { get; } = [];
     public ObservableCollection<PolicySettingViewModel> SelectedPolicySettings { get; } = [];
+    public ObservableCollection<PolicyGroupDto> PolicyGroups { get; } = [];
 
     private AdminTemplateCatalog? _catalog;
     public AdminTemplateCatalog? Catalog { get => _catalog; private set { _catalog = value; OnPropertyChanged(); } }
@@ -57,20 +60,42 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
 
     public ICommand LoadPoliciesCommand { get; }
     public ICommand SearchLocalPoliciesCommand { get; }
+    public ICommand RefreshPolicyGroupsCommand { get; }
 
-    public PolicyEditorViewModel(IAdminTemplateLoader loader, ILogger<PolicyEditorViewModel> logger, IAuditWriter audit)
+    public PolicyEditorViewModel(IAdminTemplateLoader loader, ILogger<PolicyEditorViewModel> logger, IAuditWriter audit, IPolicyGroupRepository? policyGroupRepository = null)
     {
         _loader = loader;
         _logger = logger;
         _audit = audit;
+        _policyGroups = policyGroupRepository;
         LoadPoliciesCommand = new RelayCommand(async _ => await LoadDefaultSubsetAsync().ConfigureAwait(false), _ => true);
         SearchLocalPoliciesCommand = new RelayCommand(async _ => await LoadEntireCatalogAsync("en-US", CancellationToken.None).ConfigureAwait(false), _ => true);
-        _logger.Initialized(); // TODO localize message key via resources
+        RefreshPolicyGroupsCommand = new RelayCommand(async _ => await LoadPolicyGroupsAsync().ConfigureAwait(false), _ => _policyGroups != null);
+        _logger.Initialized();
+    }
+
+    private async Task LoadPolicyGroupsAsync()
+    {
+        if (_policyGroups == null) return;
+        try
+        {
+            var groups = await _policyGroups.GetGroupsAsync(CancellationToken.None).ConfigureAwait(false);
+            App.Current.Dispatcher.Invoke(() =>
+            {
+                PolicyGroups.Clear();
+                foreach (var g in groups) PolicyGroups.Add(g);
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed loading policy groups");
+        }
     }
 
     private async Task LoadDefaultSubsetAsync()
     {
         await LoadEntireCatalogAsync("en-US", CancellationToken.None).ConfigureAwait(false);
+        await LoadPolicyGroupsAsync().ConfigureAwait(false);
     }
 
     private async Task LoadEntireCatalogAsync(string languageTag, CancellationToken token)
@@ -79,11 +104,11 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
         Result<AdminTemplateCatalog> result;
         try
         {
-            result = await this._loader.LoadLocalCatalogAsync(languageTag, 50, token).ConfigureAwait(false); // cap initial load
+            result = await this._loader.LoadLocalCatalogAsync(languageTag, 50, token).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unexpected exception loading catalog language {Language}", languageTag); // TODO localize
+            _logger.LogError(ex, "Unexpected exception loading catalog language {Language}", languageTag);
             return;
         }
         sw.Stop();
@@ -137,7 +162,7 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
         foreach (var admx in Catalog.AdmxDocuments)
         {
             foreach (var cat in admx.Categories)
-                localizedNames[cat.Id] = cat.Id.Value; // TODO: replace with localized lookup
+                localizedNames[cat.Id] = cat.Id.Value;
         }
 
         var roots = Catalog.AdmxDocuments.SelectMany(d => d.Categories)
@@ -159,7 +184,7 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
         node.Children.Clear();
 
         var childCats = Catalog.AdmxDocuments.SelectMany(d => d.Categories)
-            .Where(c => c.Parent.HasValue && c.Parent.Value.Id.Value == node.Category.Id.Value)
+            .Where(c => c.Parent.HasValue && c.Parent.Value.Id.Value == node.Category!.Id.Value)
             .OrderBy(c => c.Id.Value, StringComparer.OrdinalIgnoreCase)
             .ToList();
 
@@ -167,7 +192,7 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
             node.Children.Add(new CategoryTreeItem(c, c.Id.Value));
 
         var policyMatches = Catalog.AdmxDocuments.SelectMany(d => d.Policies)
-            .Where(pol => pol.Category.Id.Value == node.Category.Id.Value)
+            .Where(pol => pol.Category.Id.Value == node.Category!.Id.Value)
             .Join(Catalog.Summaries, pol => pol.Key.Name, s => s.Key.Name, (pol, s) => s)
             .OrderBy(s => s.DisplayName, StringComparer.OrdinalIgnoreCase)
             .ToList();
@@ -178,7 +203,7 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
         node.ChildrenMaterialized = true;
         if (node.Children.Count == 0)
             node.Children.Add(CategoryTreeItem.EmptyMarker());
-        _logger.CategoryExpanded(node.Category.Id.Value, childCats.Count, policyMatches.Count);
+        _logger.CategoryExpanded(node.Category!.Id.Value, childCats.Count, policyMatches.Count);
     }
 
     private async void OnSelectedPolicyChanged()
@@ -190,7 +215,7 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
             .FirstOrDefault(p => p.Key.Name == SelectedPolicy.Key.Name);
         if (policy == null)
         {
-            _logger.LogWarning("Selected policy key {PolicyKey} not found in catalog documents", SelectedPolicy.Key.Name); // TODO localize
+            _logger.LogWarning("Selected policy key {PolicyKey} not found in catalog documents", SelectedPolicy.Key.Name);
             return;
         }
 

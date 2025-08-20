@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace ClientApp.Logging;
+namespace KC.ITCompanion.ClientApp.Logging;
 
 public interface ILogFileAccessor
 {
@@ -34,7 +34,7 @@ internal sealed class FileLoggerProvider : ILoggerProvider, ILogFileAccessor
     private StreamWriter? _writer;
     private DateTime _fileDate = DateTime.MinValue;
     private readonly object _sync = new();
-    private readonly int _maxFileSizeBytes; // simple size-based rollover
+    private readonly int _maxFileSizeBytes;
 
     public string CurrentLogFilePath => _currentFile;
 
@@ -62,7 +62,6 @@ internal sealed class FileLoggerProvider : ILoggerProvider, ILogFileAccessor
     {
         try
         {
-            // Attempt to resolve assembly by category namespace root
             var parts = category.Split('.');
             if (parts.Length > 0)
             {
@@ -75,7 +74,7 @@ internal sealed class FileLoggerProvider : ILoggerProvider, ILogFileAccessor
             }
         }
         catch { }
-        return LogSession.AppVersion; // fallback to app version
+        return LogSession.AppVersion;
     }
 
     private async Task ProcessQueueAsync()
@@ -126,7 +125,7 @@ internal sealed class FileLoggerProvider : ILoggerProvider, ILogFileAccessor
                 _writer.WriteLine(JsonSerializer.Serialize(payload));
             }
         }
-        catch { /* swallow logging failures */ }
+        catch { }
     }
 
     private void RotateIfNeeded()
@@ -137,12 +136,9 @@ internal sealed class FileLoggerProvider : ILoggerProvider, ILogFileAccessor
             _writer?.Flush();
             _writer?.Dispose();
             _fileDate = today;
-            var fileName = $"app-{today:yyyyMMdd}-{Guid.NewGuid():N}.log"; // include guid for size rollovers
+            var fileName = $"app-{today:yyyyMMdd}-{Guid.NewGuid():N}.log";
             _currentFile = Path.Combine(_logDirectory, fileName);
-            _writer = new StreamWriter(new FileStream(_currentFile, FileMode.Create, FileAccess.Write, FileShare.ReadWrite))
-            {
-                AutoFlush = true
-            };
+            _writer = new StreamWriter(new FileStream(_currentFile, FileMode.Create, FileAccess.Write, FileShare.ReadWrite)) { AutoFlush = true };
         }
     }
 
@@ -152,7 +148,7 @@ internal sealed class FileLoggerProvider : ILoggerProvider, ILogFileAccessor
             .TakeWhile(f =>
             {
                 var name = Path.GetFileName(f);
-                if (name.Length < 16) return true; // continue (let consumer decide)
+                if (name.Length < 16) return true;
                 var datePart = name.Substring(4, 8);
                 if (DateTime.TryParseExact(datePart, "yyyyMMdd", null, System.Globalization.DateTimeStyles.None, out var d))
                     return d >= DateTime.UtcNow.Date.AddDays(-days);
@@ -201,7 +197,6 @@ public static class FileLoggerExtensions
     public static ILoggingBuilder AddFileLogger(this ILoggingBuilder builder, string? baseDirectory = null)
     {
         var provider = new FileLoggerProvider(baseDirectory);
-        // Register as provider + accessor so UI can retrieve logs
         builder.AddProvider(provider);
         builder.Services.AddSingleton<ILogFileAccessor>(provider);
         return builder;

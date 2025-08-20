@@ -5,20 +5,18 @@
 // License: MIT
 // Do not remove file headers
 
-
-using CorePolicyEngine.Parsing;
+using KC.ITCompanion.CorePolicyEngine.Parsing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Console; // explicit for AddConsole
-using Microsoft.Extensions.Logging.Debug;   // explicit for AddDebug
-using ClientApp.Logging;
-using ClientApp.ViewModels;
-using Security;
-using CorePolicyEngine.Storage;
+using Microsoft.Extensions.Logging.Console;
+using Microsoft.Extensions.Logging.Debug;
+using KC.ITCompanion.ClientApp.Logging;
+using KC.ITCompanion.ClientApp.ViewModels;
+using KC.ITCompanion.Security;
+using KC.ITCompanion.CorePolicyEngine.Storage;
+using KC.ITCompanion.CorePersistence.Sql;
 
-
-namespace ClientApp;
-
+namespace KC.ITCompanion.ClientApp;
 
 public partial class App : Application
 {
@@ -27,17 +25,15 @@ public partial class App : Application
     protected override async void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
-        this.Services = ConfigureServices();
+        Services = ConfigureServices();
 
-        var startupLogger = this.Services.GetRequiredService<ILogger<App>>();
+        var startupLogger = Services.GetRequiredService<ILogger<App>>();
         startupLogger.LogInformation("ClientApp starting up at {StartTimeUtc}", DateTime.UtcNow);
 
-        // Initialize audit
         var auditStore = Services.GetService<IAuditStore>();
         if (auditStore != null)
             await auditStore.InitializeAsync(CancellationToken.None);
 
-        // Load behavior policy snapshot to get dynamic allowed groups
         var store = Services.GetService<IBehaviorPolicyStore>();
         string[] dynamicGroups = ["Administrators"];
         if (store != null)
@@ -50,7 +46,6 @@ public partial class App : Application
             }
         }
 
-        // Replace initial policy by creating a new evaluator instance locally
         var accessPolicy = new GroupMembershipAccessPolicy(dynamicGroups);
         var evaluator = new ClientAccessEvaluator(accessPolicy);
 
@@ -67,21 +62,21 @@ public partial class App : Application
             return;
         }
 
-        MainWindow window = new()
+        var window = new MainWindow
         {
-            DataContext = this.Services.GetService(typeof(PolicyEditorViewModel))
+            DataContext = Services.GetService(typeof(PolicyEditorViewModel))
         };
         window.Show();
     }
 
     private ServiceProvider ConfigureServices()
     {
-        ServiceCollection sc = new();
+        var sc = new ServiceCollection();
 
         sc.AddLogging(builder =>
         {
             builder.ClearProviders();
-            builder.AddFileLogger(); // central file sink
+            builder.AddFileLogger();
             builder.AddConsole();
             builder.AddDebug();
             builder.SetMinimumLevel(LogLevel.Information);
@@ -94,10 +89,11 @@ public partial class App : Application
         sc.AddSingleton<IBehaviorPolicyStore, BehaviorPolicyStore>();
         sc.AddSingleton<IAuditStore, AuditStore>();
         sc.AddSingleton<IAuditWriter, AuditWriter>();
-
-        // Placeholder access policy (will be superseded at runtime evaluation)
+        sc.AddSingleton<ISqlConnectionFactory, SqlConnectionFactory>();
+        sc.AddSingleton<IPolicyDefinitionRepository, PolicyDefinitionRepository>();
+        sc.AddSingleton<IPolicyGroupRepository, PolicyGroupRepository>();
         sc.AddSingleton<IClientAccessPolicy>(_ => new GroupMembershipAccessPolicy(new []{"Administrators"}));
-        sc.AddSingleton<IClientAccessEvaluator, ClientAccessEvaluator>();
+        sc.AddSingleton(typeof(IClientAccessEvaluator), typeof(ClientAccessEvaluator));
 
         return sc.BuildServiceProvider();
     }

@@ -5,7 +5,7 @@
 // License: MIT
 // Do not remove file headers
 
-namespace CorePolicyEngine.Models;
+namespace KC.ITCompanion.CorePolicyEngine.Models;
 
 /// <summary>
 /// Represents client behavior configuration centrally managed (local or distributed).

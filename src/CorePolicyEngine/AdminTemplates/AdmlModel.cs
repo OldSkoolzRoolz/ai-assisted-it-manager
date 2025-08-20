@@ -5,8 +5,7 @@
 // License: MIT
 // Do not remove file headers
 
-
-namespace CorePolicyEngine.AdminTemplates;
+namespace KC.ITCompanion.CorePolicyEngine.AdminTemplates;
 
 
 public sealed record AdmlDocument(

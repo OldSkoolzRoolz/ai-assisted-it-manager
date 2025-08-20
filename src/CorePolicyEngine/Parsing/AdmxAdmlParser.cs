@@ -6,9 +6,9 @@
 // Do not remove file headers
 
 using System.Xml.Linq;
-using CorePolicyEngine.AdminTemplates;
+using KC.ITCompanion.CorePolicyEngine.AdminTemplates;
 
-namespace CorePolicyEngine.Parsing;
+namespace KC.ITCompanion.CorePolicyEngine.Parsing;
 
 // Composite pair result for a single ADMX + ADML
 public sealed record AdminTemplatePair(AdmxDocument Admx, AdmlDocument Adml);

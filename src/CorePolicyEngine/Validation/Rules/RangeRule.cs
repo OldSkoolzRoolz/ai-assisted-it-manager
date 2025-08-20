@@ -5,9 +5,7 @@
 // License: MIT
 // Do not remove file headers
 
-
-namespace CorePolicyEngine.Validation.Rules;
-
+namespace KC.ITCompanion.CorePolicyEngine.Validation.Rules;
 
 // Legacy range rule removed. Will be recreated for new DecimalElement semantics.
 public static class RangeRuleMarker

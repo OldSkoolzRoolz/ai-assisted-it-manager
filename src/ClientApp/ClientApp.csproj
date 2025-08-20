@@ -10,7 +10,7 @@
         <Nullable>enable</Nullable>
         <LangVersion>latest</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
-        <RootNamespace>ClientApp</RootNamespace>
+        <RootNamespace>KC.ITCompanion.ClientApp</RootNamespace>
         <RepositoryUrl>https://github.com/OldSkoolzRoolz/ai-assisted-it-manager.git</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageTags>AI;IT;enterprise;group-policy;policy-manager</PackageTags>
@@ -19,7 +19,7 @@
         <AnalysisLevel>latest</AnalysisLevel>
         <EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
         <!-- MSIX Packaging -->
-        <WindowsPackageType>None</WindowsPackageType>
+        <WindowsPackageType>Appx</WindowsPackageType>
         <EnableMsixTooling>true</EnableMsixTooling>
         <AppxBundle>Never</AppxBundle>
         <GenerateAppInstallerFile>false</GenerateAppInstallerFile>
@@ -37,11 +37,23 @@
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.8" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.8">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.8" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.8">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
         <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.8" />
         <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.8" />
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.8" />
         <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.*" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.8" />
+        <PackageReference Include="Polly" Version="8.6.2" />
+        <PackageReference Include="Polly.Extensions" Version="8.6.2" />
     </ItemGroup>
 
     <ItemGroup>
@@ -51,13 +63,10 @@
 
     <ItemGroup>
       <None Include="Package\ClientApp.Package.wapproj" />
-      <None Include="README.md">
-        <Pack>True</Pack>
-        <PackagePath>\</PackagePath>
-      </None>
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\CorePolicyEngine\CorePolicyEngine.csproj" />
+        <ProjectReference Include="..\ITCompanionDB\ITCompanionDB.sqlproj" />
         <ProjectReference Include="..\Security\Security.csproj" />
     </ItemGroup>
     <ItemGroup>

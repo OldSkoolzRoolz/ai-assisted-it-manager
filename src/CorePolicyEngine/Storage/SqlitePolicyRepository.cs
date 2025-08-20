@@ -6,7 +6,7 @@
 // Do not remove file headers
 
 
-namespace CorePolicyEngine.Storage;
+namespace KC.ITCompanion.CorePolicyEngine.Storage;
 
 
 // Legacy SqlitePolicyRepository removed pending redesign for new policy state persistence model.

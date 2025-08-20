@@ -5,7 +5,7 @@
 // License: MIT
 // Do not remove file headers
 
-namespace CorePolicyEngine;
+namespace KC.ITCompanion.CorePolicyEngine;
 
 /// <summary>
 /// Lightweight result primitive (duplicated per-module to satisfy modular isolation requirement).

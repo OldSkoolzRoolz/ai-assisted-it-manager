@@ -5,9 +5,7 @@
 // License: MIT
 // Do not remove file headers
 
-
-namespace CorePolicyEngine.Validation.Rules;
-
+namespace KC.ITCompanion.CorePolicyEngine.Validation.Rules;
 
 // Legacy rule removed pending new validation system for AdminTemplates models.
 public static class EnumMembershipRuleMarker

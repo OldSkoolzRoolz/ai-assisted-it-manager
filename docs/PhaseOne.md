@@ -2,14 +2,15 @@
 
 To add a reference to GPMgmtLib (COM):  
 - **Security Requirement:** Needs elevated privileges & domain admin rights.  
-- **Versioning:** Create SQLite tables for Policies, PolicySettings, PolicyHistory, and DeploymentLog. Set up schema for these.  
-- **Rollback:** Restore previous snapshot, apply changes, and write logs.  
-- **Validation:** Validate against the ADMX schema, check supported OS and "supportedOn" attributes.  
-- **Windows Packaging:** Link to packaging.md, but without citing.  
-For logging, use ETW or Serilog with a rolling file. We’ll keep things concise but detailed in the markdown format, with order and bold headings, keeping examples succinct.
+- **Versioning:** Persist policies, policy settings, history, and deployment log in a relational store (SQL Server baseline). Define schema objects for PolicyDefinition, PolicyGroup(+Items), Assignments, EffectivePolicy, DriftEvent, AuditEvent.  
+- **Rollback:** Restore previous snapshot (captured as versioned policy set) then apply changes and log audit + deployment outcome.  
+- **Validation:** Validate against the ADMX schema, check supported OS and `supportedOn` attributes.  
+- **Windows Packaging:** Link to packaging.md (avoid inline duplication).  
+For logging, use structured JSON rolling files (and summary rows in AuditEvent). Concise but complete entries with correlation ids.
+
 # Phase 1 scope overview
 
-Phase 1 delivers a local-first, admin-grade policy manager: parse and edit ADMX/ADML, validate policies with live feedback, deploy to local machine and (optionally) OU, and provide rollback/version history via SQLite. Keep the surface area tight to ship quickly, with clean seams for Phase 2/3 expansion.
+Phase 1 delivers a local-first, admin-grade policy manager: parse and edit ADMX/ADML, validate policies with live feedback, deploy to local machine and (optionally) OU, and provide rollback/version history via the relational policy store. Keep the surface area tight to ship quickly, with clean seams for Phase 2/3 expansion.
 
 ---
 
@@ -22,7 +23,7 @@ Phase 1 delivers a local-first, admin-grade policy manager: parse and edit ADMX/
 
 - **Visual policy editor:**
   - Tree view for categories/policies, detail pane for editing values.
-  - Property editors for each data type (checkbox, dropdown, numeric with ranges, text with masks).
+  - Property editors per data type (checkbox, dropdown, numeric, text, enum).
   - XML/source viewer with syntax highlighting and validation badges.
 
 - **Real-time validation:**
@@ -32,20 +33,20 @@ Phase 1 delivers a local-first, admin-grade policy manager: parse and edit ADMX/
 
 - **Deployment engine (local + OU preview):**
   - Apply settings to local machine/user policy registry hives.
-  - Export/import policy sets to portable artifacts (.policy.json + .reg).
+  - Export/import policy sets to portable artifacts (`.policy.json` + optional `.reg`).
   - Optional domain GPO push via GPMC COM when RSAT/GPMC present.
 
 - **Versioning and rollback:**
-  - SQLite-backed version history with diffs, labels, and timestamps.
+  - Relational-backed version history (PolicySetVersion + diff materialization service).
   - One-click rollback to any prior snapshot.
-  - Deployment log with outcome, duration, and changed keys.
+  - Deployment log with outcome, duration, and changed keys summary.
 
 - **Packaging and elevation:**
-  - Packaged WinUI 3 app (MSIX) with requestedExecutionLevel=highestAvailable behavior via brokered actions.
+  - Packaged app (MSIX – future), broker / elevated helper for privileged ops.
   - Admin check and UAC prompt for deployment operations.
 
 - **Diagnostics and logging:**
-  - Structured logs to rolling files (and SQLite summary).
+  - Structured JSON rolling files.
   - Policy validation errors/warnings surfaced inline and in a Problems pane.
 
 ---
@@ -53,251 +54,180 @@ Phase 1 delivers a local-first, admin-grade policy manager: parse and edit ADMX/
 # Implementation plan by feature
 
 ## ADMX/ADML parsing and model
-
 1. **Domain model scaffolding:**
-   - Define classes: AdmxCatalog, AdmxCategory, AdmxPolicy, AdmxPresentation, AdmxPart, AdmxSupportedOn, AdmlStrings.
+   - Classes: AdmxCatalog, AdmxCategory, AdmxPolicy, AdmxPresentation, AdmxPart, AdmxSupportedOn, AdmlStrings.
 2. **File discovery:**
-   - Implement search paths for ADMX/ADML (e.g., C:\Windows\PolicyDefinitions and custom folder).
-   - Culture selection (e.g., en-US fallback).
-3. **XML loaders:**
-   - Load ADMX → map policies, categories, supportedOn.
-   - Load ADML → map string table, presentation elements.
-4. **Merge layer:**
-   - Bind ADMX references to ADML strings/presentations; handle missing strings gracefully.
-5. **Validation pass:**
-   - Schema/structure checks; collect errors/warnings into a ValidationResult model.
-6. **Caching:**
-   - In-memory cache keyed by file set + culture; invalidate on file change.
+   - Search standard & custom PolicyDefinitions paths.
+3. **XML loaders:** Map definitions + strings.
+4. **Merge layer:** Bind ADMX references to ADML resources; graceful fallback.
+5. **Validation pass:** Collect errors/warnings.
+6. **Caching:** In-memory cache keyed by file set + culture.
 
-Acceptance criteria: Load Windows base ADMX set without crashes; policy tree populated with localized names; validation shows zero false positives for known-good files.
+Acceptance: Load base Windows ADMX set successfully; tree populated; zero false positives on known-good files.
 
 ## Visual policy editor
+1. Tree + Details + Source + Validation tabs.
+2. Data templates: Boolean, Enum, Numeric (range), Text.
+3. Two-way binding with inline errors.
+4. Source viewer (read-only) with highlighting.
+5. Search / filter with fuzzy substring.
+6. Dirty tracking & Apply/Revert.
 
-1. **Views and layout:**
-   - PolicyEditorView: left TreeView (categories), right TabView (Details, Source, Validation).
-2. **Detail editors:**
-   - Data templates per type: BooleanPart → ToggleSwitch; EnumPart → ComboBox; Decimal/Text → NumberBox/TextBox with masks.
-3. **Binding and validation UI:**
-   - Two-way binding to a PolicySettingViewModel; show inline errors with InfoBar/Badge.
-4. **Source viewer:**
-   - Read-only XML (from ADMX) with syntax highlighting (TextHighlighter rules for XML tokens).
-5. **Search and filters:**
-   - Search box with fuzzy match over policy name, category, and description.
-6. **Dirty-state and apply:**
-   - Track changed settings; enable Apply/Revert buttons.
-
-Acceptance criteria: Edit values for multiple policy types; errors display immediately; Apply/Revert correctly update pending set.
+Acceptance: Edit multiple policy types; validation immediate; revert and apply behave correctly.
 
 ## Real-time validation
+1. Rule interfaces (IValidationRule). 
+2. Rules: Type, Range, Enum, Required, SupportedOn.
+3. OS profile model feeding SupportedOnRule.
+4. Execute on change; aggregate list.
 
-1. **Rules engine:**
-   - Implement IValidationRule: TypeRule, RangeRule, EnumRule, RequiredRule, SupportedOnRule.
-2. **OS profile:**
-   - User-selectable target OS (Windows 10/11 variants, Server); rules consult supportedOn map.
-3. **Execution:**
-   - Validate on change and on demand; aggregate to Problems panel with severity and location.
-4. **Extensibility:**
-   - Rule catalog to allow custom org rules (e.g., “USB must be disabled”).
-
-Acceptance criteria: Invalid values blocked or warned; supportedOn mismatch flagged; Problems panel navigates to offending policy.
+Acceptance: Invalid values flagged; unsupported policies surfaced; navigation from Problems pane.
 
 ## Deployment engine (local + OU preview)
+1. Registry writers (HKLM/HKCU Software\Policies vendor path).
+2. Dry-run diff (current vs desired) with structured output.
+3. Transaction model + rollback token.
+4. GPO abstraction (preview). Capability detection before GPMC operations.
+5. Import/export pipeline.
 
-1. **Registry writers (local):**
-   - Map policy parts to registry under HKLM/HKCU\Software\Policies\... and Security settings where applicable.
-   - Generate .reg preview and dry-run diff (current vs desired).
-2. **Transaction + rollback token:**
-   - Snapshot changed keys/values before write; store in SQLite as rollback blob.
-3. **OU/GPO integration (preview → enable):**
-   - Introduce abstraction IPolicyTarget { LocalMachine, CurrentUser, Gpo(Id) }.
-   - If GPMC COM is available: create/open GPO, write settings; otherwise, show prerequisites and keep “preview/export” only.
-4. **Export/import:**
-   - Export current selection to .policy.json (internal schema) + optional .reg.
-   - Import merges into pending set with conflict markers.
-
-Acceptance criteria: Local deployment applies reliably; dry-run shows correct diff; OU push succeeds when GPMC present or shows actionable prerequisites.
+Acceptance: Dry-run accurate; apply modifies registry; preview OU operations gated by capability.
 
 ## Versioning and rollback
+1. Relational schema: PolicySet, PolicySetVersion, PolicySetItem, DeploymentLog.
+2. Snapshot capture + diff computation (added/changed/removed).
+3. Rollback uses prior snapshot -> deployment pipeline.
+4. Optional labels / notes per version.
 
-1. **SQLite schema:**
-   - Tables: PolicySet, PolicySetting, PolicyHistory, DeploymentLog.
-   - Store normalized settings and a compressed snapshot blob per revision.
-2. **Diff engine:**
-   - Compute adds/modifies/deletes between two snapshots; render readable diff.
-3. **Rollback operation:**
-   - Select prior revision → generate operations → apply via deployment engine with transaction.
-4. **Labels and notes:**
-   - Allow commit messages and tags per snapshot.
-
-Acceptance criteria: Every deployment records a snapshot; rollback restores previous values; diffs are accurate and human-readable.
+Acceptance: Each apply creates version; rollback restores previous state; diffs human-readable.
 
 ## Packaging and elevation
-
-1. **MSIX packaging project:**
-   - Identity, capabilities (e.g., registry, runFullTrust via AppExecutionAlias if needed).
-2. **Elevation strategy:**
-   - Broker service (Windows Service or elevated helper) for registry writes; UI communicates via IPC (named pipes/gRPC).
-3. **Startup checks:**
-   - Detect admin rights and domain/RSAT presence; surface status in a System Status bar.
-
-Acceptance criteria: App installs via MSIX; privileged actions routed through broker; clear status/error UX.
+1. Broker process / service boundary design.
+2. Elevation strategy documented; enforcement for privileged writes.
+3. Status bar for environment & capability flags (admin, domain, RSAT, broker).
 
 ## Diagnostics and logging
-
-1. **Logging:**
-   - Serilog to JSON rolling file + SQLite summary; enrich with user, machine, OS, session id.
-2. **Event correlation:**
-   - Correlate UI actions → engine operations → deployment outcomes with a single ActivityId.
-3. **Troubleshooting view:**
-   - In-app viewer for recent logs and last deployment transcript.
-
-Acceptance criteria: Actionable logs for failures; users can export a diagnostic bundle.
+1. Rolling JSON logs + retention purge.
+2. Correlation id across UI action → deploy pipeline.
+3. Log viewer (filter by level / text).
+4. Diagnostic bundle exporter (logs + recent deployment transcript).
 
 ---
 
 # Data model and formats
 
-## SQLite schema (core tables)
-
+## Core relational schema (conceptual)
 ```sql
+-- Policy sets & versions
 CREATE TABLE PolicySet (
-  Id TEXT PRIMARY KEY,
-  Name TEXT NOT NULL,
-  CreatedUtc TEXT NOT NULL,
-  CreatedBy TEXT,
-  TargetScope TEXT NOT NULL, -- LocalMachine|CurrentUser|Gpo:{Guid}
-  Notes TEXT
+  Id UNIQUEIDENTIFIER PRIMARY KEY,
+  Name NVARCHAR(256) NOT NULL,
+  TargetScope NVARCHAR(64) NOT NULL, -- LocalMachine|CurrentUser|Gpo:{Guid}
+  CreatedUtc DATETIME2 NOT NULL,
+  CreatedBy NVARCHAR(128) NULL,
+  Notes NVARCHAR(1024) NULL
 );
 
-CREATE TABLE PolicySetting (
-  Id TEXT PRIMARY KEY,
-  PolicySetId TEXT NOT NULL,
-  PolicyId TEXT NOT NULL,        -- e.g., "Computer/Windows Components/BitLocker/..."
-  PartId TEXT,                   -- specific ADMX part
-  Value TEXT NOT NULL,           -- normalized string; store original type in ValueType
-  ValueType TEXT NOT NULL,       -- Boolean|Enum|Numeric|Text
-  Enabled INTEGER NOT NULL,      -- 0/1
+CREATE TABLE PolicySetVersion (
+  PolicySetVersionId UNIQUEIDENTIFIER PRIMARY KEY,
+  PolicySetId UNIQUEIDENTIFIER NOT NULL,
+  VersionNumber INT NOT NULL,
+  CreatedUtc DATETIME2 NOT NULL,
+  CreatedBy NVARCHAR(128) NULL,
+  SnapshotJson NVARCHAR(MAX) NOT NULL,
+  Message NVARCHAR(512) NULL,
   FOREIGN KEY (PolicySetId) REFERENCES PolicySet(Id)
 );
 
-CREATE TABLE PolicyHistory (
-  Id TEXT PRIMARY KEY,
-  PolicySetId TEXT NOT NULL,
-  Version INTEGER NOT NULL,
-  CreatedUtc TEXT NOT NULL,
-  CreatedBy TEXT,
-  Snapshot BLOB NOT NULL,        -- compressed JSON of entire set
-  Message TEXT,
-  FOREIGN KEY (PolicySetId) REFERENCES PolicySet(Id)
+CREATE TABLE PolicySetItem (
+  PolicySetItemId UNIQUEIDENTIFIER PRIMARY KEY,
+  PolicySetVersionId UNIQUEIDENTIFIER NOT NULL,
+  PolicyKey NVARCHAR(512) NOT NULL,
+  PartKey NVARCHAR(256) NULL,
+  Value NVARCHAR(MAX) NULL,
+  ValueType NVARCHAR(32) NOT NULL,
+  Enabled BIT NOT NULL,
+  FOREIGN KEY (PolicySetVersionId) REFERENCES PolicySetVersion(PolicySetVersionId)
 );
 
 CREATE TABLE DeploymentLog (
-  Id TEXT PRIMARY KEY,
-  PolicySetId TEXT NOT NULL,
-  Version INTEGER NOT NULL,
-  Target TEXT NOT NULL,
-  StartedUtc TEXT NOT NULL,
-  EndedUtc TEXT NOT NULL,
-  Status TEXT NOT NULL,          -- Success|Failed|Partial
-  DiffJson TEXT NOT NULL,
-  Error TEXT
+  DeploymentLogId UNIQUEIDENTIFIER PRIMARY KEY,
+  PolicySetId UNIQUEIDENTIFIER NOT NULL,
+  VersionNumber INT NOT NULL,
+  Target NVARCHAR(128) NOT NULL,
+  StartedUtc DATETIME2 NOT NULL,
+  EndedUtc DATETIME2 NOT NULL,
+  Status NVARCHAR(16) NOT NULL, -- Success|Failed|Partial
+  DiffJson NVARCHAR(MAX) NOT NULL,
+  Error NVARCHAR(MAX) NULL,
+  FOREIGN KEY (PolicySetId) REFERENCES PolicySet(Id)
 );
 ```
 
 ## Internal policy JSON (export)
-
 ```json
 {
   "name": "Baseline - Workstations",
   "targetScope": "LocalMachine",
   "osProfile": "Windows 11 23H2",
   "settings": [
-    {
-      "policyId": "Computer\\Microsoft Defender Antivirus\\Turn off Microsoft Defender Antivirus",
-      "enabled": false,
-      "valueType": "Boolean",
-      "value": "false"
-    },
-    {
-      "policyId": "Computer\\Removable Storage Access\\All Removable Storage classes: Deny all access",
-      "enabled": true,
-      "valueType": "Boolean",
-      "value": "true"
-    }
+    { "policyId": "Computer\\Microsoft Defender Antivirus\\Turn off Microsoft Defender Antivirus", "enabled": false, "valueType": "Boolean", "value": "false" },
+    { "policyId": "Computer\\Removable Storage Access\\All Removable Storage classes: Deny all access", "enabled": true, "valueType": "Boolean", "value": "true" }
   ]
 }
 ```
 
 ---
 
-# Repository and solution structure
-
+# Repository and solution structure (current intent)
 ```
 /src
-  /Client.WinUI            # WinUI 3 UI
-    Views/
-      PolicyEditorView.xaml
-      DeploymentControlView.xaml
-      RollbackView.xaml
-    ViewModels/
-    Services/Contracts/    # IPC contracts
-  /Core.Engine             # Worker/Core library
-    Parsing/
-      AdmxLoader.cs
-      AdmlLoader.cs
-      AdmxModel.cs
-    Validation/
-      Rules/
-    Deployment/
-      RegistryWriter.cs
-      GpoWriter.cs
-    Versioning/
-      SnapshotService.cs
-      DiffService.cs
-    Storage/
-      SqliteContext.cs
-  /Broker.Service          # Elevated broker (Windows Service or FullTrust broker)
-    Ipc/
-    Operations/
-  /Shared                  # DTOs, Abstractions
-  /Package                 # MSIX packaging project
+  /ClientApp                 # WPF UI
+  /CorePolicyEngine          # Parsing, validation, policy evaluation & services
+  /Security                  # AuthZ/AuthN & integrity (future)
+  /ITCompanionDB             # Database project (T-SQL schema & sprocs)
+  /EnterpriseDashboard       # Blazor (future phase)
+  /Package                   # MSIX packaging (future)
 /docs
-  packaging.md
-  ARCHITECTURE.md
-  README.md
 ```
 
-- **Boundaries:** UI doesn’t touch registry or COM directly; it calls Core via interfaces. All privileged actions route through Broker.
-- **Contracts:** Define IPolicyRepository, IDeploymentService, IValidationService, IAdmxCatalog in Shared.
+- **Boundaries:** UI isolated from privileged operations; future broker enforces elevation boundary.
+- **Contracts:** Interfaces concentrate in CorePolicyEngine; concrete SQL / infra hidden behind repositories/services.
 
 ---
 
 # Milestones, acceptance criteria, and risks
 
+(Milestones retained; wording updated for provider-agnostic persistence.)
+
 ## Milestone 1: Parsers + basic editor (2 weeks)
-- **Deliverables:** Load/merge ADMX/ADML, tree navigation, detail editors for boolean/enum/numeric/text.
-- **Acceptance:** Can view and edit 20+ common policies with localized text; validation catches type/range.
+Deliverables: Catalog load/merge, base tree, editors, localized strings.  
+Acceptance: 20+ policies view/edit; validation baseline.
 
 ## Milestone 2: Validation + search + source view (1 week)
-- **Deliverables:** Rules engine, OS profile selector, Problems pane, XML source highlighting, global search.
-- **Acceptance:** Unsupported policies flagged; Problems pane navigates; search finds by name/description.
+Deliverables: Rules engine, OS profile, Problems pane, XML highlight, global search.  
+Acceptance: Unsupported flagged; navigation works.
 
-## Milestone 3: Local deployment + dry-run + versioning (2 weeks)
-- **Deliverables:** Registry writer, diff preview, snapshots in SQLite, Apply/Revert, rollback to prior version.
-- **Acceptance:** Dry-run shows correct changes; apply modifies registry; rollback restores previous state.
+## Milestone 3: Local deployment + versioning (2 weeks)
+Deliverables: Registry writer, dry-run diff, version snapshot tables, rollback path.  
+Acceptance: Accurate diff; rollback restores prior state.
 
-## Milestone 4: Packaging + broker + diagnostics (1 week)
-- **Deliverables:** MSIX package, elevated broker path, Serilog logs, diagnostics export.
-- **Acceptance:** Installable app; privileged ops succeed via broker; logs capture a failed and a successful deployment.
+## Milestone 4: Packaging + diagnostics (1 week)
+Deliverables: Packaging scaffolding, logging viewer, diagnostic export.  
+Acceptance: Install & run; logs captured for success & failure.
 
-## Stretch: OU/GPO writer (preview) (1 week)
-- **Deliverables:** GPO abstraction with capability checks; when GPMC present, create/update a test GPO.
-- **Acceptance:** Create and link a test GPO in a lab; otherwise show clear prerequisites.
+## Stretch: OU/GPO writer (1 week)
+Deliverables: GPO abstraction & capability detection.  
+Acceptance: Test GPO created when environment supports it.
 
-## Key risks and mitigations
-- **GPO COM availability:** Mitigate with capability checks and clear “preview/export” path; ship local-first.
-- **Elevation in MSIX:** Use brokered helper or Windows Service; keep registry writes out of UI process.
-- **ADMX edge cases:** Add robust error handling and a fallback “raw XML” inspector for unknown parts.
-- **OS variance:** Model target OS profile explicitly; allow per-policy overrides for server SKUs.
+## Key risks / mitigations
+- **COM GPMC availability:** Capability check & fall back to local deployment only.
+- **Elevation in packaged app:** Broker/service; no direct UI elevation.
+- **Schema drift:** Database project (DACPAC) + documented migration practice.
+- **Large ADMX sets:** Caching & lazy materialization.
 
-If you want, I can generate the initial project scaffolding (interfaces, models, and empty services) and a baseline SQLite migration to accelerate Milestone 1.
+---
+
+# Change log (Phase 1 doc updates)
+- Replaced SQLite-specific design with provider-agnostic relational model (SQL Server baseline).
+- Added conceptual relational schema for versioning artifacts.
+- Streamlined milestones to reflect current persistence direction.

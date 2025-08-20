@@ -5,8 +5,11 @@
 // License: MIT
 // Do not remove file headers
 
+// Global usings adjusted to new namespace scheme
 
-global using ClientApp.ViewModels;
+global using KC.ITCompanion.ClientApp.ViewModels;
 
 global using System.Windows;
 global using System.Windows.Controls;
+
+global using KC.ITCompanion.ClientApp.Logging;
