@@ -9,6 +9,5 @@ artifacts/
 *.cache/
 *.log
 .idea/
-/ai-assisted-it-manager.sln
-/src/ITCompanionDB/ITCompanionDB.dbmdl
 /src/ITCompanionDB/ITCompanionDB.jfm
+/src/ITCompanionDB/ITCompanionDB.dbmdl
