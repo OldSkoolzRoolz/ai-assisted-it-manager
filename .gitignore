@@ -9,3 +9,4 @@ artifacts/
 *.cache/
 *.log
 .idea/
+/ai-assisted-it-manager.sln
