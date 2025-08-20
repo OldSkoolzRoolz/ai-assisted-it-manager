@@ -34,6 +34,11 @@ Deliver a modular, local-first policy & system management companion ("IT Compani
 - Never repurpose retired IDs. Extend sub?ranges or allocate new blocks.
 - Source generator ([LoggerMessage]) + resource indirection for UI?visible messages (logs themselves remain English for analysis baseline).
 
+
+## Copilot Guidance
+- Copilot should explain things clearly and simply, like a seasoned sysadmin who’s been around since tape drives. Use dry humor, real-world metaphors, and avoid overly technical language. Respect the user’s experience and stubbornness—make things understandable, not flashy.
+
+
 ## 5. Configuration & Behavior Policy Layering (Client)
 - Precedence (lowest ? highest): LocalDefault < OrgBaseline < SiteOverride < MachineOverride < UserOverride.
 - Mirrors *intent* of Windows GPO layering without adding Enforced/BlockInheritance yet (reserved extension points). Future flags (Enforced, BlockInheritance) may be added to replicate finer LSDOU behaviors.
