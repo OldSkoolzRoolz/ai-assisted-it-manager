@@ -5,13 +5,8 @@
 // License: MIT
 // Do not remove file headers
 
-using Microsoft.Data.Sqlite;
+namespace KC.ITCompanion.CorePolicyEngine.Storage;
 
-namespace CorePolicyEngine.Storage;
-
-/// <summary>
-/// Lightweight local audit store (client side). Enterprise aggregation will ingest these records.
-/// </summary>
 public interface IAuditStore
 {
     Task InitializeAsync(CancellationToken token);
@@ -30,58 +25,33 @@ public sealed record AuditRecord(
 
 public sealed class AuditStore : IAuditStore
 {
-    private readonly string _dbPath;
+    private readonly string _filePath;
+    private readonly SemaphoreSlim _gate = new(1,1);
 
-    public AuditStore(string? dbPath = null)
+    public AuditStore(string? filePath = null)
     {
-        _dbPath = dbPath ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "AIManager","client","audit.db");
+        _filePath = filePath ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "AIManager","client","audit-events.jsonl");
     }
 
-    private SqliteConnection Open()
+    public Task InitializeAsync(CancellationToken token)
     {
-        Directory.CreateDirectory(Path.GetDirectoryName(_dbPath)!);
-        var c = new SqliteConnection($"Data Source={_dbPath}");
-        c.Open();
-        return c;
-    }
-
-    public async Task InitializeAsync(CancellationToken token)
-    {
-        using var c = Open();
-        var cmd = c.CreateCommand();
-        cmd.CommandText = @"CREATE TABLE IF NOT EXISTS AuditEvent(
-AuditId TEXT PRIMARY KEY,
-EventType TEXT NOT NULL,
-Actor TEXT NOT NULL,
-ActorType TEXT NOT NULL,
-PolicyKey TEXT,
-DetailsJson TEXT,
-CreatedUtc TEXT NOT NULL
-);
-CREATE INDEX IF NOT EXISTS IX_AuditEvent_EventType ON AuditEvent(EventType);
-CREATE INDEX IF NOT EXISTS IX_AuditEvent_CreatedUtc ON AuditEvent(CreatedUtc);";
-        await cmd.ExecuteNonQueryAsync(token);
+        Directory.CreateDirectory(Path.GetDirectoryName(_filePath)!);
+        if (!File.Exists(_filePath)) File.WriteAllText(_filePath, string.Empty);
+        return Task.CompletedTask;
     }
 
     public async Task WriteAsync(AuditRecord record, CancellationToken token)
     {
-        using var c = Open();
-        var cmd = c.CreateCommand();
-        cmd.CommandText = "INSERT INTO AuditEvent (AuditId,EventType,Actor,ActorType,PolicyKey,DetailsJson,CreatedUtc) VALUES ($id,$et,$a,$at,$pk,$d,$t)";
-        cmd.Parameters.AddWithValue("$id", record.AuditId);
-        cmd.Parameters.AddWithValue("$et", record.EventType);
-        cmd.Parameters.AddWithValue("$a", record.Actor);
-        cmd.Parameters.AddWithValue("$at", record.ActorType);
-        cmd.Parameters.AddWithValue("$pk", (object?)record.PolicyKey ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("$d", (object?)record.DetailsJson ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("$t", record.CreatedUtc.ToString("O"));
-        await cmd.ExecuteNonQueryAsync(token);
+        var line = System.Text.Json.JsonSerializer.Serialize(record);
+        await _gate.WaitAsync(token).ConfigureAwait(false);
+        try
+        {
+            await File.AppendAllTextAsync(_filePath, line + Environment.NewLine, token).ConfigureAwait(false);
+        }
+        finally { _gate.Release(); }
     }
 }
 
-/// <summary>
-/// Simple facade providing higher level audit intents.
-/// </summary>
 public interface IAuditWriter
 {
     Task PolicyViewedAsync(string policyKey, CancellationToken token = default);
@@ -92,17 +62,10 @@ public interface IAuditWriter
 public sealed class AuditWriter : IAuditWriter
 {
     private readonly IAuditStore _store;
-
-    public AuditWriter(IAuditStore store)
-    {
-        _store = store;
-    }
-
+    public AuditWriter(IAuditStore store) => _store = store;
     private static string Actor() => Environment.UserName;
-
     private Task WriteAsync(string eventType, string? policyKey, string? details, CancellationToken token)
         => _store.WriteAsync(new AuditRecord(Guid.NewGuid().ToString("N"), eventType, Actor(), "User", policyKey, details, DateTime.UtcNow), token);
-
     public Task PolicyViewedAsync(string policyKey, CancellationToken token = default) => WriteAsync("PolicyViewed", policyKey, null, token);
     public Task PolicySelectedAsync(string policyKey, CancellationToken token = default) => WriteAsync("PolicySelected", policyKey, null, token);
     public Task AccessDeniedAsync(string reason, CancellationToken token = default) => WriteAsync("AccessDenied", null, "{\"reason\":\"" + reason.Replace("\"","'") + "\"}", token);

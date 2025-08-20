@@ -5,7 +5,7 @@
 // License: MIT
 // Do not remove file headers
 
-namespace ClientApp.Logging;
+namespace KC.ITCompanion.ClientApp.Logging;
 
 /// <summary>
 /// Provides ambient session information to enrich log records. Invariant to enable aggregation.

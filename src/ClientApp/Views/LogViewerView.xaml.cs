@@ -5,9 +5,10 @@
 // License: MIT
 // Do not remove file headers
 
+using System.Windows;
 using System.Windows.Controls;
 
-namespace ClientApp.Views;
+namespace KC.ITCompanion.ClientApp.Views;
 
 public partial class LogViewerView : UserControl
 {

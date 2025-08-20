@@ -5,9 +5,7 @@
 // License: MIT
 // Do not remove file headers
 
-
-namespace CorePolicyEngine.Parsing;
-
+namespace KC.ITCompanion.CorePolicyEngine.Parsing;
 
 // Legacy required-value validation rule removed.
 public static class RequiredEnabledValueRuleMarker

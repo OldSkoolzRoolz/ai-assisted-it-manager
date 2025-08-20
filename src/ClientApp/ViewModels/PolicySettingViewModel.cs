@@ -8,9 +8,9 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using CorePolicyEngine.AdminTemplates;
+using KC.ITCompanion.CorePolicyEngine.AdminTemplates;
 
-namespace ClientApp.ViewModels;
+namespace KC.ITCompanion.ClientApp.ViewModels;
 
 // Placeholder per-policy element editing (will be expanded for element-specific controls)
 public class PolicySettingViewModel : INotifyPropertyChanged
@@ -34,7 +34,7 @@ public class PolicySettingViewModel : INotifyPropertyChanged
     };
 
     // Enum options (simple name/value pair) for EnumElement
-    public IReadOnlyList<EnumOption> EnumItems { get; } = Array.Empty<EnumOption>();
+    public IReadOnlyList<EnumOption> EnumItems { get; private set; } = Array.Empty<EnumOption>();
 
     private bool _enabled;
     public bool Enabled { get => _enabled; set { if (_enabled != value) { _enabled = value; OnPropertyChanged(); } } }

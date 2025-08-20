@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <None Include="ai-assisted-it-manager.sln" />
+    <None Include="ai-assisted-it-manager.sln.DotSettings.user" />
+  </ItemGroup>
+</Project>

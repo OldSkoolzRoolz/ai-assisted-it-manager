@@ -1,7 +1,7 @@
 ## Copilot Instructions – AI Assisted Policy & System Management
 
-Version: 2.5  
-Date: 2025-08-18
+Version: 2.6  
+Date: 2025-08-19
 
 ---
 ## 1. Purpose & Scope
@@ -55,9 +55,10 @@ Goal: Extend existing registry?backed policy paradigm (ADMX semantics) with appl
 DesiredState = (BehaviorPolicy Effective) + (Union of PolicyGroups assigned via ClientGroup memberships) with latter overriding earlier conflicts (last assignment order or explicit priority – priority scheme TBD). Drift detection compares DesiredState vs ReportedState snapshot from client.
 
 ## 7. Data & Persistence
-- SQLite local (client) for behavior policy & local snapshots.
-- Enterprise central store (later) may use scalable RDBMS; schema abstracted via repositories.
-- Encapsulated DB logic (parameterized commands, future migration engine). No business logic in raw SQL beyond selection and filtering.
+- Central relational store (SQL Server baseline) for enterprise entities (policy definitions, groups, assignments, drift, audit, effective state). Abstractions allow future provider implementations.
+- Client may optionally maintain a lightweight local cache (implementation detail) but no hard dependency on SQLite in design; persistence API must not assume engine-specific features.
+- Encapsulated DB logic via stored procedures for complex write / resolution paths (drift detection, effective merge) and parameterized inline queries for simple lookups.
+- No business logic embedded in ad-hoc ORM expression trees; SQL artifacts are versioned in the database project. All access goes through repositories/services.
 
 ## 8. Validation (Settings & Policies)
 - Centralized in CorePolicyEngine. Future: extend with per?policy expression/constraint language. Settings retain rule mapping for ADMX generation / validation UI hints.
@@ -81,7 +82,7 @@ DesiredState = (BehaviorPolicy Effective) + (Union of PolicyGroups assigned via 
 - MSIX (future) + elevated broker/service for privileged ops.
 
 ## 13. Guardrails
-- No speculative NuGet; verify necessity + existence.
+- No speculative NuGet; verify necessity & existence.
 - Do not add Microsoft.Extensions.Logging.Generators (in-box).
 - Minimize public surface; prefer internal except cross-module contracts.
 - Avoid >300 line monoliths; refactor into cohesive units.
@@ -89,7 +90,7 @@ DesiredState = (BehaviorPolicy Effective) + (Union of PolicyGroups assigned via 
 ## 14. Documentation & Change Management
 - Increment Version/Date on change; maintain forthcoming CHANGELOG.md.
 - Update SettingCatalog seed + docs when adding/removing settings.
-- Provide Architecture.md (high-level), ConfigSettings.md (settings), plus future PolicyModel.md (enterprise specifics).
+- Provide Architecture.md (high-level), ConfigSettings.md (settings), PolicyModel.md (enterprise specifics), and DBVersioning.md (proc/interface changes & rationale).
 
 ## 15. Outstanding TBD / Research Items
 | Area | Question | Target Decision Point |
@@ -106,8 +107,9 @@ DesiredState = (BehaviorPolicy Effective) + (Union of PolicyGroups assigned via 
 ---
 ## Removed Redundancies (Historical)
 - Consolidated overlapping modularity/localization/security directives.
-- Replaced explicit stored procedure requirement with portable encapsulated DB logic.
+- Replaced explicit stored procedure requirement with portable encapsulated DB logic (now formalized under Data & Persistence with SQL Server baseline).
 - Unified logging policy & event ID guidance.
+- Removed prior SQLite-specific references; design now provider-agnostic with SQL Server reference implementation.
 
 ---
 (End of instructions)

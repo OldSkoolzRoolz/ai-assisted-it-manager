@@ -1,7 +1,7 @@
 using System.Collections.ObjectModel;
-using CorePolicyEngine.AdminTemplates;
+using KC.ITCompanion.CorePolicyEngine.AdminTemplates;
 
-namespace ClientApp.ViewModels;
+namespace KC.ITCompanion.ClientApp.ViewModels;
 
 public class CategoryTreeItem
 {

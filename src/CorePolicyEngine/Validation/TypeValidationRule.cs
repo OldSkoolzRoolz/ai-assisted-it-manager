@@ -5,9 +5,7 @@
 // License: MIT
 // Do not remove file headers
 
-
-namespace CorePolicyEngine.Validation;
-
+namespace KC.ITCompanion.CorePolicyEngine.Validation;
 
 public static class TypeValidationRuleMarker
 {

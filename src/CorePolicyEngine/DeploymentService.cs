@@ -5,9 +5,7 @@
 // License: MIT
 // Do not remove file headers
 
-
-namespace CorePolicyEngine;
-
+namespace KC.ITCompanion.CorePolicyEngine;
 
 public sealed class DeploymentService
 {

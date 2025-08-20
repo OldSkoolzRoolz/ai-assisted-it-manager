@@ -5,9 +5,9 @@
 // License: MIT
 // Do not remove file headers
 
+using System.Windows;
 
-namespace ClientApp;
-
+namespace KC.ITCompanion.ClientApp;
 
 public partial class MainWindow : Window
 {

@@ -5,9 +5,7 @@
 // License: MIT
 // Do not remove file headers
 
-
-namespace CorePolicyEngine.AdminTemplates;
-
+namespace KC.ITCompanion.CorePolicyEngine.AdminTemplates;
 
 public sealed record PolicySummary(
     PolicyKey Key,
@@ -19,15 +17,11 @@ public sealed record PolicySummary(
     IReadOnlyList<string> ElementKinds,
     DateTimeOffset IndexedAtUtc);
 
-
-
 public sealed record CategoryNode(
     string Path,
     string Name,
     IReadOnlyList<CategoryNode> Children,
     IReadOnlyList<PolicySummary> Policies);
-
-
 
 public static class Materializer
 {

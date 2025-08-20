@@ -7,7 +7,7 @@
 
 using System.Windows;
 
-namespace ClientApp.Views;
+namespace KC.ITCompanion.ClientApp.Views;
 
 public partial class DevDiagnosticsWindow : Window
 {

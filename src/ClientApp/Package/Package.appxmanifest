@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" IgnorableNamespaces="uap">
+<Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities" IgnorableNamespaces="uap rescap">
   <Identity Name="ClientApp.ITCompanion" Publisher="CN=ITCompanion" Version="1.0.0.0" />
   <Properties>
     <DisplayName>IT Companion</DisplayName>
     <PublisherDisplayName>IT Companion</PublisherDisplayName>
+    <Description>Policy &amp; System Management Companion</Description>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
   <Dependencies>
@@ -14,10 +15,17 @@
   </Resources>
   <Applications>
     <Application Id="App" Executable="ClientApp.exe" EntryPoint="Windows.FullTrustApplication">
-      <uap:VisualElements DisplayName="IT Companion" Description="Policy & System Management" BackgroundColor="transparent" Square150x150Logo="Assets\Square150x150Logo.scale-200.png" Square44x44Logo="Assets\Square44x44Logo.scale-200.png" />
+      <uap:VisualElements DisplayName="IT Companion" Description="Policy &amp; System Management" BackgroundColor="transparent" Square150x150Logo="Assets\Square150x150Logo.scale-200.png" Square44x44Logo="Assets\Square44x44Logo.scale-200.png" />
+      <Extensions>
+        <uap:Extension Category="windows.appExecutionAlias">
+          <uap:AppExecutionAlias Executable="ClientApp.exe" EntryPoint="Windows.FullTrustApplication" Alias="itcompanion" />
+        </uap:Extension>
+      </Extensions>
     </Application>
   </Applications>
   <Capabilities>
-    <rescap:Capability Name="runFullTrust" xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities" />
+    <rescap:Capability Name="runFullTrust" />
+    <uap:Capability Name="enterpriseAuthentication" />
+    <uap:Capability Name="privateNetworkClientServer" />
   </Capabilities>
 </Package>

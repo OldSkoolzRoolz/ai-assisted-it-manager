@@ -1,0 +1,11 @@
+-- Indexes & supporting structures
+CREATE INDEX IX_PolicyDefinition_Category ON [dbo].[PolicyDefinition]([Category]);
+CREATE INDEX IX_PolicyGroupItem_Group ON [dbo].[PolicyGroupItem]([PolicyGroupId]);
+CREATE INDEX IX_PolicyGroupItem_Policy ON [dbo].[PolicyGroupItem]([PolicyDefId]);
+CREATE INDEX IX_Client_LastHeartbeat ON [dbo].[Client]([LastHeartbeatUtc]);
+CREATE INDEX IX_PolicyAssignment_Group ON [dbo].[PolicyAssignment]([ClientGroupId]);
+CREATE INDEX IX_ClientEffectivePolicy_Hash ON [dbo].[ClientEffectivePolicy]([Hash]);
+CREATE INDEX IX_DriftEvent_Status ON [dbo].[DriftEvent]([Status]);
+CREATE INDEX IX_AuditEvent_EventType ON [dbo].[AuditEvent]([EventType]);
+CREATE INDEX IX_AuditEvent_CreatedUtc ON [dbo].[AuditEvent]([CreatedUtc]);
+GO

@@ -5,7 +5,9 @@
 // License: MIT
 // Do not remove file headers
 
-namespace CorePolicyEngine.Parsing;
+using KC.ITCompanion.CorePolicyEngine.Parsing;
+
+namespace KC.ITCompanion.CorePolicyEngine.Parsing;
 
 // Backwards compatibility shim (scheduled for removal). Now returns raw pair without Result wrapper.
 [Obsolete("Use IAdminTemplateLoader directly. This shim will be removed.")]

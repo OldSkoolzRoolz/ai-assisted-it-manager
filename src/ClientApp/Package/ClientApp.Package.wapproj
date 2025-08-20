@@ -1,25 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
   <PropertyGroup>
     <ProjectGuid>{F5F1F1F1-AAAA-4B5E-9F11-1234567890AB}</ProjectGuid>
-    <OutputType>AppContainerExe</OutputType>
-    <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
     <TargetPlatformVersion>10.0.19041.0</TargetPlatformVersion>
     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
-    <AssetTargetFallback>uap10.0</AssetTargetFallback>
-    <RootNamespace>ClientApp.Package</RootNamespace>
-    <AssemblyName>ClientApp.Package</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <AppxPackage>true</AppxPackage>
-    <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
-    <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
+    <AppxSymbolPackageEnabled>false</AppxSymbolPackageEnabled>
     <AppxBundle>Never</AppxBundle>
-    <PackageCertificateThumbprint />
+    <GenerateAppInstallerFile>false</GenerateAppInstallerFile>
+    <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
+    <AppInstallerUpdateFrequency>0</AppInstallerUpdateFrequency>
+    <AppInstallerCheckForUpdateFrequency>OnApplicationRun</AppInstallerCheckForUpdateFrequency>
+    <PackageCertificateThumbprint></PackageCertificateThumbprint>
+    <PackageCertificateKeyFile>ClientApp_TemporaryKey.pfx</PackageCertificateKeyFile>
+    <EntryPointProjectUniqueName>..\ClientApp\ClientApp.csproj</EntryPointProjectUniqueName>
+    <GenerateTemporaryStoreCertificate>True</GenerateTemporaryStoreCertificate>
+    <MakePriExtension>pri</MakePriExtension>
   </PropertyGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ClientApp\ClientApp.csproj" />
+    <ProjectReference Include="..\ClientApp\ClientApp.csproj">
+      <Project>{00000000-0000-0000-0000-000000000000}</Project>
+      <Name>ClientApp</Name>
+    </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\ClientApp\Assets\Square150x150Logo.scale-200.png" />
+    <Content Include="..\ClientApp\Assets\Square44x44Logo.scale-200.png" />
+    <Content Include="..\ClientApp\Assets\StoreLogo.png" />
+    <Content Include="..\ClientApp\Assets\Wide310x150Logo.scale-200.png" />
+    <Content Include="..\ClientApp\Assets\SplashScreen.scale-200.png" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\DesktopBridge\Microsoft.DesktopBridge.targets" Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\DesktopBridge\Microsoft.DesktopBridge.targets')" />
 </Project>
