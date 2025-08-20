@@ -73,6 +73,6 @@ public sealed class BehaviorPolicyStore : IBehaviorPolicyStore
     {
         var raw = $"{p.LogRetentionDays}|{p.MaxLogFileSizeMB}|{p.MinLogLevel}|{p.UiLanguage}|{p.EnableTelemetry}|{p.PolicyVersion}|{p.EffectiveUtc:O}|{p.AllowedGroupsCsv}";
         using var sha = SHA256.Create();
-        return Convert.ToHexString(sha.ComputeHash(Encoding.UTF8.GetBytes(raw)));
+        return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(raw)));
     }
 }
