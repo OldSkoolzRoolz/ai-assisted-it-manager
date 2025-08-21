@@ -76,7 +76,7 @@
     <Build Include="SchemaVer1\19_AuditEvent.sql" />
     <Build Include="SchemaVer1\20_AuditRetention.sql" />
     <Build Include="SchemaVer1\Indexes.sql" />
-    <Build Include="30_LogSource.sql" />
+    <Build Include="Tables\30_LogSource.sql" />
     <Build Include="31_LogSourceTag.sql" />
     <Build Include="32_LogIngestionCursor.sql" />
     <Build Include="33_LogEvent.sql" />
