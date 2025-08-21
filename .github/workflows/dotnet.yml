@@ -24,6 +24,5 @@ jobs:
       run: dotnet restore ITCompanion.sln
     - name: Build
       run: dotnet restore ITCompanion.sln
-    - name: Build
       run: dotnet build ITCompanion.sln --no-restore
  
