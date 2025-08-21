@@ -205,7 +205,7 @@ For enterprise deployments:
 
 - [GitHub Branch Protection Documentation](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/defining-the-mergeability-of-pull-requests/about-protected-branches)
 - [GitHub Security Features](https://docs.github.com/en/code-security)
-- [Repository Validation Steps](../.github/copilot-instructions.md) - Section 14
+- [Repository Validation Steps](../.github/copilot-instructions.md#repository-validation-steps) - See "Repository Validation Steps" section
 - [Documentation Versioning](../docs/DOCUMENTATION_VERSION_MANIFEST.md)
 
 ---
