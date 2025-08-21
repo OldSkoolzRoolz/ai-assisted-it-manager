@@ -1,6 +1,3 @@
-﻿Perfect—thanks for sharing, Kyle. Based on your repo’s current roadmap and structure, here’s a tailored `README.md` template that reflects your latest direction, including the phased rollout, monetization strategy, and technical stack.
-
----
 
 ## 🛡️ AI-Assisted Policy Manager & IT Companion
 
