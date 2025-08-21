@@ -41,6 +41,7 @@ public class LogSinkHealthViewModel
 
 public class LogViewerViewModel : INotifyPropertyChanged, IDisposable
 {
+    private bool _disposed = false;
     private readonly ILogFileAccessor _logAccessor;
     private readonly ILogHealthAccessor? _healthAccessor;
     private readonly ILogger<LogViewerViewModel> _logger;
