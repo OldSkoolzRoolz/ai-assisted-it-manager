@@ -234,7 +234,7 @@ ALWAYS execute in this exact order from a clean working tree (no uncommitted cha
 5. dotnet build ITCompanion.sln -c Debug
 6. dotnet test ITCompanion.sln --no-build
 7. (If format tooling present) dotnet format --verify-no-changes
-   - If changes needed: dotnet format (then re-run tests)
+   - If changes needed: dotnet format (if formatting changes affect test files, re-run tests)
 8. (If DB changes) apply migrations locally; verify startup of affected host project
 9. Run primary executable (e.g., ClientApp) to smoke test
 10. (If adding new API/service endpoints) exercise minimal functional path
