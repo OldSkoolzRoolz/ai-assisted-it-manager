@@ -60,6 +60,7 @@
     <Folder Include="SchemaVer1" />
     <Folder Include="Scripts\" />
     <PostDeploy Include="Scripts\PostDeployment.sql" />
+    <Folder Include="Tables\" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="SchemaVer1\02_BehaviorPolicyLayer.sql" />
