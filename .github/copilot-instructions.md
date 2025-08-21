@@ -85,7 +85,7 @@ ALWAYS perform these steps in a clean clone before attempting builds:
    dotnet restore ITCompanion.sln
 
 6. (If database features needed) Confirm local SQL Server instance reachable. Provide (or create) a local connection string in user-secrets or appsettings.Development.json if project demands it. If unsure and build fails on missing connection string, create placeholder:
-   Server=(localdb)\\MSSQLLocalDB;Database=ITCompanion;Trusted_Connection=True;Encrypt=False;
+   Server=(localdb)\\MSSQLLocalDB;Database=ITCompanion;Trusted_Connection=True;Encrypt=True;
 
 ---
 
