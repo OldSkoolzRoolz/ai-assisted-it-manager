@@ -240,6 +240,9 @@ ALWAYS execute in this exact order from a clean working tree (no uncommitted cha
 10. (If adding new API/service endpoints) exercise minimal functional path
 11. git add .
 12. git commit -m "feat: <concise summary>"
+    - For complex changes, add a commit message body describing the rationale and impact:
+      git commit -m "feat: <concise summary>" -m "<detailed explanation>"
+    - If the change is breaking, include a footer in the body: BREAKING CHANGE: <description of breaking change>
 13. git push -u origin feature/<short-descriptor>
 
 NEVER skip steps 4–6. ALWAYS re-run steps 5–7 after resolving merge conflicts.
