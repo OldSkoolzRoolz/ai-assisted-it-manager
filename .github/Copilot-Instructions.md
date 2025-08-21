@@ -1,7 +1,7 @@
 ## Copilot Instructions – AI Assisted Policy & System Management
 
-Version: 2.6  
-Date: 2025-08-19
+Version: 2.8  
+Date: 2025-08-21
 
 ---
 ## 1. Purpose & Scope
@@ -10,9 +10,9 @@ Deliver a modular, local-first policy & system management companion ("IT Compani
 ## 2. Solution Topology (Projects)
 - CorePolicyEngine: Parse / validate / model ADMX+ADML, policy evaluation, behavior policy, policy/state persistence, validation rules.
 - ClientApp: WPF UI (editing, monitoring, diagnostics, limited AI teaser interface).
-- Security (future): Signing, integrity, authN/authZ, tamper detection enrichment.
+- Security: Signing, integrity, authN/authZ, tamper detection enrichment.
 - EnterpriseDashboard (future): Blazor aggregated control & reporting (policy groups, drift alerts, audit explorer).
-- AICompanion (future expansion area): Recommendations, anomaly detection, cross?client correlation.
+- AICompanion: Recommendations, anomaly detection, cross?client correlation.
 
 ## 3. Cross-Cutting Principles
 - Modularity, minimal public surface, deterministic behavior, security by design.
@@ -36,13 +36,15 @@ Deliver a modular, local-first policy & system management companion ("IT Compani
 
 
 ## Copilot Guidance
-- Copilot should explain things clearly and simply, like a seasoned sysadmin who’s been around since tape drives. Use dry humor, real-world metaphors, and avoid overly technical language. Respect the user’s experience and stubbornness—make things understandable, not flashy.
+- Copilot should explain things clearly and simply, avoiding jargon where possible. Don't over explain or use complex language. Have a friendly, helpful tone.
+- Prompt for clarification if the request is ambiguous or incomplete.
+- Theming Compliance: ALL new or modified UI controls must consume existing theme tokens (colors, brushes, fonts, spacing, styles) via StaticResource / DynamicResource keys defined in Themes/*.xaml. No hard-coded Color, Brush, FontFamily, FontSize, CornerRadius, or spacing literals in view XAML or code-behind. If a needed visual primitive does not exist, add a semantic token (e.g., Brush.Alert.Critical, Space.24, FontSize.Overline) to the appropriate theme dictionary (Light, Dark, HighContrast) and then reference it. Maintain parity across Colors.xaml, Colors.Dark.xaml, Colors.HighContrast.xaml when introducing new color tokens.
+- Prefer style extension (BasedOn) instead of duplicating Setters; keep style keys namespaced: Control.*, Shell.*, UI.* for semantic mapping.
 
-
-## 5. Configuration & Behavior Policy Layering (Client)
-- Precedence (lowest ? highest): LocalDefault < OrgBaseline < SiteOverride < MachineOverride < UserOverride.
+## 5. Configuration of Settings
+- Internal system controls will use ADMX-backed registry settings (HKLM/HKCU\Software\Policies\<Vendor>\Companion) for initial configuration.
 - Mirrors *intent* of Windows GPO layering without adding Enforced/BlockInheritance yet (reserved extension points). Future flags (Enforced, BlockInheritance) may be added to replicate finer LSDOU behaviors.
-- SettingCatalog: authoritative metadata & future mapping to ADMX.
+- SettingCatalog.md: authoritative metadata outlining all settings, their ADMX paths, types, default values, and descriptions. This serves as the source of truth for both UI and policy generation.
 - Polling watcher (default 30s) with future ETW/notification optimization.
 
 ## 6. Enterprise Policy Model (Extension)
@@ -58,15 +60,16 @@ Goal: Extend existing registry?backed policy paradigm (ADMX semantics) with appl
 
 ### Enterprise Layering (Conceptual)
 DesiredState = (BehaviorPolicy Effective) + (Union of PolicyGroups assigned via ClientGroup memberships) with latter overriding earlier conflicts (last assignment order or explicit priority – priority scheme TBD). Drift detection compares DesiredState vs ReportedState snapshot from client.
+- Distributed policy application: Clients report effective state (hash + values) to central store; server computes drift by comparing against DesiredState.
+- Centralized policy management: Admins create/modify PolicyDefinitions and PolicyGroups; assignments are made to ClientGroups.
 
 ## 7. Data & Persistence
 - Central relational store (SQL Server baseline) for enterprise entities (policy definitions, groups, assignments, drift, audit, effective state). Abstractions allow future provider implementations.
 - Client may optionally maintain a lightweight local cache (implementation detail) but no hard dependency on SQLite in design; persistence API must not assume engine-specific features.
-- Encapsulated DB logic via stored procedures for complex write / resolution paths (drift detection, effective merge) and parameterized inline queries for simple lookups.
-- No business logic embedded in ad-hoc ORM expression trees; SQL artifacts are versioned in the database project. All access goes through repositories/services.
+- Encapsulated DB logic via stored procedures when at all possible. Parameterized inline queries for simple lookups.
+- All db elements need to be scripted for possible deployment to a dedicated SQL Server instance and packaged for versioning.
+- Database project being used for ease of develperment and deployment. Scripts should be versioned and maintained in a dedicated folder structure (e.g., Data\Scripts\Versioning).
 
-## 8. Validation (Settings & Policies)
-- Centralized in CorePolicyEngine. Future: extend with per?policy expression/constraint language. Settings retain rule mapping for ADMX generation / validation UI hints.
 
 ## 9. UI Requirements
 - ICommand + CanExecute for all interactive elements (no direct code-behind except removable dev tooling).
@@ -84,7 +87,7 @@ DesiredState = (BehaviorPolicy Effective) + (Union of PolicyGroups assigned via 
 
 ## 12. Packaging & Deployment
 - WPF baseline; WinUI migration exploratory only.
-- MSIX (future) + elevated broker/service for privileged ops.
+- MSIX Packaging for ClientApp (future: enterprise dashboard, AI companion).
 
 ## 13. Guardrails
 - No speculative NuGet; verify necessity & existence.
