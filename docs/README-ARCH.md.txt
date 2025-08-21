@@ -5,7 +5,7 @@
 ## **Enterprise Policy Manager + AI‑Assisted IT Companion — Dev Reference**
 
 **Layer 1 — Client Layer (UI/Interaction)**  
-**Frameworks**: WinUI 3, XAML, C# .NET 8.0  
+**Frameworks**: WinUI 3, XAML, C# .NET 9.0  
 - `PolicyEditorView` — ADMX/ADML parser, syntax highlighting (Roslyn integration)  
 - `DeploymentControlView` — triggers policy push commands  
 - `RollbackView` — fetches historical states from SQLite  
