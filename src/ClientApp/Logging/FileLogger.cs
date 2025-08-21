@@ -24,7 +24,20 @@ public interface ILogFileAccessor
     IEnumerable<string> GetRecentLogFiles(int days = 7);
 }
 
-internal sealed class FileLoggerProvider : ILoggerProvider, ILogFileAccessor
+/// <summary>
+/// Provides health metrics for the logging system without expensive Count() operations.
+/// </summary>
+public interface ILogHealthMonitor
+{
+    long MessagesEnqueued { get; }
+    long MessagesWritten { get; }
+    long MessagesDropped { get; }
+    long WriteErrors { get; }
+    DateTime? LastErrorUtc { get; }
+    bool IsHealthy { get; }
+}
+
+internal sealed class FileLoggerProvider : ILoggerProvider, ILogFileAccessor, ILogHealthMonitor
 {
     private readonly BlockingCollection<LogMessage> _queue = new(new ConcurrentQueue<LogMessage>());
     private readonly CancellationTokenSource _cts = new();
@@ -36,7 +49,28 @@ internal sealed class FileLoggerProvider : ILoggerProvider, ILogFileAccessor
     private readonly object _sync = new();
     private readonly int _maxFileSizeBytes;
 
+    // Thread-safe counters for efficient metrics tracking without Count() operations
+    private long _messagesEnqueued = 0;
+    private long _messagesWritten = 0;
+    private long _messagesDropped = 0;
+    private long _writeErrors = 0;
+    private DateTime? _lastErrorUtc = null;
+    
+    // Circuit breaker state
+    private const int MaxConsecutiveErrors = 10;
+    private int _consecutiveErrors = 0;
+    private bool _circuitOpen = false;
+    private DateTime _circuitOpenTime = DateTime.MinValue;
+
     public string CurrentLogFilePath => _currentFile;
+
+    // ILogHealthMonitor implementation - thread-safe properties using efficient reads
+    public long MessagesEnqueued => Interlocked.Read(ref _messagesEnqueued);
+    public long MessagesWritten => Interlocked.Read(ref _messagesWritten);
+    public long MessagesDropped => Interlocked.Read(ref _messagesDropped);
+    public long WriteErrors => Interlocked.Read(ref _writeErrors);
+    public DateTime? LastErrorUtc => _lastErrorUtc;
+    public bool IsHealthy => !_circuitOpen && _consecutiveErrors < MaxConsecutiveErrors;
 
     private sealed record LogMessage(DateTime TimestampUtc, string Category, LogLevel Level, EventId EventId, string Message, Exception? Exception, IReadOnlyDictionary<string, object?> State);
 
@@ -52,9 +86,38 @@ internal sealed class FileLoggerProvider : ILoggerProvider, ILogFileAccessor
 
     internal void Enqueue(string category, LogLevel level, EventId eventId, string message, Exception? ex, IReadOnlyDictionary<string, object?> state)
     {
+        // Check circuit breaker state first
+        if (_circuitOpen)
+        {
+            // Try to reset circuit breaker after 60 seconds
+            if (DateTime.UtcNow.Subtract(_circuitOpenTime).TotalSeconds > 60)
+            {
+                _circuitOpen = false;
+                _consecutiveErrors = 0;
+            }
+            else
+            {
+                Interlocked.Increment(ref _messagesDropped);
+                return;
+            }
+        }
+
         if (!_queue.IsAddingCompleted)
         {
-            _queue.Add(new LogMessage(DateTime.UtcNow, category, level, eventId, message, ex, state));
+            try
+            {
+                _queue.Add(new LogMessage(DateTime.UtcNow, category, level, eventId, message, ex, state));
+                Interlocked.Increment(ref _messagesEnqueued);
+            }
+            catch
+            {
+                // Queue is full or disposed - increment dropped counter
+                Interlocked.Increment(ref _messagesDropped);
+            }
+        }
+        else
+        {
+            Interlocked.Increment(ref _messagesDropped);
         }
     }
 
@@ -83,7 +146,20 @@ internal sealed class FileLoggerProvider : ILoggerProvider, ILogFileAccessor
         {
             foreach (var msg in _queue.GetConsumingEnumerable(_cts.Token))
             {
-                WriteMessage(msg);
+                if (WriteMessage(msg))
+                {
+                    Interlocked.Increment(ref _messagesWritten);
+                    // Reset consecutive errors on successful write
+                    if (_consecutiveErrors > 0)
+                    {
+                        Interlocked.Exchange(ref _consecutiveErrors, 0);
+                    }
+                }
+                else
+                {
+                    // WriteMessage failed, handle error tracking
+                    HandleWriteError();
+                }
             }
         }
         catch (OperationCanceledException) { }
@@ -98,14 +174,14 @@ internal sealed class FileLoggerProvider : ILoggerProvider, ILogFileAccessor
         await Task.CompletedTask;
     }
 
-    private void WriteMessage(LogMessage msg)
+    private bool WriteMessage(LogMessage msg)
     {
         try
         {
             lock (_sync)
             {
                 RotateIfNeeded();
-                if (_writer == null) return;
+                if (_writer == null) return false;
                 var payload = new
                 {
                     ts = msg.TimestampUtc.ToString("O"),
@@ -123,9 +199,28 @@ internal sealed class FileLoggerProvider : ILoggerProvider, ILogFileAccessor
                     moduleVer = GetModuleVersion(msg.Category)
                 };
                 _writer.WriteLine(JsonSerializer.Serialize(payload));
+                return true;
             }
         }
-        catch { }
+        catch 
+        { 
+            return false;
+        }
+    }
+
+    private void HandleWriteError()
+    {
+        Interlocked.Increment(ref _writeErrors);
+        _lastErrorUtc = DateTime.UtcNow;
+        
+        var errors = Interlocked.Increment(ref _consecutiveErrors);
+        
+        // Open circuit breaker if too many consecutive errors
+        if (errors >= MaxConsecutiveErrors && !_circuitOpen)
+        {
+            _circuitOpen = true;
+            _circuitOpenTime = DateTime.UtcNow;
+        }
     }
 
     private void RotateIfNeeded()
@@ -199,6 +294,7 @@ public static class FileLoggerExtensions
         var provider = new FileLoggerProvider(baseDirectory);
         builder.AddProvider(provider);
         builder.Services.AddSingleton<ILogFileAccessor>(provider);
+        builder.Services.AddSingleton<ILogHealthMonitor>(provider);
         return builder;
     }
 }
