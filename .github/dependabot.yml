@@ -78,4 +78,4 @@ updates:
       - dependency-type: "direct"
         update-type: "security"
       - dependency-type: "indirect"
-        update-type: "security"
+# (Removed duplicate NuGet security update configuration for root directory)
