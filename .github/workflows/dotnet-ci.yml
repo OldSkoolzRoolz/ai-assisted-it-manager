@@ -1,0 +1,66 @@
+name: .NET CI
+
+on:
+  push:
+    branches: 
+      - master
+      - 'feature/*'
+  pull_request:
+    branches: 
+      - master
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+    
+    strategy:
+      matrix:
+        dotnet-version: ['9.0.x']
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ matrix.dotnet-version }}
+        include-prerelease: true
+        
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+          
+    - name: Restore dependencies
+      run: dotnet restore ITCompanion.sln
+      
+    - name: Build solution
+      run: dotnet build ITCompanion.sln --configuration Release --no-restore --verbosity normal
+      env:
+      run: dotnet build ITCompanion.sln --configuration Release --no-restore --verbosity normal /p:TreatWarningsAsErrors=true
+        
+    - name: Run tests
+      run: dotnet test ITCompanion.sln --configuration Release --no-build --verbosity normal --logger trx --results-directory TestResults/
+      
+    - name: Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results-${{ matrix.dotnet-version }}
+        path: TestResults/
+        retention-days: 30
+        
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      if: success()
+      with:
+        name: build-artifacts-${{ matrix.dotnet-version }}
+        path: |
+          src/**/bin/Release/
+          !src/**/bin/Release/**/ref/
+          !src/**/bin/Release/**/*.pdb
+        retention-days: 7
