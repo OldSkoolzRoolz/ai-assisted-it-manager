@@ -10,25 +10,22 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
+                <!-- Active theme (default Light). Swap Source at runtime for Dark / HighContrast -->
+                <ResourceDictionary Source="Themes/Colors.xaml" />
+                <ResourceDictionary Source="Themes/Brushes.xaml" />
+                <ResourceDictionary Source="Themes/Spacing.xaml" />
+                <ResourceDictionary Source="Themes/Typography.xaml" />
+                <ResourceDictionary Source="Themes/Controls.Buttons.xaml" />
+                <ResourceDictionary Source="Themes/Controls.Text.xaml" />
+                <ResourceDictionary Source="Themes/Window.xaml" />
                 <ResourceDictionary Source="Themes/Generic.xaml" />
-                </ResourceDictionary.MergedDictionaries>
-                <Color x:Key="Primary">#512BD4</Color>
-            <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}" />
-            <SolidColorBrush x:Key="WhiteBrush" Color="White" />
-            <SolidColorBrush x:Key="BlackBrush" Color="Black" />
+                <ResourceDictionary Source="Themes/ThemeManager.xaml" />
+            </ResourceDictionary.MergedDictionaries>
 
-            <Style x:Key="MyLabel" TargetType="TextBlock">
-                <Setter Property="Foreground" Value="{StaticResource PrimaryBrush}" />
-            </Style>
-
-            <Style x:Key="Action" TargetType="Button">
-                <Setter Property="Padding" Value="14,10" />
-            </Style>
-
-            <Style x:Key="PrimaryAction" TargetType="Button" BasedOn="{StaticResource Action}">
-                <Setter Property="Background" Value="{StaticResource PrimaryBrush}" />
-                <Setter Property="Foreground" Value="{StaticResource WhiteBrush}" />
-            </Style>
+            <!-- Compatibility aliases for legacy keys (map to new token styles) -->
+            <Style x:Key="Action" TargetType="Button" BasedOn="{StaticResource Control.Button.Base}" />
+            <Style x:Key="PrimaryAction" TargetType="Button" BasedOn="{StaticResource Control.Button.Primary}" />
+            <Style x:Key="MyLabel" TargetType="TextBlock" BasedOn="{StaticResource Control.Text.Label}" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

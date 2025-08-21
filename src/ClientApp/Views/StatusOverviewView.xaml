@@ -1,0 +1,63 @@
+<UserControl x:Class="KC.ITCompanion.ClientApp.Views.StatusOverviewView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d">
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal" Grid.Row="0">
+            <Border Background="{StaticResource Brush.Panel.Dark}" Padding="12" CornerRadius="6" Margin="0,0,16,0">
+                <StackPanel>
+                    <TextBlock Style="{StaticResource Control.Text.Label}" Text="Overall Health" Foreground="White"/>
+                    <TextBlock Text="{Binding OverallHealth}" FontSize="24" FontWeight="Bold" Foreground="{Binding OverallHealthBrush}"/>
+                </StackPanel>
+            </Border>
+            <Border Background="{StaticResource Brush.Panel.Dark}" Padding="12" CornerRadius="6" Margin="0,0,16,0">
+                <StackPanel>
+                    <TextBlock Style="{StaticResource Control.Text.Label}" Text="Active Alerts" Foreground="White"/>
+                    <TextBlock Text="{Binding ActiveAlertCount}" FontSize="24" FontWeight="Bold" Foreground="{StaticResource Brush.Warning}"/>
+                </StackPanel>
+            </Border>
+            <Border Background="{StaticResource Brush.Panel.Dark}" Padding="12" CornerRadius="6">
+                <StackPanel>
+                    <TextBlock Style="{StaticResource Control.Text.Label}" Text="Policy Drift" Foreground="White"/>
+                    <TextBlock Text="{Binding DriftCount}" FontSize="24" FontWeight="Bold" Foreground="{Binding DriftBrush}"/>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+        <Grid Grid.Row="1" Margin="0,20,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <GroupBox Header="Recent High Importance Events" Margin="0,0,12,0">
+                <ListBox ItemsSource="{Binding HighImportanceEvents}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Margin="4">
+                                <TextBlock Text="{Binding Timestamp}" Style="{StaticResource Control.Text.Caption}"/>
+                                <TextBlock Text="{Binding Message}" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </GroupBox>
+            <GroupBox Header="Active Alerts" Grid.Column="1">
+                <ListBox ItemsSource="{Binding ActiveAlerts}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Margin="4">
+                                <TextBlock Text="{Binding Severity}" FontWeight="Bold" Foreground="{Binding SeverityBrush}"/>
+                                <TextBlock Text="{Binding Description}" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </GroupBox>
+        </Grid>
+    </Grid>
+</UserControl>

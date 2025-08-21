@@ -8,6 +8,7 @@
     [PolicyVersion] NVARCHAR(32) NOT NULL,
     [EffectiveUtc] DATETIME2 NOT NULL,
     [AllowedGroupsCsv] NVARCHAR(512) NOT NULL DEFAULT 'Administrators',
+    [LogViewPollSeconds] INT NOT NULL DEFAULT 15,
     [UpdatedUtc] DATETIME2 NOT NULL
 );
 GO

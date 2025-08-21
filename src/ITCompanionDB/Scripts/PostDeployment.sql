@@ -24,7 +24,8 @@ GO
 -- ('AutoPurgeOnStartup','1','AutoPurgeOnStartup','Machine/User','Bool','Run log purge at startup','0|1',1,'None','(N/A)','Core','0.1.0','0.1.0','AIManager_AutoPurge'),
 -- ('EtwWatcherEnabled','0','EtwWatcherEnabled','Machine/User','Bool','Enable ETW watcher subsystem','0|1',1,'Service','(N/A)','Diagnostics','0.1.0','0.1.0','AIManager_EtwWatcherEnabled'),
 -- ('EtwWatcherConfigPath','','EtwWatcherConfigPath','Machine/User','Path','Watcher definition bundle path','Absolute path',1,'Service','(N/A)','Diagnostics','0.1.0','0.1.0','AIManager_EtwWatcherConfigPath'),
--- ('AllowedGroupsCsv','Administrators','AllowedGroupsCsv','Machine/User','Csv','Semicolon separated allowed Windows groups','Free text',1,'None','AllowedGroupsCsv','Security','0.1.0','0.1.0','AIManager_AllowedGroupsCsv')
+-- ('AllowedGroupsCsv','Administrators','AllowedGroupsCsv','Machine/User','Csv','Semicolon separated allowed Windows groups','Free text',1,'None','AllowedGroupsCsv','Security','0.1.0','0.1.0','AIManager_AllowedGroupsCsv'),
+-- ('LogViewPollSeconds','15','LogViewPollSeconds','Machine/User','Int','UI log view refresh interval seconds','5-300',1,'None','LogViewPollSeconds','Core','0.1.1','0.1.1','AIManager_LogViewPollSeconds')
 --) AS src(Name,DefaultValue,RegistryName,Scope,Type,Description,Allowed,HotReload,RestartRequirement,ModelProperty,Owner,IntroducedVersion,LastChangedVersion,FutureAdmxPolicyName)
 --ON tgt.Name = src.Name
 --WHEN MATCHED THEN UPDATE SET DefaultValue=src.DefaultValue, RegistryName=src.RegistryName, Scope=src.Scope, Type=src.Type, Description=src.Description, Allowed=src.Allowed, HotReload=src.HotReload, RestartRequirement=src.RestartRequirement, ModelProperty=src.ModelProperty, Owner=src.Owner, IntroducedVersion=src.IntroducedVersion, LastChangedVersion=src.LastChangedVersion, FutureAdmxPolicyName=src.FutureAdmxPolicyName, UpdatedUtc=SYSUTCDATETIME()
@@ -37,9 +38,9 @@ IF EXISTS (SELECT 1 FROM sys.tables WHERE name = 'BehaviorPolicyLayer' AND schem
 AND NOT EXISTS (SELECT 1 FROM dbo.BehaviorPolicyLayer)
 BEGIN
     INSERT INTO dbo.BehaviorPolicyLayer
-        (Layer, LogRetentionDays, MaxLogFileSizeMB, MinLogLevel, UiLanguage, EnableTelemetry, PolicyVersion, EffectiveUtc, AllowedGroupsCsv, UpdatedUtc)
+        (Layer, LogRetentionDays, MaxLogFileSizeMB, MinLogLevel, UiLanguage, EnableTelemetry, PolicyVersion, EffectiveUtc, AllowedGroupsCsv, LogViewPollSeconds, UpdatedUtc)
     VALUES
-        (0, 7, 5, 'Information', 'en-US', 0, '0.0.0', SYSUTCDATETIME(), 'Administrators', SYSUTCDATETIME());
+        (0, 7, 5, 'Information', 'en-US', 0, '0.0.0', SYSUTCDATETIME(), 'Administrators', 15, SYSUTCDATETIME());
 END;
 GO
 
@@ -49,5 +50,20 @@ AND NOT EXISTS (SELECT 1 FROM dbo.AuditRetention)
 BEGIN
     INSERT INTO dbo.AuditRetention (RetentionDays, CreatedUtc)
     VALUES (365, SYSUTCDATETIME());
+END;
+GO
+
+PRINT 'Seeding sample log sources';
+IF EXISTS (SELECT 1 FROM sys.tables WHERE name = 'LogSource' AND schema_id = SCHEMA_ID('dbo'))
+BEGIN
+    MERGE dbo.LogSource AS tgt
+    USING (VALUES
+        ('ClientApp','C:\\ProgramData\\AIManager\\client\\logs\\app-*.log'),
+        ('CorePolicyEngine','C:\\ProgramData\\AIManager\\client\\logs\\core-*.log')
+    ) AS src(Application, FilePath)
+    ON tgt.FilePath = src.FilePath
+    WHEN MATCHED THEN UPDATE SET Application = src.Application, UpdatedUtc = SYSUTCDATETIME()
+    WHEN NOT MATCHED THEN INSERT (Application, FilePath, Enabled, CreatedUtc, UpdatedUtc)
+        VALUES (src.Application, src.FilePath, 1, SYSUTCDATETIME(), SYSUTCDATETIME());
 END;
 GO

@@ -1,76 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup Label="Globals">
-      <WV2WinRTExplicitIncludesOnly>True</WV2WinRTExplicitIncludesOnly>
-    </PropertyGroup>
-    <PropertyGroup>
-        <TargetFramework>net9.0-windows</TargetFramework>
-        <OutputType>WinExe</OutputType>
-		<UseWpf>true</UseWpf>
-        <Nullable>enable</Nullable>
-        <LangVersion>latest</LangVersion>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <RootNamespace>KC.ITCompanion.ClientApp</RootNamespace>
-        <RepositoryUrl>https://github.com/OldSkoolzRoolz/ai-assisted-it-manager.git</RepositoryUrl>
-        <RepositoryType>git</RepositoryType>
-        <PackageTags>AI;IT;enterprise;group-policy;policy-manager</PackageTags>
-        <PackageReleaseNotes>RELEASE.md</PackageReleaseNotes>
-        <PackageReadmeFile>README.md</PackageReadmeFile>
-        <AnalysisLevel>latest</AnalysisLevel>
-        <EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
-        <!-- MSIX Packaging -->
-        <WindowsPackageType>Appx</WindowsPackageType>
-        <EnableMsixTooling>true</EnableMsixTooling>
-        <AppxBundle>Never</AppxBundle>
-        <GenerateAppInstallerFile>false</GenerateAppInstallerFile>
-    </PropertyGroup>
+  <PropertyGroup Label="Globals">
+    <WV2WinRTExplicitIncludesOnly>True</WV2WinRTExplicitIncludesOnly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <TargetFramework>net9.0-windows</TargetFramework>
+    <OutputType>WinExe</OutputType>
+    <UseWpf>true</UseWpf>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>KC.ITCompanion.ClientApp</RootNamespace>
+    <RepositoryUrl>https://github.com/OldSkoolzRoolz/ai-assisted-it-manager.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>AI;IT;enterprise;group-policy;policy-manager</PackageTags>
+    <PackageReleaseNotes>RELEASE.md</PackageReleaseNotes>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
+    <!-- Bind external manifest with requireAdministrator -->
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- Disable MSIX during classic elevation debugging -->
+    <EnableMsixTooling>false</EnableMsixTooling>
+  </PropertyGroup>
 
+  <ItemGroup>
+    <Content Include="Assets\SplashScreen.scale-200.png" />
+    <Content Include="Assets\LockScreenLogo.scale-200.png" />
+    <Content Include="Assets\Square150x150Logo.scale-200.png" />
+    <Content Include="Assets\Square44x44Logo.scale-200.png" />
+    <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
+    <Content Include="Assets\StoreLogo.png" />
+    <Content Include="Assets\Wide310x150Logo.scale-200.png" />
+  </ItemGroup>
 
-    <ItemGroup>
-        <Content Include="Assets\SplashScreen.scale-200.png" />
-        <Content Include="Assets\LockScreenLogo.scale-200.png" />
-        <Content Include="Assets\Square150x150Logo.scale-200.png" />
-        <Content Include="Assets\Square44x44Logo.scale-200.png" />
-        <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
-        <Content Include="Assets\StoreLogo.png" />
-        <Content Include="Assets\Wide310x150Logo.scale-200.png" />
-    </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.8" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.*" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.8" />
+    <PackageReference Include="Polly" Version="8.6.2" />
+    <PackageReference Include="Polly.Extensions" Version="8.6.2" />
+  </ItemGroup>
 
-    <ItemGroup>
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.8" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.8">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.8" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.8">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
-        <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.8" />
-        <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="9.0.8" />
-        <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.8" />
-        <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.*" />
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.8" />
-        <PackageReference Include="Polly" Version="8.6.2" />
-        <PackageReference Include="Polly.Extensions" Version="8.6.2" />
-    </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Strings.resx" />
+    <EmbeddedResource Include="Resources\Strings.es.resx" />
+  </ItemGroup>
 
-    <ItemGroup>
-      <EmbeddedResource Include="Resources\Strings.resx" />
-      <EmbeddedResource Include="Resources\Strings.es.resx" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Include="Package\ClientApp.Package.wapproj" />
-    </ItemGroup>
-    <ItemGroup>
-        <ProjectReference Include="..\CorePolicyEngine\CorePolicyEngine.csproj" />
-        <ProjectReference Include="..\ITCompanionDB\ITCompanionDB.sqlproj" />
-        <ProjectReference Include="..\Security\Security.csproj" />
-    </ItemGroup>
-    <ItemGroup>
-      <Folder Include="Logging\" />
-      <Folder Include="Resources\" />
-    </ItemGroup>
+  <ItemGroup>
+    <None Include="Package\ClientApp.Package.wapproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CorePolicyEngine\CorePolicyEngine.csproj" />
+    <ProjectReference Include="..\Security\Security.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Logging\" />
+    <Folder Include="Resources\" />
+  </ItemGroup>
 </Project>

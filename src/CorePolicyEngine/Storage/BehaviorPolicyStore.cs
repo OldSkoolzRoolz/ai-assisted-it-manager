@@ -20,15 +20,12 @@ public interface IBehaviorPolicyStore
 
 public sealed class BehaviorPolicyStore : IBehaviorPolicyStore
 {
-    // In-memory backing until SQL Server persistence implemented
     private readonly Dictionary<BehaviorPolicyLayer, BehaviorPolicy> _layers = new();
 
     public Task InitializeAsync(CancellationToken token)
     {
         if (!_layers.ContainsKey(BehaviorPolicyLayer.LocalDefault))
-        {
             _layers[BehaviorPolicyLayer.LocalDefault] = BehaviorPolicy.Default;
-        }
         return Task.CompletedTask;
     }
 
@@ -41,7 +38,7 @@ public sealed class BehaviorPolicyStore : IBehaviorPolicyStore
     public Task<BehaviorPolicySnapshot> GetSnapshotAsync(CancellationToken token)
     {
         BehaviorPolicy effective = BehaviorPolicy.Default with { };
-        foreach (var layer in Enum.GetValues<BehaviorPolicyLayer>().OrderBy(l=>l))
+        foreach (var layer in Enum.GetValues<BehaviorPolicyLayer>().OrderBy(l => l))
         {
             if (_layers.TryGetValue(layer, out var p))
             {
@@ -54,7 +51,12 @@ public sealed class BehaviorPolicyStore : IBehaviorPolicyStore
                     EnableTelemetry = p.EnableTelemetry,
                     PolicyVersion = p.PolicyVersion,
                     EffectiveUtc = p.EffectiveUtc,
-                    AllowedGroupsCsv = p.AllowedGroupsCsv
+                    AllowedGroupsCsv = p.AllowedGroupsCsv,
+                    LogViewPollSeconds = p.LogViewPollSeconds,
+                    LogQueueMaxDepthPerModule = p.LogQueueMaxDepthPerModule,
+                    LogCircuitErrorThreshold = p.LogCircuitErrorThreshold,
+                    LogCircuitErrorWindowSeconds = p.LogCircuitErrorWindowSeconds,
+                    LogFailoverEnabled = p.LogFailoverEnabled
                 };
             }
         }
@@ -71,8 +73,7 @@ public sealed class BehaviorPolicyStore : IBehaviorPolicyStore
 
     private static string ComputeHash(BehaviorPolicy p)
     {
-        var raw = $"{p.LogRetentionDays}|{p.MaxLogFileSizeMB}|{p.MinLogLevel}|{p.UiLanguage}|{p.EnableTelemetry}|{p.PolicyVersion}|{p.EffectiveUtc:O}|{p.AllowedGroupsCsv}";
-        using var sha = SHA256.Create();
+        var raw = $"{p.LogRetentionDays}|{p.MaxLogFileSizeMB}|{p.MinLogLevel}|{p.UiLanguage}|{p.EnableTelemetry}|{p.PolicyVersion}|{p.EffectiveUtc:O}|{p.AllowedGroupsCsv}|{p.LogViewPollSeconds}|{p.LogQueueMaxDepthPerModule}|{p.LogCircuitErrorThreshold}|{p.LogCircuitErrorWindowSeconds}|{p.LogFailoverEnabled}";
         return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(raw)));
     }
 }

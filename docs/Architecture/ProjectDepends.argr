@@ -1,0 +1,10 @@
+<ArchitectureGraph>
+  <Module Identifier="5CD77F88-85BA-4391-A4FA-1AEC4B5048E5" Name="SelfHealingPolicyEngine" />
+  <Module Identifier="37E5EDDF-6E13-4477-8563-5145D0267C82" Name="ITCompanionDB" />
+  <Module Identifier="C864BABA-9C22-4626-9A63-7C062BBE7497" Name="Security" />
+  <Module Identifier="FCDF3DD0-C9F7-4F7B-A792-E1686C28324B" Name="EnterpriseDashboard" />
+  <Module Identifier="908F0AB6-CF2A-497A-AFA2-6726B41731DD" Name="ClientApp" />
+  <Module Identifier="72D9131D-B8BA-4788-802D-F4ADF4921274" Name="CorePolicyEngine" />
+  <Reference Identifier="908F0AB6-CF2A-497A-AFA2-6726B41731DD/r:Security" SourceId="908F0AB6-CF2A-497A-AFA2-6726B41731DD" Name="Security" TargetId="C864BABA-9C22-4626-9A63-7C062BBE7497" />
+  <Reference Identifier="908F0AB6-CF2A-497A-AFA2-6726B41731DD/r:CorePolicyEngine" SourceId="908F0AB6-CF2A-497A-AFA2-6726B41731DD" Name="CorePolicyEngine" TargetId="72D9131D-B8BA-4788-802D-F4ADF4921274" />
+</ArchitectureGraph>
