@@ -483,3 +483,15 @@ $RECYCLE.BIN/
 # Vim temporary swap files
 *.swp
 /ai-assisted-it-manager.sln
+/testsln.sln.sln
+/TestSolution.sln.txt
+/workspace-presets.ps1
+/troubleshooting.md
+/setup-guide.md
+/repo-structure.txt
+/repo-structure-small.txt
+/Container.csproj
+/copilot-access-test.txt
+/global.json
+/ITCompanion - Copy.sln.txt
+/policy-cheatsheet.md
