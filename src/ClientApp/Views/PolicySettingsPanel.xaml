@@ -6,33 +6,27 @@
              xmlns:viewModels="clr-namespace:KC.ITCompanion.ClientApp.ViewModels"
              mc:Ignorable="d">
     <UserControl.Resources>
-        <!-- Explicit key-based template (omit DataType to avoid namespace resolution issues) -->
         <DataTemplate x:Key="PolicySettingTemplate">
-            <Border BorderBrush="#DDD" BorderThickness="1" Margin="4" Padding="8" CornerRadius="4">
+            <Border BorderBrush="{StaticResource Brush.Border}" Background="{StaticResource Brush.Card}" BorderThickness="1" Margin="4" Padding="8" CornerRadius="4">
                 <StackPanel>
-                    <!-- Header row: Enabled + Label (if any) -->
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,6">
                         <CheckBox IsChecked="{Binding Enabled}" Content="Enabled" Margin="0,0,8,0" />
-                        <TextBlock Text="{Binding PartId}" FontWeight="Bold" />
+                        <TextBlock Text="{Binding PartId}" Style="{StaticResource Control.Text.Label}" />
                     </StackPanel>
-
-                    <!-- Editors switch by ValueType -->
                     <ContentControl Content="{Binding}" Margin="0,0,0,4">
                         <ContentControl.Style>
                             <Style TargetType="ContentControl">
                                 <Setter Property="ContentTemplate">
                                     <Setter.Value>
                                         <DataTemplate>
-                                            <TextBlock Text="(No editor)" Foreground="Gray" />
+                                            <TextBlock Text="(No editor)" Foreground="{StaticResource Brush.Text.Secondary}" />
                                         </DataTemplate>
                                     </Setter.Value>
                                 </Setter>
                                 <Style.Triggers>
-                                    <!-- Boolean: just checkbox already present; hide editor -->
                                     <DataTrigger Binding="{Binding ValueType}" Value="Boolean">
                                         <Setter Property="Visibility" Value="Collapsed" />
                                     </DataTrigger>
-                                    <!-- Numeric -->
                                     <DataTrigger Binding="{Binding ValueType}" Value="Numeric">
                                         <Setter Property="ContentTemplate">
                                             <Setter.Value>
@@ -42,7 +36,6 @@
                                             </Setter.Value>
                                         </Setter>
                                     </DataTrigger>
-                                    <!-- Text -->
                                     <DataTrigger Binding="{Binding ValueType}" Value="Text">
                                         <Setter Property="ContentTemplate">
                                             <Setter.Value>
@@ -52,7 +45,6 @@
                                             </Setter.Value>
                                         </Setter>
                                     </DataTrigger>
-                                    <!-- Enum -->
                                     <DataTrigger Binding="{Binding ValueType}" Value="Enum">
                                         <Setter Property="ContentTemplate">
                                             <Setter.Value>
@@ -69,12 +61,10 @@
                             </Style>
                         </ContentControl.Style>
                     </ContentControl>
-
-                    <!-- Errors -->
                     <ItemsControl ItemsSource="{Binding Errors}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <TextBlock Foreground="Red" Text="{Binding}" FontSize="11" />
+                                <TextBlock Foreground="{StaticResource Brush.Danger}" Text="{Binding}" FontSize="11" />
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
@@ -82,7 +72,6 @@
             </Border>
         </DataTemplate>
     </UserControl.Resources>
-    <!-- Responsive wrapping panel for policy parts -->
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <ItemsControl ItemsSource="{Binding SelectedPolicySettings}" ItemTemplate="{StaticResource PolicySettingTemplate}">
             <ItemsControl.ItemsPanel>

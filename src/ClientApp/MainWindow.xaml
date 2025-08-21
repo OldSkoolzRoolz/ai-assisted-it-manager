@@ -5,18 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:views="clr-namespace:KC.ITCompanion.ClientApp.Views"
         mc:Ignorable="d"
-        Title="Policy Editor" Height="600" Width="1000" MinHeight="450" MinWidth="800">
-    <!-- Root layout uses DockPanel so we can dock Menu (top) and StatusBar (bottom) -->
+        Title="IT Companion" Height="600" Width="1100" MinHeight="500" MinWidth="900" Style="{StaticResource Shell.Window}">
     <DockPanel LastChildFill="True">
-        <!-- Menu Bar -->
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
-                <MenuItem Header="Open ADMX..." InputGestureText="Ctrl+O" />
-                <Separator />
                 <MenuItem Header="E_xit" />
-            </MenuItem>
-            <MenuItem Header="_View">
-                <MenuItem Header="Refresh" InputGestureText="F5" />
             </MenuItem>
             <MenuItem Header="_Tools">
                 <MenuItem Header="Validate Policies" />
@@ -26,39 +19,22 @@
                 <MenuItem Header="About" />
             </MenuItem>
         </Menu>
-
-        <!-- Status Bar -->
         <StatusBar DockPanel.Dock="Bottom">
-            <StatusBarItem>
-                <TextBlock Text="Ready" />
-            </StatusBarItem>
-            <StatusBarItem HorizontalAlignment="Right">
-                <TextBlock Text="v0.1" />
-            </StatusBarItem>
+            <StatusBarItem><TextBlock Text="Ready" /></StatusBarItem>
+            <StatusBarItem HorizontalAlignment="Right"><TextBlock Text="v0.1" /></StatusBarItem>
         </StatusBar>
-
-        <!-- Central workspace with tabs -->
         <TabControl>
-            <TabItem Header="Policy Editor">
+            <TabItem Header="Status">
+                <views:StatusOverviewView />
+            </TabItem>
+            <TabItem Header="Policies">
+                <views:PoliciesReadOnlyView />
+            </TabItem>
+            <TabItem Header="Logs">
+                <views:LogAggregateView />
+            </TabItem>
+            <TabItem Header="Editor">
                 <views:PolicyEditorView />
-            </TabItem>
-            <TabItem Header="Deployment">
-                <Grid Margin="12">
-                    <TextBlock Text="Deployment workflow (placeholder)" FontSize="16" />
-                </Grid>
-            </TabItem>
-            <TabItem Header="Audit Log">
-                <Grid Margin="12">
-                    <TextBlock Text="Audit log view (placeholder)" FontSize="16" />
-                </Grid>
-            </TabItem>
-            <TabItem Header="Settings">
-                <Grid Margin="12">
-                    <StackPanel>
-                        <TextBlock Text="Settings (placeholder)" FontSize="16" Margin="0,0,0,8" />
-                        <TextBlock Text="Future configuration options will appear here." TextWrapping="Wrap" />
-                    </StackPanel>
-                </Grid>
             </TabItem>
         </TabControl>
     </DockPanel>

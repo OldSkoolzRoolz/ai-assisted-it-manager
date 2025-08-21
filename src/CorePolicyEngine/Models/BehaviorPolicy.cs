@@ -19,20 +19,43 @@ public sealed record BehaviorPolicy(
     bool EnableTelemetry,
     string PolicyVersion,
     DateTime EffectiveUtc,
-    string AllowedGroupsCsv
+    string AllowedGroupsCsv,
+    int LogViewPollSeconds,
+    int LogQueueMaxDepthPerModule,
+    int LogCircuitErrorThreshold,
+    int LogCircuitErrorWindowSeconds,
+    bool LogFailoverEnabled
 )
 {
     public static BehaviorPolicy Default => new(
-        LogRetentionDays: 7,
-        MaxLogFileSizeMB: 5,
-        MinLogLevel: "Information",
-        UiLanguage: "en-US",
-        EnableTelemetry: false,
-        PolicyVersion: "0.0.0",
-        EffectiveUtc: DateTime.UtcNow,
-        AllowedGroupsCsv: "Administrators"
+        7,
+        5,
+        "Information",
+        "en-US",
+        false,
+        "0.0.0",
+        DateTime.UtcNow,
+        "BUILTIN\\Administrators",
+        15,
+        5000,
+        25,
+        60,
+        true
     );
 }
+
+/// <summary>
+/// Snapshot returning effective merged policy and per-layer hashes for drift / change detection.
+/// </summary>
+public sealed record BehaviorPolicySnapshot(
+    BehaviorPolicy Effective,
+    string LocalDefaultHash,
+    string OrgBaselineHash,
+    string SiteOverrideHash,
+    string MachineOverrideHash,
+    string UserOverrideHash,
+    DateTime GeneratedUtc
+);
 
 public enum BehaviorPolicyLayer
 {

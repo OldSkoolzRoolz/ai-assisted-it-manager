@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<policyDefinitions revision="1.0" schemaVersion="1.0">
+  <policyNamespaces>
+    <target prefix="ITC" namespace="urn:itcompanion:admx:clientbehavior" />
+    <using prefix="windows" namespace="urn:schemas-microsoft-com:windows" />
+  </policyNamespaces>
+  <resources minRequiredRevision="1.0"/>
+  <supportedOn>
+    <definitions>
+      <definition name="SUPPORTED_ANY" displayName="$(string.SUPPORTED_ANY)" />
+    </definitions>
+  </supportedOn>
+  <categories>
+    <category name="ITC_Client" displayName="$(string.ITC_Client)" />
+  </categories>
+  <policies>
+    <policy name="LogRetentionDays" class="Both" displayName="$(string.LogRetentionDays)" explainText="$(string.LogRetentionDays_Explain)" key="Software\Policies\KCITCompanion\Client" valueName="LogRetentionDays" presentation="LogRetentionDays_Presentation">
+      <decimal minValue="1" maxValue="365" />
+      <supportedOn ref="SUPPORTED_ANY" />
+    </policy>
+    <policy name="MaxLogFileSizeMB" class="Machine" displayName="$(string.MaxLogFileSizeMB)" explainText="$(string.MaxLogFileSizeMB_Explain)" key="Software\Policies\KCITCompanion\Client" valueName="MaxLogFileSizeMB" presentation="MaxLogFileSizeMB_Presentation">
+      <decimal minValue="1" maxValue="512" />
+      <supportedOn ref="SUPPORTED_ANY" />
+    </policy>
+    <policy name="MinLogLevel" class="Both" displayName="$(string.MinLogLevel)" explainText="$(string.MinLogLevel_Explain)" key="Software\Policies\KCITCompanion\Client" valueName="MinLogLevel" presentation="MinLogLevel_Presentation">
+      <enum>
+        <item displayName="Trace" value="Trace" />
+        <item displayName="Debug" value="Debug" />
+        <item displayName="Information" value="Information" />
+        <item displayName="Warning" value="Warning" />
+        <item displayName="Error" value="Error" />
+        <item displayName="Critical" value="Critical" />
+      </enum>
+      <supportedOn ref="SUPPORTED_ANY" />
+    </policy>
+    <policy name="UiLanguage" class="Both" displayName="$(string.UiLanguage)" explainText="$(string.UiLanguage_Explain)" key="Software\Policies\KCITCompanion\Client" valueName="UiLanguage" presentation="UiLanguage_Presentation">
+      <text maxLength="32" />
+      <supportedOn ref="SUPPORTED_ANY" />
+    </policy>
+    <policy name="EnableTelemetry" class="Both" displayName="$(string.EnableTelemetry)" explainText="$(string.EnableTelemetry_Explain)" key="Software\Policies\KCITCompanion\Client" valueName="EnableTelemetry" presentation="EnableTelemetry_Presentation">
+      <decimal minValue="0" maxValue="1" />
+      <supportedOn ref="SUPPORTED_ANY" />
+    </policy>
+    <policy name="AllowedGroupsCsv" class="Machine" displayName="$(string.AllowedGroupsCsv)" explainText="$(string.AllowedGroupsCsv_Explain)" key="Software\Policies\KCITCompanion\Client" valueName="AllowedGroupsCsv" presentation="AllowedGroupsCsv_Presentation">
+      <text maxLength="512" />
+      <supportedOn ref="SUPPORTED_ANY" />
+    </policy>
+    <policy name="LogViewPollSeconds" class="Both" displayName="$(string.LogViewPollSeconds)" explainText="$(string.LogViewPollSeconds_Explain)" key="Software\Policies\KCITCompanion\Client" valueName="LogViewPollSeconds" presentation="LogViewPollSeconds_Presentation">
+      <decimal minValue="5" maxValue="300" />
+      <supportedOn ref="SUPPORTED_ANY" />
+    </policy>
+    <policy name="LogQueueMaxDepthPerModule" class="Machine" displayName="$(string.LogQueueMaxDepthPerModule)" explainText="$(string.LogQueueMaxDepthPerModule_Explain)" key="Software\Policies\KCITCompanion\Client" valueName="LogQueueMaxDepthPerModule" presentation="LogQueueMaxDepthPerModule_Presentation">
+      <decimal minValue="500" maxValue="50000" />
+      <supportedOn ref="SUPPORTED_ANY" />
+    </policy>
+    <policy name="LogCircuitErrorThreshold" class="Machine" displayName="$(string.LogCircuitErrorThreshold)" explainText="$(string.LogCircuitErrorThreshold_Explain)" key="Software\Policies\KCITCompanion\Client" valueName="LogCircuitErrorThreshold" presentation="LogCircuitErrorThreshold_Presentation">
+      <decimal minValue="5" maxValue="500" />
+      <supportedOn ref="SUPPORTED_ANY" />
+    </policy>
+    <policy name="LogCircuitErrorWindowSeconds" class="Machine" displayName="$(string.LogCircuitErrorWindowSeconds)" explainText="$(string.LogCircuitErrorWindowSeconds_Explain)" key="Software\Policies\KCITCompanion\Client" valueName="LogCircuitErrorWindowSeconds" presentation="LogCircuitErrorWindowSeconds_Presentation">
+      <decimal minValue="10" maxValue="3600" />
+      <supportedOn ref="SUPPORTED_ANY" />
+    </policy>
+    <policy name="LogFailoverEnabled" class="Machine" displayName="$(string.LogFailoverEnabled)" explainText="$(string.LogFailoverEnabled_Explain)" key="Software\Policies\KCITCompanion\Client" valueName="LogFailoverEnabled" presentation="LogFailoverEnabled_Presentation">
+      <decimal minValue="0" maxValue="1" />
+      <supportedOn ref="SUPPORTED_ANY" />
+    </policy>
+  </policies>
+</policyDefinitions>

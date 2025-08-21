@@ -1,0 +1,22 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!-- Dark Theme Color Tokens -->
+  <Color x:Key="Color.Primary.500">#FF6A75F0</Color>
+  <Color x:Key="Color.Primary.600">#FF5962D6</Color>
+  <Color x:Key="Color.Primary.700">#FF464EB6</Color>
+  <Color x:Key="Color.Secondary.500">#FFFFB74D</Color>
+  <Color x:Key="Color.Neutral.000">#FF1A1D21</Color>
+  <Color x:Key="Color.Neutral.050">#FF22262B</Color>
+  <Color x:Key="Color.Neutral.100">#FF2B3036</Color>
+  <Color x:Key="Color.Neutral.200">#FF394048</Color>
+  <Color x:Key="Color.Neutral.300">#FF4A545E</Color>
+  <Color x:Key="Color.Neutral.400">#FF5C6772</Color>
+  <Color x:Key="Color.Neutral.500">#FF7B8894</Color>
+  <Color x:Key="Color.Neutral.600">#FFA0AAB4</Color>
+  <Color x:Key="Color.Neutral.700">#FFCDD2D6</Color>
+  <Color x:Key="Color.Neutral.800">#FFFFFFFF</Color>
+  <Color x:Key="Color.Danger.500">#FFFF5F56</Color>
+  <Color x:Key="Color.Warning.500">#FFFCD34D</Color>
+  <Color x:Key="Color.Success.500">#FF34D399</Color>
+  <Color x:Key="Color.Info.500">#FF38BDF8</Color>
+</ResourceDictionary>

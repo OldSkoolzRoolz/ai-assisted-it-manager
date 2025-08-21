@@ -1,0 +1,11 @@
+CREATE TABLE [dbo].[LogSource](
+    [LogSourceId] INT IDENTITY(1,1) NOT NULL CONSTRAINT PK_LogSource PRIMARY KEY,
+    [Application] NVARCHAR(128) NOT NULL,
+    [FilePath] NVARCHAR(512) NOT NULL,
+    [Enabled] BIT NOT NULL DEFAULT 1,
+    [CreatedUtc] DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+    [UpdatedUtc] DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+);
+GO
+CREATE UNIQUE INDEX UX_LogSource_FilePath ON [dbo].[LogSource]([FilePath]);
+GO

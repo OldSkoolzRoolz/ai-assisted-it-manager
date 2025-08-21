@@ -1,0 +1,21 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <!-- Brush Tokens (derived) -->
+  <SolidColorBrush x:Key="Brush.Primary" Color="{StaticResource Color.Primary.500}" />
+  <SolidColorBrush x:Key="Brush.Primary.Hover" Color="{StaticResource Color.Primary.600}" />
+  <SolidColorBrush x:Key="Brush.Primary.Active" Color="{StaticResource Color.Primary.700}" />
+  <SolidColorBrush x:Key="Brush.Secondary" Color="{StaticResource Color.Secondary.500}" />
+  <SolidColorBrush x:Key="Brush.Surface" Color="{StaticResource Color.Neutral.050}" />
+  <SolidColorBrush x:Key="Brush.Surface.Alt" Color="{StaticResource Color.Neutral.100}" />
+  <SolidColorBrush x:Key="Brush.Border" Color="{StaticResource Color.Neutral.200}" />
+  <SolidColorBrush x:Key="Brush.Text.Primary" Color="{StaticResource Color.Neutral.800}" />
+  <SolidColorBrush x:Key="Brush.Text.Secondary" Color="{StaticResource Color.Neutral.500}" />
+  <SolidColorBrush x:Key="Brush.Danger" Color="{StaticResource Color.Danger.500}" />
+  <SolidColorBrush x:Key="Brush.Warning" Color="{StaticResource Color.Warning.500}" />
+  <SolidColorBrush x:Key="Brush.Success" Color="{StaticResource Color.Success.500}" />
+  <SolidColorBrush x:Key="Brush.Info" Color="{StaticResource Color.Info.500}" />
+  <SolidColorBrush x:Key="Brush.Transparent" Color="#00FFFFFF" />
+  <!-- Added semantic panel/card brushes -->
+  <SolidColorBrush x:Key="Brush.Panel.Dark" Color="{StaticResource Color.Neutral.700}" />
+  <SolidColorBrush x:Key="Brush.Card" Color="{StaticResource Color.Neutral.100}" />
+</ResourceDictionary>

@@ -10,7 +10,7 @@ Unless otherwise noted, values are read at startup and when the BehaviorPolicyPr
 ## Quick View
 | Setting Name | Default Value | Registry Value Name | Type | Description | Notes |
 |--------------|---------------|---------------------|------|-------------|-------|
-| LogRetentionDays | 7 | `LogRetentionDays` | DWORD | Number of days to retain log files before deletion. | Policy layer may override; minimum enforced = 1. |
+| LogRetentionDays | 7 | `LogRetentionDays` | DWORD | Number of days of log entries shown in UI. | View-only filter; does NOT delete files. |
 | MaxLogFileSizeMB | 5 | `MaxLogFileSizeMB` | DWORD | Maximum size (MB) for a single rolling log file before a new file is created. | Hard cap in code; must be >0. |
 | MinLogLevel | Information | `MinLogLevel` | STRING | Minimum log level emitted (Trace, Debug, Information, Warning, Error, Critical). | Affects all sinks; dynamic updates applied. |
 | UiLanguage | en-US | `UiLanguage` | STRING | Preferred UI culture (IETF language tag). | Falling back to en-US if resources unavailable. |
@@ -21,10 +21,11 @@ Unless otherwise noted, values are read at startup and when the BehaviorPolicyPr
 | DatabasePath | %ProgramData%\AIManager\client\behavior.db | `DatabasePath` | STRING | Location of the behavior policy SQLite database. | Machine scope only; user override ignored. |
 | LogsDirectory | <AppBase>\logs | `LogsDirectory` | STRING | Root directory for JSON log files. | Changing requires restart. |
 | SessionCorrelationEnabled | 1 (true) | `SessionCorrelationEnabled` | DWORD | Enables inclusion of session, host, process and module version metadata in logs. | Disable only for privacy-constrained environments. |
-| AutoPurgeOnStartup | 1 (true) | `AutoPurgeOnStartup` | DWORD | Run log retention purge immediately at startup. | If disabled, purge runs on first scheduled interval. |
+| AutoPurgeOnStartup | 1 (true) | `AutoPurgeOnStartup` | DWORD | Run log retention purge immediately at startup. | Purge implementation TBD; currently no deletion. |
 | TelemetryEndpoint | (empty) | `TelemetryEndpoint` | STRING | Custom endpoint for telemetry submission. | Empty disables remote send even if telemetry enabled. |
 | EtwWatcherEnabled | 0 (false) | `EtwWatcherEnabled` | DWORD | Enables ETW watcher subsystem (future feature). | Will activate ETW watcher service when implemented. |
 | EtwWatcherConfigPath | (empty) | `EtwWatcherConfigPath` | STRING | Path to watcher definition bundle (JSON/ signed). | Future feature placeholder. |
+| LogViewPollSeconds | 15 | `LogViewPollSeconds` | DWORD | Interval (seconds) UI log grid auto-refreshes. | Clamped 5–300; does not affect logging. |
 
 ## Detailed Matrix
 | Setting | ModelProperty | RegistryName | Scope | Type | Default | Allowed | HotReload | Restart | ValidationRuleId | FutureAdmxPolicyName | IntroducedVersion | Owner | SecurityNote |
@@ -38,10 +39,11 @@ Unless otherwise noted, values are read at startup and when the BehaviorPolicyPr
 | DatabasePath | (N/A) | DatabasePath | Machine | Path | %ProgramData%/AIManager/client/behavior.db | Absolute path | No | App | VR_PATH_ABSOLUTE | AIManager_DatabasePath | 0.1.0 | Core | Controlled by installer/admin |
 | LogsDirectory | (N/A) | LogsDirectory | Machine/User | Path | <AppBase>/logs | Absolute path | No | App | VR_PATH_ABSOLUTE | AIManager_LogsDirectory | 0.1.0 | Core | Ensure ACLs protect contents |
 | SessionCorrelationEnabled | (N/A) | SessionCorrelationEnabled | Machine/User | Bool | 1 | 0|1 | Yes | None | VR_BOOL | AIManager_SessionCorrelation | 0.1.0 | Core | Disabling reduces forensic context |
-| AutoPurgeOnStartup | (N/A) | AutoPurgeOnStartup | Machine/User | Bool | 1 | 0|1 | Yes | None | VR_BOOL | AIManager_AutoPurge | 0.1.0 | Core | If disabled, log growth until scheduled purge |
+| AutoPurgeOnStartup | (N/A) | AutoPurgeOnStartup | Machine/User | Bool | 1 | 0|1 | Yes | None | VR_BOOL | AIManager_AutoPurge | 0.1.0 | Core | If disabled, log growth until purge implemented |
 | EtwWatcherEnabled | (N/A) | EtwWatcherEnabled | Machine/User | Bool | 0 | 0|1 | Planned | Service | VR_BOOL | AIManager_EtwWatcherEnabled | 0.1.0 | Diagnostics | May surface sensitive event data |
 | EtwWatcherConfigPath | (N/A) | EtwWatcherConfigPath | Machine/User | Path | (empty) | Absolute path | Planned | Service | VR_PATH_ABSOLUTE | AIManager_EtwWatcherConfigPath | 0.1.0 | Diagnostics | Validate source authenticity |
 | TelemetryEndpoint | (N/A) | TelemetryEndpoint | Machine/User | Url | (empty) | Valid URI/empty | Yes | None | VR_URI_OPTIONAL | AIManager_TelemetryEndpoint | 0.1.0 | Telemetry | Endpoint must be trusted |
+| LogViewPollSeconds | LogViewPollSeconds | LogViewPollSeconds | Machine/User | Int | 15 | 5-300 | Yes | None | VR_LOGVIEWPOLL_RANGE | AIManager_LogViewPollSeconds | 0.1.1 | Core | Excessively low increases UI CPU/IO |
 
 Legend: HotReload: Yes=applies immediately; Partial=some UI elements may require refresh; Planned=future feature.
 
@@ -68,6 +70,7 @@ Behavior policy authoritative values are persisted in the SQLite database (table
 | PolicyPollIntervalSeconds | Clamp to [10, 3600] |
 | DatabasePath | Must be absolute, writable, directory must exist or be creatable |
 | LogsDirectory | Must be absolute & writable |
+| LogViewPollSeconds | Clamp to [5, 300] |
 
 ## Future Extensions (Planned)
 - Add cryptographic signature fields: `PolicySignature`, `PolicySigner` for distributed policies.
@@ -90,9 +93,11 @@ Windows Registry Editor Version 5.00
 "SessionCorrelationEnabled"=dword:00000001
 "AutoPurgeOnStartup"=dword:00000001
 "EtwWatcherEnabled"=dword:00000000
+"LogViewPollSeconds"=dword:0000000f
 ```
 
 ## Notes
+- LogRetentionDays currently filters UI display only; physical deletion will be added with purge implementation respecting AutoPurgeOnStartup.
 - Settings not present fall back to defaults defined in `BehaviorPolicy.Default` or hard-coded operational defaults.
 - Changing `UiLanguage` at runtime triggers UI resource reload on next refresh cycle (planned hook). Restart may be required for certain views.
-- High-frequency polling can increase I/O; keep interval >= 30s unless actively testing distribution.
+- High-frequency polling (PolicyPollIntervalSeconds or LogViewPollSeconds) can increase I/O and CPU; keep within recommended ranges unless testing.

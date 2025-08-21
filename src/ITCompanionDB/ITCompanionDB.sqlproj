@@ -15,7 +15,7 @@
     <AssemblyName>ITCompanionDB</AssemblyName>
     <ModelCollation>1033, CI</ModelCollation>
     <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
-    <DeployToDatabase>True</DeployToDatabase>
+    <DeployToDatabase>False</DeployToDatabase>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <TargetLanguage>CS</TargetLanguage>
     <AppDesignerFolder>Properties</AppDesignerFolder>
@@ -49,7 +49,6 @@
   </PropertyGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
-    <!-- Default to the v11.0 targets path if the targets file for the current VS version is not found -->
     <SSDTExists Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets')">True</SSDTExists>
     <VisualStudioVersion Condition="'$(SSDTExists)' == ''">11.0</VisualStudioVersion>
   </PropertyGroup>
@@ -77,5 +76,9 @@
     <Build Include="SchemaVer1\19_AuditEvent.sql" />
     <Build Include="SchemaVer1\20_AuditRetention.sql" />
     <Build Include="SchemaVer1\Indexes.sql" />
+    <Build Include="30_LogSource.sql" />
+    <Build Include="31_LogSourceTag.sql" />
+    <Build Include="32_LogIngestionCursor.sql" />
+    <Build Include="33_LogEvent.sql" />
   </ItemGroup>
 </Project>

@@ -33,31 +33,6 @@ public partial class PolicyEditorView : UserControl
         }
     }
 
-    private void CategoryTree_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
-    {
-        if (e.NewValue is CategoryTreeItem item)
-        {
-            if (item.IsPolicy && item.Policy is not null)
-            {
-                ViewModel.SelectedCategoryNode = null;
-                ViewModel.SelectedPolicy = item.Policy;
-            }
-            else if (!item.IsPolicy)
-            {
-                ViewModel.SelectedCategoryNode = item;
-            }
-        }
-    }
-
-    private void TreeViewItem_Expanded(object sender, RoutedEventArgs e)
-    {
-        if (e.OriginalSource is TreeViewItem tvi && tvi.DataContext is CategoryTreeItem node)
-        {
-            ViewModel.EnsureCategoryChildren(node);
-            tvi.Items.Refresh();
-        }
-    }
-
     private void OnOpenDevDiag(object sender, RoutedEventArgs e)
     {
         var app = Application.Current as App;
