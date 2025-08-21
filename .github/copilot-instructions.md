@@ -3,6 +3,8 @@
 READ THIS FIRST  
 These instructions are the canonical source of truth for automations working in this repository. Always follow them in the order given. ONLY perform exploratory searches (grep/code search) if the needed information is absent here or an executed command contradicts what is documented.
 
+**Repository CODEOWNER**: @KyleC69
+
 ---
 
 ## 1. Repository Summary
@@ -26,7 +28,7 @@ Current emphasis (Phase 1) = Core Policy Manager & foundational modules.
 - Database: SQL Server (local developer instance likely required for DB-related features).
 - AI Layer (future / scaffolding): ONNX runtime integration (not necessarily active yet).
 - Scripts & Docs:
-  - docs/ (architecture drafts).
+  - docs/ (architecture drafts, versioned documentation with audit trails via DOCUMENTATION_VERSION_MANIFEST.md).
   - onboarding/ (module descriptions, setup guide, workspace-presets.ps1).
 - Tests directory: tests/ (dotnet test entry per README).
 - Additional engines / future: Blazor Server (Phase 3), WinUI 3 migration path, security integrations.
@@ -348,13 +350,32 @@ If any path differs, list src/ to identify correct project and adjust only that 
 
 ---
 
-## 23. Quality Bar
+## 23. Documentation Management & Versioning
+
+**Documentation Authority**: @KyleC69 (Repository CODEOWNER) has final approval for all documentation changes.
+
+**Version Control**: All documentation in `/docs` folder is versioned and tracked via `docs/DOCUMENTATION_VERSION_MANIFEST.md`:
+- Review manifest before modifying any documentation
+- Update manifest with change log entries for all documentation updates
+- Follow version format: YYYY-MM-DD.vX
+- Include technical accuracy reviews and framework version updates
+
+**Automation Guidelines for Documentation**:
+- Always reference the version manifest for current document versions
+- Ensure technical references (e.g., .NET versions) match repository standards
+- Update manifest when making any documentation changes
+- Tag @KyleC69 for review approval on documentation PRs
+
+---
+
+## 24. Quality Bar
 
 A change is "ready" ONLY if:
 - Builds cleanly (no new warnings if avoidable).
 - All tests pass (and new tests cover new logic).
 - No hard-coded environment-only paths or credentials.
 - UI or service still starts successfully after change.
+- Documentation changes include manifest updates and maintain technical accuracy.
 
 ---
 
