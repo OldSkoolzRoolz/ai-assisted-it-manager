@@ -1,0 +1,81 @@
+version: 2
+
+updates:
+  # NuGet package dependencies - Root level
+  - package-ecosystem: "nuget"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+    open-pull-requests-limit: 10
+    assignees:
+      - "KyleC69"
+      - "OldSkoolzRoolz"
+    labels:
+      - "dependencies"
+      - "nuget"
+
+  # NuGet package dependencies - Source projects
+  - package-ecosystem: "nuget"
+    directory: "/src"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+    open-pull-requests-limit: 10
+    assignees:
+      - "KyleC69"
+      - "OldSkoolzRoolz"
+    labels:
+      - "dependencies"
+      - "nuget"
+
+  # NuGet package dependencies - Test projects
+  - package-ecosystem: "nuget"
+    directory: "/tests"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+    open-pull-requests-limit: 10
+    assignees:
+      - "KyleC69"
+      - "OldSkoolzRoolz"
+    labels:
+      - "dependencies"
+      - "nuget"
+
+  # GitHub Actions workflow dependencies
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+    open-pull-requests-limit: 5
+    assignees:
+      - "KyleC69"
+      - "OldSkoolzRoolz"
+    labels:
+      - "dependencies"
+      - "github-actions"
+
+  # Security updates - Daily check for vulnerabilities
+  - package-ecosystem: "nuget"
+    directory: "/"
+    schedule:
+      interval: "daily"
+      time: "06:00"
+    open-pull-requests-limit: 5
+    assignees:
+      - "KyleC69"
+      - "OldSkoolzRoolz"
+    labels:
+      - "dependencies"
+      - "security"
+    allow:
+      - dependency-type: "direct"
+        update-type: "security"
+      - dependency-type: "indirect"
+        update-type: "security"
