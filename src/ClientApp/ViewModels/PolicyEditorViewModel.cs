@@ -51,7 +51,29 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
 
     private CategoryTreeItem? _selectedCategoryNode;
     public CategoryTreeItem? SelectedCategoryNode { get => _selectedCategoryNode; set { if (_selectedCategoryNode != value) { _selectedCategoryNode = value; OnPropertyChanged(); if (_selectedCategoryNode?.Category != null) PopulateSelectedCategoryPolicies(_selectedCategoryNode); Breadcrumb = BuildBreadcrumb(_selectedCategoryNode?.Category); SelectedPolicy = null; } } }
+    public CategoryTreeItem? SelectedCategoryNode
+    {
+        get => _selectedCategoryNode;
+        set
+        {
+            if (_selectedCategoryNode != value)
+            {
+                _selectedCategoryNode = value;
+                OnSelectedCategoryNodeChanged();
+            }
+        }
+    }
 
+    private void OnSelectedCategoryNodeChanged()
+    {
+        OnPropertyChanged(nameof(SelectedCategoryNode));
+        if (_selectedCategoryNode?.Category != null)
+        {
+            PopulateSelectedCategoryPolicies(_selectedCategoryNode);
+        }
+        Breadcrumb = BuildBreadcrumb(_selectedCategoryNode?.Category);
+        SelectedPolicy = null;
+    }
     private string? _lastSearch;
     private string? _searchText;
     public string? SearchText
