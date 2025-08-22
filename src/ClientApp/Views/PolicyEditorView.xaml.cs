@@ -17,8 +17,8 @@ public partial class PolicyEditorView : UserControl
     {
         InitializeComponent();
         var app = Application.Current as App;
-        ViewModel = app?.Services.GetService(typeof(PolicyEditorViewModel)) as PolicyEditorViewModel ??
-            throw new InvalidOperationException("PolicyEditorViewModel not registered");
+        ViewModel = app?.Services.GetService(typeof(PolicyEditorViewModel)) as PolicyEditorViewModel
+            ?? throw new InvalidOperationException("PolicyEditorViewModel not registered");
         Loaded += OnLoaded;
         DataContext = ViewModel;
     }
@@ -27,9 +27,10 @@ public partial class PolicyEditorView : UserControl
 
     private async void OnLoaded(object sender, RoutedEventArgs e)
     {
-        if (!ViewModel.Policies.Any())
+        if (ViewModel.Catalog == null)
         {
-            await ViewModel.SearchLocalPoliciesAsync(null, CancellationToken.None).ConfigureAwait(false);
+            await ViewModel.EnsureCatalogLoadedAsync();
+            ViewModel.ApplySearchFilter(null);
         }
     }
 
@@ -58,6 +59,29 @@ public partial class PolicyEditorView : UserControl
                 Content = new LogViewerView { DataContext = logVm }
             };
             win.Show();
+        }
+    }
+
+    private void OnCategoryExpanded(object sender, RoutedEventArgs e)
+    {
+        if (e.OriginalSource is TreeViewItem tvi && tvi.DataContext is CategoryTreeItem cat && !cat.IsPolicy)
+        {
+            ViewModel.EnsureCategoryChildren(cat);
+        }
+    }
+
+    private void OnCategoryTreeSelected(object sender, RoutedPropertyChangedEventArgs<object> e)
+    {
+        if (e.NewValue is CategoryTreeItem item)
+        {
+            if (item.IsPolicy && item.Policy != null)
+            {
+                ViewModel.SelectedPolicy = item.Policy;
+            }
+            else
+            {
+                ViewModel.SelectedCategoryNode = item;
+            }
         }
     }
 }
