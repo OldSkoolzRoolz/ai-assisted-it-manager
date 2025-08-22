@@ -37,7 +37,7 @@
             </StackPanel>
             <TreeView Margin="4" ItemsSource="{Binding CategoryTree}" SelectedItemChanged="OnCategoryTreeSelected">
                 <TreeView.ItemContainerStyle>
-                    <Style TargetType="TreeViewItem" BasedOn="{StaticResource Control.TreeViewItem}">
+                    <Style TargetType="TreeViewItem">
                         <EventSetter Event="Expanded" Handler="OnCategoryExpanded" />
                     </Style>
                 </TreeView.ItemContainerStyle>
