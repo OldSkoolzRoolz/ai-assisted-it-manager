@@ -3,7 +3,7 @@
 Optional retro / nostalgic UI behaviors toggled manually. OFF by default and **no impact** on core functionality.
 
 ## 1. Retro Splash Screen
-ANSI?green, pseudo "tape drive" style startup sequence with staged status messages.
+ANSI-green, pseudo "tape drive" style startup sequence with staged status messages.
 
 ### Enable at Startup (Developer Only)
 Uncomment the `ShowSplash();` line in `App.xaml.cs` (marked "Retro splash (developer manual toggle)"). Commit should keep it commented.
