@@ -5,6 +5,8 @@ These instructions are the canonical source of truth for automations working in 
 
 **Repository CODEOWNER**: @KyleC69
 
+Version: 3.0
+Date: 2025-08-22
 ---
 
 ## 1. Repository Summary
@@ -16,7 +18,7 @@ This repository (ai-assisted-it-manager) is the codebase for a multi‑phase "AI
 - Centralize configuration and policy state in a SQL Server–backed data layer.
 - Evolve toward enterprise RBAC, auditing, and monetization phases.
 
-Current emphasis (Phase 1) = Core Policy Manager & foundational modules.
+Current emphasis (Phase 1) = Core Policy Manager & foundational modules, minimal conversational AI.
 
 ---
 
@@ -42,11 +44,11 @@ Root files & directories:
 - .gitignore
 - ITCompanion.sln
 - README.md
-- SelfHealingPolicyEngine/ (module directory – details not enumerated here)
+- SelfHealingPolicyEngine/ 
 - docs/
 - onboarding/
-- src/ (contains "several projects" – main code modules)
-- tests/ (solution test projects)
+- src/ (contains all project modules)
+- tests/ (solution test projects) To be implemented later
 
 Module references (from onboarding/README.md):
 - CorePolicyEngine (core ADMX/ADML parsing & validation)
@@ -54,7 +56,7 @@ Module references (from onboarding/README.md):
 - EnterpriseDashboard (future Blazor Server)
 - ITCompanionDB (database schema / migrations)
 - Security (defender integration, enforcement logic)
-- SelfHealingPolicyEngine (present at root – may integrate or evolve)
+- SelfHealingPolicyEngine (tamper protection, policy enforcement)
 
 Expect each implementation project to reside under src/<ProjectName>/ with a corresponding *.csproj and be included in ITCompanion.sln. The SelfHealingPolicyEngine currently sits at root (historic or experimental placement); when modifying it, ensure it remains properly referenced in the solution.
 
