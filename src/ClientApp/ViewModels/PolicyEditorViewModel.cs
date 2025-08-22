@@ -63,7 +63,26 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
         }
     }
 
-    private void OnSelectedCategoryNodeChanged()
+    public CategoryTreeItem? SelectedCategoryNode
+    {
+        get => _selectedCategoryNode;
+        set => OnSelectedCategoryNodeChanged(value);
+    }
+
+    private void OnSelectedCategoryNodeChanged(CategoryTreeItem? value)
+    {
+        if (_selectedCategoryNode != value)
+        {
+            _selectedCategoryNode = value;
+            OnPropertyChanged();
+            if (_selectedCategoryNode?.Category != null)
+                PopulateSelectedCategoryPolicies(_selectedCategoryNode);
+            Breadcrumb = BuildBreadcrumb(_selectedCategoryNode?.Category);
+            SelectedPolicy = null;
+        }
+    }
+
+    // Remove the old OnSelectedCategoryNodeChanged() method if it exists below
     {
         OnPropertyChanged(nameof(SelectedCategoryNode));
         if (_selectedCategoryNode?.Category != null)
