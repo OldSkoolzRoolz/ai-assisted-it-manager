@@ -50,7 +50,6 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
     public PolicySummary? SelectedPolicy { get => _selectedPolicy; set { if (_selectedPolicy != value) { _selectedPolicy = value; OnSelectedPolicyChanged(); OnPropertyChanged(); } } }
 
     private CategoryTreeItem? _selectedCategoryNode;
-    public CategoryTreeItem? SelectedCategoryNode { get => _selectedCategoryNode; set { if (_selectedCategoryNode != value) { _selectedCategoryNode = value; OnPropertyChanged(); if (_selectedCategoryNode?.Category != null) PopulateSelectedCategoryPolicies(_selectedCategoryNode); Breadcrumb = BuildBreadcrumb(_selectedCategoryNode?.Category); SelectedPolicy = null; } } }
     public CategoryTreeItem? SelectedCategoryNode
     {
         get => _selectedCategoryNode;
