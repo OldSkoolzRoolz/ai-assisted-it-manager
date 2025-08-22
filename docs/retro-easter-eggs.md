@@ -9,7 +9,7 @@ ANSI-green, pseudo "tape drive" style startup sequence with staged status messag
 Uncomment the `ShowSplash();` line in `App.xaml.cs` (marked "Retro splash (developer manual toggle)"). Commit should keep it commented.
 
 ### Manual Launch (Runtime)
-Press `Ctrl + Alt + Shift + F12` in the main window to open the splash screen non?modally at any time. (Obscure combo to avoid collisions.)
+Press `Ctrl + Alt + Shift + F12` in the main window to open the splash screen non-modally at any time. (Obscure combo to avoid collisions.)
 
 ### Disable
 Re?comment the `ShowSplash();` line and avoid pressing the key combination.
