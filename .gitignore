@@ -496,3 +496,4 @@ $RECYCLE.BIN/
 /ITCompanion - Copy.sln.txt
 /policy-cheatsheet.md
 /Show-PolicyCategoryGraph.ps1
+*.DotSettings
