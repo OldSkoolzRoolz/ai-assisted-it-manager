@@ -23,7 +23,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{96061940-41CD-4A25-A924-353A325559AE}"
 	ProjectSection(SolutionItems) = preProject
 		docs\ARCHITECTURE.md = docs\ARCHITECTURE.md
-		onboarding\copilot-personality.md = onboarding\copilot-personality.md
+		..\..\..\categories.dot = ..\..\..\categories.dot
 		docs\PhaseOne.md = docs\PhaseOne.md
 		onboarding\policy-cheatsheet.md = onboarding\policy-cheatsheet.md
 		docs\README-ARCH.md.txt = docs\README-ARCH.md.txt
@@ -36,7 +36,49 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{96061940-4
 EndProject
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "ITCompanionDB", "src\ITCompanionDB\ITCompanionDB.sqlproj", "{37E5EDDF-6E13-4477-8563-5145D0267C82}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SelfHealingPolicyEngine", "SelfHealingPolicyEngine\SelfHealingPolicyEngine.csproj", "{5CD77F88-85BA-4391-A4FA-1AEC4B5048E5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SelfHealingPolicyEngine", "src\SelfHealingPolicyEngine\SelfHealingPolicyEngine.csproj", "{AACD30B5-90ED-8A94-9FDE-EC644A211F70}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LocalPolicies", "LocalPolicies", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+	ProjectSection(SolutionItems) = preProject
+		C:\Windows\PolicyDefinitions\en-US\MicrosoftEdge.adml = C:\Windows\PolicyDefinitions\en-US\MicrosoftEdge.adml
+		C:\Windows\PolicyDefinitions\en-US\msched.adml = C:\Windows\PolicyDefinitions\en-US\msched.adml
+		C:\Windows\PolicyDefinitions\msched.admx = C:\Windows\PolicyDefinitions\msched.admx
+		C:\Windows\PolicyDefinitions\en-US\nca.adml = C:\Windows\PolicyDefinitions\en-US\nca.adml
+		C:\Windows\PolicyDefinitions\nca.admx = C:\Windows\PolicyDefinitions\nca.admx
+		C:\Windows\PolicyDefinitions\en-US\NCSI.adml = C:\Windows\PolicyDefinitions\en-US\NCSI.adml
+		C:\Windows\PolicyDefinitions\NCSI.admx = C:\Windows\PolicyDefinitions\NCSI.admx
+		C:\Windows\PolicyDefinitions\en-US\OOBE.adml = C:\Windows\PolicyDefinitions\en-US\OOBE.adml
+		C:\Windows\PolicyDefinitions\OOBE.admx = C:\Windows\PolicyDefinitions\OOBE.admx
+		C:\Windows\PolicyDefinitions\en-US\PowerShellExecutionPolicy.adml = C:\Windows\PolicyDefinitions\en-US\PowerShellExecutionPolicy.adml
+		C:\Windows\PolicyDefinitions\PowerShellExecutionPolicy.admx = C:\Windows\PolicyDefinitions\PowerShellExecutionPolicy.admx
+		C:\Windows\PolicyDefinitions\en-US\PushToInstall.adml = C:\Windows\PolicyDefinitions\en-US\PushToInstall.adml
+		C:\Windows\PolicyDefinitions\PushToInstall.admx = C:\Windows\PolicyDefinitions\PushToInstall.admx
+		C:\Windows\PolicyDefinitions\en-US\RacWmiProv.adml = C:\Windows\PolicyDefinitions\en-US\RacWmiProv.adml
+		C:\Windows\PolicyDefinitions\RacWmiProv.admx = C:\Windows\PolicyDefinitions\RacWmiProv.admx
+		C:\Windows\PolicyDefinitions\en-US\ReAgent.adml = C:\Windows\PolicyDefinitions\en-US\ReAgent.adml
+		C:\Windows\PolicyDefinitions\ReAgent.admx = C:\Windows\PolicyDefinitions\ReAgent.admx
+		C:\Windows\PolicyDefinitions\en-US\sdiageng.adml = C:\Windows\PolicyDefinitions\en-US\sdiageng.adml
+		C:\Windows\PolicyDefinitions\sdiageng.admx = C:\Windows\PolicyDefinitions\sdiageng.admx
+		C:\Windows\PolicyDefinitions\en-US\sdiagschd.adml = C:\Windows\PolicyDefinitions\en-US\sdiagschd.adml
+		C:\Windows\PolicyDefinitions\sdiagschd.admx = C:\Windows\PolicyDefinitions\sdiagschd.admx
+		C:\Windows\PolicyDefinitions\en-US\Search.adml = C:\Windows\PolicyDefinitions\en-US\Search.adml
+		C:\Windows\PolicyDefinitions\Search.admx = C:\Windows\PolicyDefinitions\Search.admx
+		C:\Windows\PolicyDefinitions\en-US\SmartScreen.adml = C:\Windows\PolicyDefinitions\en-US\SmartScreen.adml
+		C:\Windows\PolicyDefinitions\SmartScreen.admx = C:\Windows\PolicyDefinitions\SmartScreen.admx
+		C:\Windows\PolicyDefinitions\en-US\Speech.adml = C:\Windows\PolicyDefinitions\en-US\Speech.adml
+		C:\Windows\PolicyDefinitions\Speech.admx = C:\Windows\PolicyDefinitions\Speech.admx
+		C:\Windows\PolicyDefinitions\en-US\StorageHealth.adml = C:\Windows\PolicyDefinitions\en-US\StorageHealth.adml
+		C:\Windows\PolicyDefinitions\StorageHealth.admx = C:\Windows\PolicyDefinitions\StorageHealth.admx
+		C:\Windows\PolicyDefinitions\en-US\StorageSense.adml = C:\Windows\PolicyDefinitions\en-US\StorageSense.adml
+		C:\Windows\PolicyDefinitions\StorageSense.admx = C:\Windows\PolicyDefinitions\StorageSense.admx
+		C:\Windows\PolicyDefinitions\en-US\TextInput.adml = C:\Windows\PolicyDefinitions\en-US\TextInput.adml
+		C:\Windows\PolicyDefinitions\TextInput.admx = C:\Windows\PolicyDefinitions\TextInput.admx
+		C:\Windows\PolicyDefinitions\en-US\WebThreatDefense.adml = C:\Windows\PolicyDefinitions\en-US\WebThreatDefense.adml
+		C:\Windows\PolicyDefinitions\WebThreatDefense.admx = C:\Windows\PolicyDefinitions\WebThreatDefense.admx
+		C:\Windows\PolicyDefinitions\WindowsDefenderSecurityCenter.admx = C:\Windows\PolicyDefinitions\WindowsDefenderSecurityCenter.admx
+		C:\Windows\PolicyDefinitions\WindowsMediaDRM.admx = C:\Windows\PolicyDefinitions\WindowsMediaDRM.admx
+		C:\Windows\PolicyDefinitions\WindowsMediaPlayer.admx = C:\Windows\PolicyDefinitions\WindowsMediaPlayer.admx
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -112,17 +154,18 @@ Global
 		{37E5EDDF-6E13-4477-8563-5145D0267C82}.Release|x86.ActiveCfg = Release|Any CPU
 		{37E5EDDF-6E13-4477-8563-5145D0267C82}.Release|x86.Build.0 = Release|Any CPU
 		{37E5EDDF-6E13-4477-8563-5145D0267C82}.Release|x86.Deploy.0 = Release|Any CPU
-		{5CD77F88-85BA-4391-A4FA-1AEC4B5048E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5CD77F88-85BA-4391-A4FA-1AEC4B5048E5}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{5CD77F88-85BA-4391-A4FA-1AEC4B5048E5}.Debug|x64.Build.0 = Debug|Any CPU
-		{5CD77F88-85BA-4391-A4FA-1AEC4B5048E5}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{5CD77F88-85BA-4391-A4FA-1AEC4B5048E5}.Debug|x86.Build.0 = Debug|Any CPU
-		{5CD77F88-85BA-4391-A4FA-1AEC4B5048E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5CD77F88-85BA-4391-A4FA-1AEC4B5048E5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5CD77F88-85BA-4391-A4FA-1AEC4B5048E5}.Release|x64.ActiveCfg = Release|Any CPU
-		{5CD77F88-85BA-4391-A4FA-1AEC4B5048E5}.Release|x64.Build.0 = Release|Any CPU
-		{5CD77F88-85BA-4391-A4FA-1AEC4B5048E5}.Release|x86.ActiveCfg = Release|Any CPU
-		{5CD77F88-85BA-4391-A4FA-1AEC4B5048E5}.Release|x86.Build.0 = Release|Any CPU
+		{AACD30B5-90ED-8A94-9FDE-EC644A211F70}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AACD30B5-90ED-8A94-9FDE-EC644A211F70}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AACD30B5-90ED-8A94-9FDE-EC644A211F70}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{AACD30B5-90ED-8A94-9FDE-EC644A211F70}.Debug|x64.Build.0 = Debug|Any CPU
+		{AACD30B5-90ED-8A94-9FDE-EC644A211F70}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{AACD30B5-90ED-8A94-9FDE-EC644A211F70}.Debug|x86.Build.0 = Debug|Any CPU
+		{AACD30B5-90ED-8A94-9FDE-EC644A211F70}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AACD30B5-90ED-8A94-9FDE-EC644A211F70}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AACD30B5-90ED-8A94-9FDE-EC644A211F70}.Release|x64.ActiveCfg = Release|Any CPU
+		{AACD30B5-90ED-8A94-9FDE-EC644A211F70}.Release|x64.Build.0 = Release|Any CPU
+		{AACD30B5-90ED-8A94-9FDE-EC644A211F70}.Release|x86.ActiveCfg = Release|Any CPU
+		{AACD30B5-90ED-8A94-9FDE-EC644A211F70}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -133,7 +176,7 @@ Global
 		{FCDF3DD0-C9F7-4F7B-A792-E1686C28324B} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{C864BABA-9C22-4626-9A63-7C062BBE7497} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{37E5EDDF-6E13-4477-8563-5145D0267C82} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
-		{5CD77F88-85BA-4391-A4FA-1AEC4B5048E5} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{AACD30B5-90ED-8A94-9FDE-EC644A211F70} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {05B8EB68-E610-4318-9C6F-13F6DC0C6D71}

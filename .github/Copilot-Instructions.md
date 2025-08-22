@@ -1,7 +1,7 @@
-## Copilot Instructions – AI Assisted Policy & System Management
+ï»¿## Copilot Instructions â€“ AI Assisted Policy & System Management
 
-Version: 2.8  
-Date: 2025-08-21
+Version: 2.9
+Date: 2025-08-22
 
 ---
 ## 1. Purpose & Scope
@@ -13,6 +13,7 @@ Deliver a modular, local-first policy & system management companion ("IT Compani
 - Security: Signing, integrity, authN/authZ, tamper detection enrichment.
 - EnterpriseDashboard (future): Blazor aggregated control & reporting (policy groups, drift alerts, audit explorer).
 - AICompanion: Recommendations, anomaly detection, cross?client correlation.
+- SelfHealingPolicyEngine: Automated remediation workflows, rollback capabilities, integration with OS recovery features.
 
 ## 3. Cross-Cutting Principles
 - Modularity, minimal public surface, deterministic behavior, security by design.
@@ -23,23 +24,23 @@ Deliver a modular, local-first policy & system management companion ("IT Compani
 - Per?module rolling JSON logs (independent rotation). Central viewers aggregate when needed.
 - Enriched fields: ts, level, category, eventId, eventName, msg, ex, sessionId, host, user, pid, appVer, moduleVer.
 - Event ID allocation (1k windows):
-  - CorePolicyEngine: 1000–1999 (sub?ranges per §4 prior version)
-  - ClientApp (UI): 2000–2999
-  - Security: 3000–3999
-  - EnterpriseDashboard: 4000–4999
-    - Policy Groups & Assignment: 4100–4149
-    - Drift Detection & Alerts: 4150–4179
-    - Audit & Compliance Export: 4180–4199
-  - AICompanion: 5000–5999
+  - CorePolicyEngine: 1000â€“1999 (sub?ranges per Â§4 prior version)
+  - ClientApp (UI): 2000â€“2999
+  - Security: 3000â€“3999
+  - EnterpriseDashboard: 4000â€“4999
+    - Policy Groups & Assignment: 4100â€“4149
+    - Drift Detection & Alerts: 4150â€“4179
+    - Audit & Compliance Export: 4180â€“4199
+  - AICompanion: 5000â€“5999
 - Never repurpose retired IDs. Extend sub?ranges or allocate new blocks.
 - Source generator ([LoggerMessage]) + resource indirection for UI?visible messages (logs themselves remain English for analysis baseline).
 
 
 ## Copilot Guidance
-- Copilot should explain things clearly and simply, avoiding jargon where possible. Don't over explain or use complex language. Have a friendly, helpful tone.
+- Copilot should explain things clearly and simply, avoiding jargon where possible. Don't over explain or use complex language. Have a fun, friendly, helpful tone. Be personable.
 - Prompt for clarification if the request is ambiguous or incomplete.
-- Theming Compliance: ALL new or modified UI controls must consume existing theme tokens (colors, brushes, fonts, spacing, styles) via StaticResource / DynamicResource keys defined in Themes/*.xaml. No hard-coded Color, Brush, FontFamily, FontSize, CornerRadius, or spacing literals in view XAML or code-behind. If a needed visual primitive does not exist, add a semantic token (e.g., Brush.Alert.Critical, Space.24, FontSize.Overline) to the appropriate theme dictionary (Light, Dark, HighContrast) and then reference it. Maintain parity across Colors.xaml, Colors.Dark.xaml, Colors.HighContrast.xaml when introducing new color tokens.
-- Prefer style extension (BasedOn) instead of duplicating Setters; keep style keys namespaced: Control.*, Shell.*, UI.* for semantic mapping.
+- Make recommendations if the request may violate core principles, best practices or industry standards.
+
 
 ## 5. Configuration of Settings
 - Internal system controls will use ADMX-backed registry settings (HKLM/HKCU\Software\Policies\<Vendor>\Companion) for initial configuration.
@@ -48,8 +49,8 @@ Deliver a modular, local-first policy & system management companion ("IT Compani
 - Polling watcher (default 30s) with future ETW/notification optimization.
 
 ## 6. Enterprise Policy Model (Extension)
-Goal: Extend existing registry?backed policy paradigm (ADMX semantics) with application?level grouping while remaining consistent with Windows’ approach (we enhance, not redefine). Elements:
-- PolicyDefinition: Canonical catalog of manageable settings (maps to registry path + value or composite operation) – stable identifiers for ADMX export later.
+Goal: Extend existing registry?backed policy paradigm (ADMX semantics) with application?level grouping while remaining consistent with Windowsâ€™ approach (we enhance, not redefine). Elements:
+- PolicyDefinition: Canonical catalog of manageable settings (maps to registry path + value or composite operation) â€“ stable identifiers for ADMX export later.
 - PolicyGroup: Admin-defined collection of PolicyDefinitions with desired Enabled + Value states.
 - ClientGroup (Department / Role): Sales, Executives, IT, etc.
 - PolicyAssignment: Association of PolicyGroup ? ClientGroup.
@@ -59,7 +60,7 @@ Goal: Extend existing registry?backed policy paradigm (ADMX semantics) with appl
 - Registry Consistency: All applied policies should continue to land under HKLM/HKCU\Software\Policies\<Vendor>\Companion ensuring ADMX alignment.
 
 ### Enterprise Layering (Conceptual)
-DesiredState = (BehaviorPolicy Effective) + (Union of PolicyGroups assigned via ClientGroup memberships) with latter overriding earlier conflicts (last assignment order or explicit priority – priority scheme TBD). Drift detection compares DesiredState vs ReportedState snapshot from client.
+DesiredState = (BehaviorPolicy Effective) + (Union of PolicyGroups assigned via ClientGroup memberships) with latter overriding earlier conflicts (last assignment order or explicit priority â€“ priority scheme TBD). Drift detection compares DesiredState vs ReportedState snapshot from client.
 - Distributed policy application: Clients report effective state (hash + values) to central store; server computes drift by comparing against DesiredState.
 - Centralized policy management: Admins create/modify PolicyDefinitions and PolicyGroups; assignments are made to ClientGroups.
 
@@ -111,6 +112,51 @@ DesiredState = (BehaviorPolicy Effective) + (Union of PolicyGroups assigned via 
 | Event Range Extensions | Handling saturation | As expansion occurs |
 | Enforcement Flags | Need Enforced / BlockInheritance? | After initial layered rollout |
 | Drift Priority | Conflict resolution strategy | Before enterprise GA |
+
+-----
+
+## **UI Design Intent & Core Principles** ðŸŽ¨  
+
+These principles guide Copilotâ€‘assisted UI designs toward logical flows, robust adaptability, and appealing visuals â€” while conforming to Windows standards for seamless development and maintainability.  
+
+### **1. Purposeâ€‘Driven Flow**
+- Begin with the userâ€™s end goal and design backward to create a natural, intuitive journey.  
+- Group and order elements according to likely usage sequences.  
+- Keep navigation consistent while using visual cues to guide attention without distraction.  
+
+### **2. Adaptive Architecture**
+- Ensure component layouts **reflow gracefully** across devices, data states, and user roles.  
+- Use modular, reusable UI patterns for easy feature expansion and roleâ€‘based variation.  
+- Maintain coherent function and appearance even when panels or controls are hidden or dynamically loaded.  
+
+### **3. Progressive Depth**
+- Surface essential controls immediately; reveal advanced options contextually.  
+- Employ interaction patterns like tabs, accordions, and hover/tap reveals to retain clarity.  
+- Strike the right balance between speed for common actions and depth for specialized tasks.  
+
+### **4. Theme Compliance & Styling**
+- **All visual styling must come from the resource dictionaries in the `/Themes` folder.**  
+- The UI must **automatically bind to the current system theme variant** (Light, Dark, High Contrast) by default, honoring user accessibility settings and Windows visual standards.  
+- This approach ensures consistency, accessibility compliance, and minimizes redundant style overrides.  
+- A designated **UI developer** will fineâ€‘tune colors, spacing, padding, and other visual parameters within these theme resources â€” keeping logic and layout code clean and maintainable.  
+
+### **5. Color With Intent**
+- Apply a **palette hierarchy** via theme resources:  
+  - **Primary** â€” brand and primary actions  
+  - **Secondary** â€” supporting visuals, status indicators  
+  - **Neutral** â€” surfaces and typography  
+- Colors should guide focus, not compete for attention.  
+- Reserve richer or animated effects for key feedback moments (e.g., success, warnings, critical errors).  
+
+### **6. Confident Visual Tone**
+- Favor clarity and competence over gimmicks.  
+- Let typography, spacing, and alignment convey polish without visual noise.  
+- Use subtle motion or state transitions to strengthen affordances rather than distract.  
+
+---
+
+
+
 
 ---
 ## Removed Redundancies (Historical)

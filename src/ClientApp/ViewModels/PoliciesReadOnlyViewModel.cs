@@ -34,14 +34,17 @@ public sealed class PoliciesReadOnlyViewModel : INotifyPropertyChanged
         Refresh();
     }
 
-    private void Refresh()
+    private async void Refresh()
     {
-        if (_editorVm.Policies.Count == 0 && _editorVm.Catalog == null)
+        try
         {
-            // trigger load
-            Task.Run(async () => await _editorVm.SearchLocalPoliciesAsync(null, CancellationToken.None));
+            await _editorVm.EnsureCatalogLoadedAsync();
+            ApplyFilter();
         }
-        ApplyFilter();
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Policies read-only refresh failed");
+        }
     }
 
     private void ApplyFilter()

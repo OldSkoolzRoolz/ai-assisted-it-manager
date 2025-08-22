@@ -50,7 +50,7 @@ public partial class App : Application
 
         this.Services.GetRequiredService<IThemeService>().Apply(AppTheme.Light);
 
-        ShowSplash();
+        // ShowSplash(); // Uncomment to show splash screen
         CreateAndShowMainWindow();
     }
 
