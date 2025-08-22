@@ -346,7 +346,7 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
         List<string> parts = new();
         var current = category;
         int guard = 0;
-        while (current != null && guard < 64)
+        while (current != null && guard < MaxBreadcrumbDepth)
         {
             parts.Add(LocalizedCategoryName(current.Id.Value));
             guard++;
