@@ -90,7 +90,6 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
         }
         Breadcrumb = BuildBreadcrumb(_selectedCategoryNode?.Category);
         SelectedPolicy = null;
-    }
     private string? _lastSearch;
     private string? _searchText;
     public string? SearchText
