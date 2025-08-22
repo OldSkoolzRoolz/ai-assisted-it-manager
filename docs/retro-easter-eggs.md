@@ -39,7 +39,7 @@ Re-comment the `ShowSplash();` line and avoid pressing the key combination.
 | Chiptune Alert | Short chiptune on successful deployment |
 
 When implementing new eggs:
-1. Keep strictly opt?in with clear code comments.
+1. Keep strictly opt-in with clear code comments.
 2. Update this document.
 3. Avoid any external system dependencies.
 
