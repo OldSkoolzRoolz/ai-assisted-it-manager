@@ -2,7 +2,7 @@
 // File Name: PoliciesReadOnlyViewModel.cs
 // Author: Kyle Crowder
 // Github:  OldSkoolzRoolz
-// License: All Rights Reserved. No use without consent.
+// License: MIT License. See LICENSE file in the project root for full license information.
 // Do not remove file headers
 
 
