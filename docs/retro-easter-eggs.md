@@ -30,7 +30,6 @@ Re-comment the `ShowSplash();` line and avoid pressing the key combination.
 - Startup splash is modal (blocks until script completes). Manual splash is non-modal.
 - Logging initializes before splash so early events are captured.
 - No environment variables, registry keys, or external integration involved.
-
 ## 2. Future Ideas (Not Implemented Yet)
 | Idea | Description |
 |------|-------------|
