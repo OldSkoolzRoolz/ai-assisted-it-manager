@@ -64,6 +64,7 @@ BenchmarkDotNet.Artifacts/
 project.lock.json
 project.fragment.lock.json
 artifacts/
+<<<<<<< HEAD
 
 # Tye
 .tye/
@@ -495,4 +496,13 @@ $RECYCLE.BIN/
 /global.json
 /ITCompanion - Copy.sln.txt
 /policy-cheatsheet.md
-/Show-PolicyCategoryGraph.ps1
+=======
+*.cache/
+*.log
+/ai-assisted-it-manager.sln
+/Container.csproj
+/Container.csproj
+/global.json
+>>>>>>> 97395a4 (sln removal)
+/VSWorkspaceSettings.json
+*.DotSettings
