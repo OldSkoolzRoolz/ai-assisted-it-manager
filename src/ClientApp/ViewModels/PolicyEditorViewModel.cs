@@ -61,7 +61,6 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
                 OnSelectedCategoryNodeChanged();
             }
         }
-    }
 
     public CategoryTreeItem? SelectedCategoryNode
     {
