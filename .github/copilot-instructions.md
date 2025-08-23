@@ -5,7 +5,7 @@ These instructions are the canonical source of truth for automations working in 
 
 **Repository CODEOWNER**: @KyleC69
 
-Version: 3.1
+Version: 3.2
 Date: 2025-08-22
 ---
 
@@ -38,7 +38,7 @@ Date: 2025-08-22
     - Inject light humor or empathy when appropriate.
     - Respect the user’s time, experience, and autonomy.
 
-
+---
 
 ## 1. Repository Summary
 
@@ -129,16 +129,26 @@ ALWAYS perform these steps in a clean clone before attempting builds:
 Canonical build sequence (ALWAYS in this order after bootstrap):
 
 1. dotnet restore ITCompanion.sln
-2. dotnet build ITCompanion.sln -c Debug
-3. (Optional release) dotnet build ITCompanion.sln -c Release
+2. dotnet build ITCompanion.sln -c Debug -warnaserror /p:TreatWarningsAsErrors=true /p:AnalysisLevel=latest /p:EnforceCodeStyleInBuild=true
+3. (Optional release) dotnet build ITCompanion.sln -c Release -warnaserror /p:TreatWarningsAsErrors=true /p:AnalysisLevel=latest /p:EnforceCodeStyleInBuild=true
+4. (Analyzer formatting) dotnet format analyzers --verify-no-changes || dotnet format analyzers
 
-If build fails due to preview SDK mismatch, update Visual Studio 2022 (latest preview) and/or install matching .NET 9 preview.
+ALWAYS ensure zero warnings. If an upstream package triggers unavoidable warnings, add a targeted suppression with justification (never blanket disable ruleset globally without CODEOWNER approval).
 
-If adding a new project:
-- Create directory under src/
-- dotnet new <template> -n <ProjectName> -o src/<ProjectName>
-- dotnet sln ITCompanion.sln add src/<ProjectName>/<ProjectName>.csproj
-- Then repeat restore + build sequence.
+---
+
+## 5a. Warning / Analyzer Enforcement Policy
+
+Automation MUST:
+- Fail fast if any compiler/analyzer warning appears (treat as error).
+- Prefer code fixes over suppressions; suppress only with linked issue + rationale comment.
+- Keep .editorconfig authoritative for code style; do not inline style suppressions unless rule conflicts with generated code.
+
+Manual Workflow Quick Command (local):
+```
+dotnet clean ITCompanion.sln
+DOTNET_NOLOGO=1 dotnet build ITCompanion.sln -c Debug -warnaserror /p:TreatWarningsAsErrors=true /p:AnalysisLevel=latest /p:EnforceCodeStyleInBuild=true
+```
 
 ---
 
@@ -170,7 +180,7 @@ Standard test invocation (from README):
 Preferred verbose form (surface all results, skip build duplicates):
   dotnet test ITCompanion.sln --no-build --configuration Debug
 
-ALWAYS run dotnet build first for deterministic behavior; dotnet test will otherwise restore & build implicitly, which can mask incremental issues.
+ALWAYS run dotnet build (with -warnaserror) first for deterministic behavior; dotnet test will otherwise restore & build implicitly, which can mask incremental issues.
 
 If integration tests (e.g., DB or WMI) exist and are slow/flaky:
 - Look for traits/categories (e.g., [Category("Integration")]) and optionally filter:
@@ -187,10 +197,11 @@ Ensure new test project is referenced in solution and uses the standard test fra
 If a dotnet format or analyzers configuration (Directory.Build.props / .editorconfig) exists, enforce locally:
 
 Recommended pre-commit routine:
-1. dotnet build
+1. dotnet build -warnaserror
 2. dotnet test
-3. dotnet format (if tool is installed)
-4. (Optional) dotnet pack (only for library packaging scenarios)
+3. dotnet format analyzers --verify-no-changes
+4. dotnet format style --verify-no-changes || dotnet format style
+5. (Optional) dotnet pack (only for library packaging scenarios)
 
 ALWAYS fix analyzer warnings introduced by new code—treat warnings as future risk even if not failing CI yet.
 
@@ -206,8 +217,9 @@ Look for a project (e.g., src/ITCompanionDB or database project). Typical patter
   dotnet ef database update --project src/ITCompanionDB
 
 ALWAYS update the solution + build before generating migrations to avoid stale model issues.
+Always test migration application on a fresh local database instance to verify correctness.
+Always document migration procedures to outline steps for applying in production environments. migrations should be idempotent and reversible if possible. outlined in docs/migrations.md if it exists- create if it doesn't.
 
-If migrations not yet implemented, do NOT unilaterally introduce EF—verify architectural intent in docs/ first.
 
 ---
 
@@ -232,10 +244,15 @@ ALWAYS:
 3. Update DI registration (if a central Startup/Program or composition root exists—search for Program.cs under each host project).
 4. Add unit tests in corresponding test project before or alongside implementation.
 5. Run full validation sequence (Section 14).
+6. Ensure performance considerations (avoid blocking UI threads with heavy I/O).
+7. Respect existing abstractions; prefer extension over modification for shared logic.
 
-When modifying ADMX/ADML logic:
-- Central parser utilities likely reside in CorePolicyEngine (look for Parser, Model, or Admx* classes).
-- Keep performance in mind—avoid large synchronous UI-blocking operations; offload to background tasks if necessary.
+XML DOCUMENTATION MANDATORY:
+- Every new class, struct, interface, enum, delegate, method (public/internal/private), property, event, and field MUST include an XML documentation header (///) summarizing purpose.
+- Methods: document <summary>, each <param>, <returns> (if non-void), and <exception> tags for any thrown exceptions.
+- Properties/fields: concise intent, units/ranges if applicable.
+- Update or add docs when modifying a signature or behavior materially.
+- No PR should introduce undocumented members. Treat missing docs as a build blocker (enforced manually until automated rule added).
 
 ---
 
@@ -266,10 +283,10 @@ ALWAYS execute in this exact order from a clean working tree (no uncommitted cha
 2. git switch -c feature/<short-descriptor> (or rebase from latest master before final push)
 3. pwsh onboarding/workspace-presets.ps1            (ensures local prerequisites are refreshed)
 4. dotnet restore ITCompanion.sln
-5. dotnet build ITCompanion.sln -c Debug
+5. dotnet build ITCompanion.sln -c Debug -warnaserror /p:TreatWarningsAsErrors=true /p:AnalysisLevel=latest /p:EnforceCodeStyleInBuild=true
 6. dotnet test ITCompanion.sln --no-build
-7. (If format tooling present) dotnet format --verify-no-changes
-   - If changes needed: dotnet format (if formatting changes affect test files, re-run tests)
+7. dotnet format analyzers --verify-no-changes || dotnet format analyzers
+   - If formatting changes needed: dotnet format style (if formatting changes affect test files, re-run tests)
 8. (If DB changes) apply migrations locally; verify startup of affected host project
 9. Run primary executable (e.g., ClientApp) to smoke test
 10. (If adding new API/service endpoints) exercise minimal functional path
@@ -280,16 +297,16 @@ ALWAYS execute in this exact order from a clean working tree (no uncommitted cha
     - If the change is breaking, include a footer in the body: BREAKING CHANGE: <description of breaking change>
 13. git push -u origin feature/<short-descriptor>
 
-NEVER skip steps 4–6. ALWAYS re-run steps 5–7 after resolving merge conflicts.
+NEVER skip steps 4–7. ALWAYS re-run steps 5–7 after resolving merge conflicts.
 
 ---
 
 ## 15. CI / Workflows (General Expectations)
 
 Even though specific workflow YAML files are not enumerated here, assume CI will:
-- Restore + build solution
+- Restore + build solution with -warnaserror
 - Run unit tests
-- Possibly enforce formatting/analyzers
+- Enforce analyzers (AnalysisLevel=latest) and style (EnforceCodeStyleInBuild=true)
 Design changes so they pass non-interactively (no UI prompts). If you add steps requiring secrets or services, gate them behind conditionals (e.g., only if env var present).
 
 ---
@@ -304,6 +321,9 @@ Mitigation: Provide fallback localdb connection string in development config.
 
 Pitfall: Adding new project but forgetting solution inclusion → Tests/build skip code.
 Mitigation: dotnet sln ITCompanion.sln list (verify presence) before pushing.
+
+Pitfall: Ignoring warnings locally → CI failure with -warnaserror.
+Mitigation: Always run local build command with flags from Section 5.
 
 Pitfall: Long restore times after minor edits.
 Mitigation: Avoid unnecessary global package version changes; keep restore deterministic.
@@ -364,7 +384,7 @@ git clone https://github.com/OldSkoolzRoolz/ai-assisted-it-manager.git
 cd ai-assisted-it-manager
 pwsh onboarding/workspace-presets.ps1
 dotnet restore ITCompanion.sln
-dotnet build ITCompanion.sln -c Debug
+dotnet build ITCompanion.sln -c Debug -warnaserror /p:TreatWarningsAsErrors=true /p:AnalysisLevel=latest /p:EnforceCodeStyleInBuild=true
 dotnet test ITCompanion.sln --no-build
 dotnet run --project src/ClientApp/ClientApp.csproj
 ```
@@ -404,11 +424,13 @@ If any path differs, list src/ to identify correct project and adjust only that 
 ## 24. Quality Bar
 
 A change is "ready" ONLY if:
-- Builds cleanly (no new warnings if avoidable).
+- Builds cleanly (no warnings: enforced by -warnaserror / TreatWarningsAsErrors=true).
 - All tests pass (and new tests cover new logic).
 - No hard-coded environment-only paths or credentials.
 - UI or service still starts successfully after change.
 - Documentation changes include manifest updates and maintain technical accuracy.
+- Analyzer + code style passes: dotnet format analyzers/style --verify-no-changes.
+- XML documentation headers exist for all new or modified members (see Section 11).
 
 ---
 

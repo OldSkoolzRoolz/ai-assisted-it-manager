@@ -2,7 +2,7 @@
 // File Name: RelayCommand.cs
 // Author: Kyle Crowder
 // Github:  OldSkoolzRoolz
-// License: MIT
+// License: All Rights Reserved. No use without consent.
 // Do not remove file headers
 
 
@@ -24,8 +24,8 @@ public class RelayCommand : ICommand
 
     public RelayCommand(Func<object?, Task> execute, Func<object?, bool>? canExecute = null)
     {
-        _executeAsync = execute ?? throw new ArgumentNullException(nameof(execute));
-        _canExecute = canExecute;
+        this._executeAsync = execute ?? throw new ArgumentNullException(nameof(execute));
+        this._canExecute = canExecute;
     }
 
 
@@ -34,8 +34,8 @@ public class RelayCommand : ICommand
 
     public RelayCommand(Action<object?> execute, Func<object?, bool>? canExecute = null)
     {
-        _executeSync = execute ?? throw new ArgumentNullException(nameof(execute));
-        _canExecute = canExecute;
+        this._executeSync = execute ?? throw new ArgumentNullException(nameof(execute));
+        this._canExecute = canExecute;
     }
 
 
@@ -44,7 +44,7 @@ public class RelayCommand : ICommand
 
     public bool CanExecute(object? parameter)
     {
-        return _canExecute?.Invoke(parameter) ?? true;
+        return this._canExecute?.Invoke(parameter) ?? true;
     }
 
 
@@ -53,14 +53,10 @@ public class RelayCommand : ICommand
 
     public async void Execute(object? parameter)
     {
-        if (_executeAsync != null)
-        {
-            await _executeAsync(parameter).ConfigureAwait(false);
-        }
+        if (this._executeAsync != null)
+            await this._executeAsync(parameter).ConfigureAwait(false);
         else
-        {
-            _executeSync?.Invoke(parameter);
-        }
+            this._executeSync?.Invoke(parameter);
     }
 
 
@@ -75,6 +71,6 @@ public class RelayCommand : ICommand
 
     public void RaiseCanExecuteChanged()
     {
-        CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+        this.CanExecuteChanged?.Invoke(this, EventArgs.Empty);
     }
 }

@@ -2,13 +2,13 @@
 // File Name: RegOps.cs
 // Author: Kyle Crowder
 // Github:  OldSkoolzRoolz
-// License: MIT
+// License: All Rights Reserved
 // Do not remove file headers
 
 namespace KC.ITCompanion.CorePolicyEngine.AdminTemplates;
 
 public sealed record PolicyEvaluationInput(
-    Policy Policy,
+    AdminPolicy Policy,
     PolicyState State,
     IReadOnlyDictionary<ElementId, object?> ElementValues
 );

@@ -16,12 +16,13 @@
     <PackageTags>AI;IT;enterprise;group-policy;policy-manager</PackageTags>
     <PackageReleaseNotes>RELEASE.md</PackageReleaseNotes>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <AnalysisLevel>latest</AnalysisLevel>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
     <EnableDefaultEmbeddedResourceItems>false</EnableDefaultEmbeddedResourceItems>
     <!-- Bind external manifest with requireAdministrator -->
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <!-- Disable MSIX during classic elevation debugging -->
     <EnableMsixTooling>false</EnableMsixTooling>
+    <EnforceCodeStyleInBuild>True</EnforceCodeStyleInBuild>
   </PropertyGroup>
 
   <ItemGroup>
@@ -55,9 +56,9 @@
   <ItemGroup>
     <ProjectReference Include="..\CorePolicyEngine\CorePolicyEngine.csproj" />
     <ProjectReference Include="..\Security\Security.csproj" />
+    <ProjectReference Include="..\ClientShared\ClientShared.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Logging\" />
     <Folder Include="Resources\" />
   </ItemGroup>
 </Project>

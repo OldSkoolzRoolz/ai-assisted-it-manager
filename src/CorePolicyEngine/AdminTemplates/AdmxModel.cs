@@ -2,8 +2,9 @@
 // File Name: AdmxModel.cs
 // Author: Kyle Crowder
 // Github:  OldSkoolzRoolz
-// License: MIT
+// License: All Rights Reserved
 // Do not remove file headers
+
 
 namespace KC.ITCompanion.CorePolicyEngine.AdminTemplates;
 
@@ -13,7 +14,7 @@ public sealed record AdmxDocument(
     IReadOnlyList<NamespaceBinding> RequiredNamespaces,
     IReadOnlyList<Category> Categories,
     IReadOnlyList<SupportDefinition> Support,
-    IReadOnlyList<Policy> Policies,
+    IReadOnlyList<AdminPolicy> Policies,
     DocumentLineage Lineage);
 
 public sealed record AdmxHeader(
@@ -59,7 +60,7 @@ public enum PolicyClass
     Both // Added to align with official ADMX schema PolicyClass enumeration
 }
 
-public sealed record Policy(
+public sealed record AdminPolicy(
     PolicyKey Key,
     PolicyClass Class,
     LocalizedRef DisplayName,
@@ -96,11 +97,11 @@ public enum PolicyDefaultState
 // Registry mapping primitives
 public enum RegistryHive
 {
-    HKEY_LOCAL_MACHINE,
-    HKEY_CURRENT_USER,
-    HKEY_CLASSES_ROOT,
-    HKEY_USERS,
-    HKEY_CURRENT_CONFIG
+    LocalMachine,
+    CurrentUser,
+    ClassesRoot,
+    Users,
+    CurrentConfig
 }
 
 public enum RegistryValueType

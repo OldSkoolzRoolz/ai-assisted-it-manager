@@ -2,35 +2,25 @@
 // File Name: App.xaml.cs
 // Author: Kyle Crowder
 // Github:  OldSkoolzRoolz
-// License: MIT License. See LICENSE file in the project root for full license text.
+// License: All Rights Reserved. No use without consent.
 // Do not remove file headers
-
 
 using KC.ITCompanion.ClientApp.Services;
 using KC.ITCompanion.ClientApp.Views;
-using KC.ITCompanion.CorePersistence.Sql;
 using KC.ITCompanion.CorePolicyEngine.Models;
 using KC.ITCompanion.CorePolicyEngine.Parsing;
 using KC.ITCompanion.CorePolicyEngine.Storage;
-using KC.ITCompanion.Security;
-
+using KC.ITCompanion.CorePolicyEngine.Storage.Sql;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-
-
-// log ingestion repos live in CorePolicyEngine.Storage.Sql
-
+using Security;
 
 namespace KC.ITCompanion.ClientApp;
 
-
 public partial class App : Application
 {
+    private static readonly string[] DefaultAccessGroups = ["Administrators"]; // CA1861 fixed
     public ServiceProvider Services { get; private set; } = null!;
-
-
-
-
 
     protected override async void OnStartup(StartupEventArgs e)
     {
@@ -38,7 +28,7 @@ public partial class App : Application
         this.Services = ConfigureServices();
 
         ILogger<App> startupLogger = this.Services.GetRequiredService<ILogger<App>>();
-        startupLogger.LogInformation("ClientApp starting up at {StartTimeUtc}", DateTime.UtcNow);
+        Logger.LogClientappStartingUpAtStarttimeutc(startupLogger, DateTime.UtcNow);
 
         await InitializeAuditStoreAsync(startupLogger).ConfigureAwait(false);
         var dynamicGroups = await ResolveDynamicGroupsAsync(startupLogger).ConfigureAwait(false);
@@ -48,29 +38,14 @@ public partial class App : Application
             return;
         }
 
-        this.Services.GetRequiredService<IThemeService>().Apply(AppTheme.Light);
+        var themeSvc = this.Services.GetRequiredService<IThemeService>();
+        themeSvc.Initialize(); // auto apply system theme
 
         // ShowSplash(); // Uncomment to show splash screen
         CreateAndShowMainWindow();
     }
 
-
-
-
-
-    /// <summary>
-    ///     Configures and registers application services into a dependency injection container.
-    /// </summary>
-    /// <remarks>
-    ///     This method sets up various services required by the application, including logging,
-    ///     view models, repositories, and other core services. It ensures that all dependencies
-    ///     are properly registered and available for use throughout the application.
-    /// </remarks>
-    /// <returns>
-    ///     A <see cref="Microsoft.Extensions.DependencyInjection.ServiceProvider" /> instance
-    ///     containing the configured services.
-    /// </returns>
-    private ServiceProvider ConfigureServices()
+    private static ServiceProvider ConfigureServices()
     {
         var sc = new ServiceCollection();
 
@@ -95,8 +70,10 @@ public partial class App : Application
         sc.AddSingleton<ISqlConnectionFactory, SqlConnectionFactory>();
         sc.AddSingleton<IPolicyDefinitionRepository, PolicyDefinitionRepository>();
         sc.AddSingleton<IPolicyGroupRepository, PolicyGroupRepository>();
-        sc.AddSingleton<IClientAccessPolicy>(sp => new GroupMembershipAccessPolicy(new[] { "Administrators" }, sp.GetService<ILogger<GroupMembershipAccessPolicy>>()));
-        sc.AddSingleton(typeof(IClientAccessEvaluator), typeof(ClientAccessEvaluator));
+        sc.AddSingleton<IClientAccessPolicy>(sp =>
+            new GroupMembershipAccessPolicy(DefaultAccessGroups,
+                sp.GetService<ILogger<GroupMembershipAccessPolicy>>()));
+        sc.AddSingleton<IClientAccessEvaluator, ClientAccessEvaluator>();
         sc.AddSingleton<IThemeService, ThemeService>();
         sc.AddSingleton<ILogSourceRepository, LogSourceRepository>();
         sc.AddSingleton<ILogIngestionCursorRepository, LogIngestionCursorRepository>();
@@ -104,10 +81,6 @@ public partial class App : Application
 
         return sc.BuildServiceProvider();
     }
-
-
-
-
 
     #region Startup Steps
 
@@ -121,13 +94,9 @@ public partial class App : Application
         }
         catch (Exception ex)
         {
-            logger.LogWarning(ex, "Audit store initialization failed");
+            Logger.LogAuditStoreInitializationFailed(logger, ex);
         }
     }
-
-
-
-
 
     private async Task<string[]> ResolveDynamicGroupsAsync(ILogger logger)
     {
@@ -144,31 +113,24 @@ public partial class App : Application
         }
         catch (Exception ex)
         {
-            logger.LogWarning(ex, "Behavior policy store initialization failed; using default access groups");
+            Logger.LogBehaviorPolicyStoreInitializationFailedUsingDefaultAccessGroups(logger, ex);
         }
 
         return dynamicGroups;
     }
 
-
-
-
-
     private async Task<bool> VerifyAccessAsync(string[] dynamicGroups, ILogger logger)
     {
-        var accessPolicy = new GroupMembershipAccessPolicy(dynamicGroups, Services.GetService<ILogger<GroupMembershipAccessPolicy>>());
+        var accessPolicy = new GroupMembershipAccessPolicy(dynamicGroups,
+            this.Services.GetService<ILogger<GroupMembershipAccessPolicy>>());
         var evaluator = new ClientAccessEvaluator(accessPolicy);
         if (evaluator.CheckAccess(out var denialReason)) return true;
 
-        logger.LogWarning("Access denied starting client: {Reason}", denialReason);
+        Logger.LogAccessDeniedStartingClientReason(logger, denialReason ?? "unknown"); // CS8604 fixed
         await AuditAccessDeniedAsync(denialReason);
         MessageBox.Show(denialReason ?? "Access denied", "IT Companion", MessageBoxButton.OK, MessageBoxImage.Error);
         return false;
     }
-
-
-
-
 
     private async Task AuditAccessDeniedAsync(string? denialReason)
     {
@@ -178,24 +140,14 @@ public partial class App : Application
         {
             await writer.AccessDeniedAsync(denialReason ?? "unknown", CancellationToken.None).ConfigureAwait(false);
         }
-        catch
-        {
-        }
+        catch { }
     }
 
-
-
-
-
-    private void ShowSplash()
+    private static void ShowSplash()
     {
         var splash = new Splash();
         splash.ShowDialog();
     }
-
-
-
-
 
     private void CreateAndShowMainWindow()
     {

@@ -10,22 +10,9 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <!-- Active theme (default Light). Swap Source at runtime for Dark / HighContrast -->
-                <ResourceDictionary Source="Themes/Colors.xaml" />
-                <ResourceDictionary Source="Themes/Brushes.xaml" />
-                <ResourceDictionary Source="Themes/Spacing.xaml" />
-                <ResourceDictionary Source="Themes/Typography.xaml" />
-                <ResourceDictionary Source="Themes/Controls.Buttons.xaml" />
-                <ResourceDictionary Source="Themes/Controls.Text.xaml" />
-                <ResourceDictionary Source="Themes/Window.xaml" />
-                <ResourceDictionary Source="Themes/Generic.xaml" />
-                <ResourceDictionary Source="Themes/ThemeManager.xaml" />
+                <!-- Current theme dictionary (replaced at runtime) -->
+                <ResourceDictionary Source="Themes/Theme.Light.xaml" />
             </ResourceDictionary.MergedDictionaries>
-
-            <!-- Compatibility aliases for legacy keys (map to new token styles) -->
-            <Style x:Key="Action" TargetType="Button" BasedOn="{StaticResource Control.Button.Base}" />
-            <Style x:Key="PrimaryAction" TargetType="Button" BasedOn="{StaticResource Control.Button.Primary}" />
-            <Style x:Key="MyLabel" TargetType="TextBlock" BasedOn="{StaticResource Control.Text.Label}" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

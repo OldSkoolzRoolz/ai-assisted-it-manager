@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "ITCompanionClient (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "ITCompanionClient (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}

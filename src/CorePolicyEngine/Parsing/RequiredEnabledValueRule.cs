@@ -2,7 +2,7 @@
 // File Name: RequiredEnabledValueRule.cs
 // Author: Kyle Crowder
 // Github:  OldSkoolzRoolz
-// License: MIT
+// License: All Rights Reserved
 // Do not remove file headers
 
 namespace KC.ITCompanion.CorePolicyEngine.Parsing;

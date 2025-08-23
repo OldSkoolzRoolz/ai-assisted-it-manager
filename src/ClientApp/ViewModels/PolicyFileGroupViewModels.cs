@@ -2,53 +2,150 @@
 // File Name: PolicyFileGroupViewModels.cs
 // Author: Kyle Crowder
 // Github:  OldSkoolzRoolz
-// License: MIT
+// License: All Rights Reserved. No use without consent.
 // Do not remove file headers
+
 
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+
 using KC.ITCompanion.CorePolicyEngine.AdminTemplates;
 
+
 namespace KC.ITCompanion.ClientApp.ViewModels;
+
 
 // Wrapper for individual policy (allows drift flag etc.)
 public sealed class PolicyItemViewModel : INotifyPropertyChanged
 {
-    public PolicySummary Summary { get; }
     private bool _isDrifted;
-    public bool IsDrifted { get => _isDrifted; set { if (_isDrifted != value) { _isDrifted = value; OnPropertyChanged(); } } }
 
-    public PolicyItemViewModel(PolicySummary summary) => Summary = summary;
+
+
+
+
+    public PolicyItemViewModel(PolicySummary summary)
+    {
+        this.Summary = summary;
+    }
+
+
+
+
+
+    public PolicySummary Summary { get; }
+
+    public bool IsDrifted
+    {
+        get => this._isDrifted;
+        set
+        {
+            if (this._isDrifted != value)
+            {
+                this._isDrifted = value;
+                OnPropertyChanged();
+            }
+        }
+    }
 
     public event PropertyChangedEventHandler? PropertyChanged;
-    private void OnPropertyChanged([CallerMemberName] string? name = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+
+
+
+
+
+    private void OnPropertyChanged([CallerMemberName] string? name = null)
+    {
+        this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+    }
 }
+
+
 
 // Group of policies sourced from one ADMX file
 public sealed class PolicyFileGroup : INotifyPropertyChanged
 {
+    private int _driftCount;
+
+    private bool _hasDrift;
+
+    private bool _isExpanded;
+
+
+
+
+
+    public PolicyFileGroup(string fileName, string fullPath)
+    {
+        this.FileName = fileName;
+        this.FullPath = fullPath;
+    }
+
+
+
+
+
     public string FileName { get; }
     public string FullPath { get; }
     public ObservableCollection<PolicyItemViewModel> Policies { get; } = [];
 
-    private bool _isExpanded;
-    public bool IsExpanded { get => _isExpanded; set { if (_isExpanded != value) { _isExpanded = value; OnPropertyChanged(); } } }
-
-    private bool _hasDrift;
-    public bool HasDrift { get => _hasDrift; set { if (_hasDrift != value) { _hasDrift = value; OnPropertyChanged(); } } }
-
-    private int _driftCount;
-    public int DriftCount { get => _driftCount; set { if (_driftCount != value) { _driftCount = value; OnPropertyChanged(); } } }
-
-    public PolicyFileGroup(string fileName, string fullPath)
+    public bool IsExpanded
     {
-        FileName = fileName;
-        FullPath = fullPath;
+        get => this._isExpanded;
+        set
+        {
+            if (this._isExpanded != value)
+            {
+                this._isExpanded = value;
+                OnPropertyChanged();
+            }
+        }
     }
 
-    public override string ToString() => FileName;
+    public bool HasDrift
+    {
+        get => this._hasDrift;
+        set
+        {
+            if (this._hasDrift != value)
+            {
+                this._hasDrift = value;
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public int DriftCount
+    {
+        get => this._driftCount;
+        set
+        {
+            if (this._driftCount != value)
+            {
+                this._driftCount = value;
+                OnPropertyChanged();
+            }
+        }
+    }
 
     public event PropertyChangedEventHandler? PropertyChanged;
-    private void OnPropertyChanged([CallerMemberName] string? name = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+
+
+
+
+
+    public override string ToString()
+    {
+        return this.FileName;
+    }
+
+
+
+
+
+    private void OnPropertyChanged([CallerMemberName] string? name = null)
+    {
+        this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+    }
 }
