@@ -5,6 +5,10 @@
 // License: All Rights Reserved
 // Do not remove file headers
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
 namespace KC.ITCompanion.CorePolicyEngine.AdminTemplates;
 
 public sealed record PolicyEvaluationInput(

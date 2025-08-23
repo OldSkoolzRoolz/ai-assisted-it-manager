@@ -2,7 +2,7 @@
 // File Name: PolicyEditorViewModel.cs
 // Author: Kyle Crowder
 // Github:  OldSkoolzRoolz
-// License: MIT
+// License: All Rights Reserved. No use without consent.
 // Do not remove file headers
 
 using System;
@@ -19,22 +19,23 @@ using KC.ITCompanion.CorePolicyEngine;
 using KC.ITCompanion.CorePolicyEngine.AdminTemplates;
 using KC.ITCompanion.CorePolicyEngine.Parsing;
 using KC.ITCompanion.CorePolicyEngine.Storage;
+using KC.ITCompanion.CorePolicyEngine.Storage.Sql;
 using Microsoft.Extensions.Logging;
 
 namespace KC.ITCompanion.ClientShared;
 
 /// <summary>
-/// ViewModel orchestrating policy catalog loading, filtering, navigation and selection.
-/// Framework-neutral (no direct WPF / WinUI references) – UI hosts supply dispatcher & prompt services.
+///     ViewModel orchestrating policy catalog loading, filtering, navigation and selection.
+///     Framework-neutral (no direct WPF / WinUI references) – UI hosts supply dispatcher & prompt services.
 /// </summary>
 public class PolicyEditorViewModel : INotifyPropertyChanged
 {
     private const int MaxBreadcrumbDepth = 32;
     private readonly IAuditWriter _audit;
+    private readonly IUiDispatcher _dispatcher;
     private readonly IAdminTemplateLoader _loader;
     private readonly ILogger<PolicyEditorViewModel> _logger;
     private readonly IPolicyGroupRepository? _policyGroups;
-    private readonly IUiDispatcher _dispatcher;
     private readonly IMessagePromptService? _prompt;
 
     private string? _breadcrumb;
@@ -44,6 +45,8 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
     private string? _lastSearch;
     private string? _searchText;
     private PolicySummary? _selectedPolicy;
+    private string? _categoryFilterId;
+    private Dictionary<string, string>? _policyCategoryIdMap;
 
     public PolicyEditorViewModel(
         IAdminTemplateLoader loader,
@@ -64,7 +67,7 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
         RefreshPolicyGroupsCommand = new RelayCommand(async _ => await LoadPolicyGroupsAsync(), _ => _policyGroups != null);
         OpenSearchDialogCommand = new RelayCommand(_ => OnOpenSearchDialog(), _ => Catalog != null);
         OpenPolicyDetailCommand = new RelayCommand(p => OnOpenPolicyDetail(p as PolicyGridRow), p => p is PolicyGridRow);
-        _logger.Initialized();
+        _logger.LogInformation("PolicyEditor initialized");
     }
 
     public ObservableCollection<PolicySummary> Policies { get; } = new();
@@ -75,6 +78,7 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
     public ObservableCollection<CategoryNavLevel> CategoryLevels { get; } = new();
     public ObservableCollection<PolicyGridRow> CategoryPolicyRows { get; } = new();
     public PolicyGridColumnVisibility ColumnVisibility { get; } = new();
+    public ObservableCollection<CategoryListItem> CategoryListItems { get; } = new();
 
     public AdminTemplateCatalog? Catalog
     {
@@ -107,9 +111,15 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
                 OnPropertyChanged();
                 ApplySearchFilter(_searchText);
                 RebuildNavigation();
-                _logger.SearchFilterApplied(_searchText ?? string.Empty);
+                _logger.LogDebug("Search filter applied '{Query}'", _searchText ?? string.Empty);
             }
         }
+    }
+
+    public string? CategoryFilterId
+    {
+        get => _categoryFilterId;
+        private set { if (_categoryFilterId != value) { _categoryFilterId = value; OnPropertyChanged(); ReapplyFilters(); } }
     }
 
     public ICommand LoadPoliciesCommand { get; }
@@ -129,14 +139,14 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
         if (_policyGroups == null) return;
         try
         {
-            IReadOnlyList<PolicyGroupDto> groups = await _policyGroups.GetGroupsAsync(CancellationToken.None);
+            IReadOnlyList<PolicyGroupDto> groups = await _policyGroups.GetGroupsAsync(CancellationToken.None).ConfigureAwait(false);
             _dispatcher.Post(() =>
             {
                 PolicyGroups.Clear();
                 foreach (var g in groups) PolicyGroups.Add(g);
             });
         }
-        catch (Exception ex) { PolicyEditorViewModelErrorLogs.LoadPolicyGroupsFailed(_logger, ex); }
+        catch (Exception ex) { _logger.LogError(ex, "Failed loading policy groups"); }
     }
 
     private async Task LoadDefaultSubsetAsync()
@@ -146,17 +156,72 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
     {
         var sw = System.Diagnostics.Stopwatch.StartNew();
         Result<AdminTemplateCatalog> result;
-        try { result = await _loader.LoadLocalCatalogAsync(languageTag, 50, token); }
-        catch (Exception ex) { PolicyEditorViewModelErrorLogs.CatalogUnexpectedError(_logger, ex, languageTag); return; }
+        try { result = await _loader.LoadLocalCatalogAsync(languageTag, 50, token).ConfigureAwait(false); }
+        catch (Exception ex) { _logger.LogError(ex, "Unexpected exception loading catalog language {LanguageTag}", languageTag); return; }
         sw.Stop();
-        if (!result.Success || result.Value is null) { _logger.CatalogLoadFailed(languageTag); return; }
+        if (!result.Success || result.Value is null) { _logger.LogWarning("Catalog load failed for language {LanguageTag}", languageTag); return; }
         Catalog = result.Value;
         IndexCategories();
+        _policyCategoryIdMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         Policies.Clear();
-        foreach (var s in Catalog.Summaries.OrderBy(s => s.DisplayName, StringComparer.OrdinalIgnoreCase)) Policies.Add(s);
+        foreach (var s in Catalog.Summaries.OrderBy(s => s.DisplayName, StringComparer.OrdinalIgnoreCase))
+        {
+            Policies.Add(s);
+        }
+        // build key->category id map from documents
+        foreach (var pol in Catalog.AdmxDocuments.SelectMany(d => d.Policies))
+        {
+            try
+            {
+                var catId = pol.Category.Id.Value; // CategoryId underlying string
+                if (!string.IsNullOrWhiteSpace(catId))
+                    _policyCategoryIdMap[pol.Key.Name] = catId;
+            }
+            catch { }
+        }
         FilteredPolicies.Clear(); foreach (var p in Policies) FilteredPolicies.Add(p);
         BuildFileGroups(); RebuildNavigation(); Breadcrumb = null;
-        _logger.CatalogLoaded(languageTag, Policies.Count, sw.ElapsedMilliseconds);
+        _logger.LogInformation("Catalog loaded language {LanguageTag} policies={PolicyCount} in {ElapsedMs}ms", languageTag, Policies.Count, sw.ElapsedMilliseconds);
+    }
+
+    public void SetCategoryFilter(string? categoryId)
+    { CategoryFilterId = string.IsNullOrWhiteSpace(categoryId) ? null : categoryId; }
+
+    public void ApplySearchFilter(string? query)
+    {
+        _lastSearch = query;
+        ReapplyFilters();
+    }
+
+    private void ReapplyFilters()
+    {
+        if (Catalog == null) { FilteredPolicies.Clear(); return; }
+        IEnumerable<PolicySummary> source = Policies;
+        if (!string.IsNullOrWhiteSpace(_lastSearch))
+        {
+            var q = _lastSearch.Trim();
+            source = source.Where(p => (!string.IsNullOrEmpty(p.DisplayName) && p.DisplayName.Contains(q, StringComparison.OrdinalIgnoreCase)) ||
+                                       p.Key.Name.Contains(q, StringComparison.OrdinalIgnoreCase) ||
+                                       (!string.IsNullOrEmpty(p.CategoryPath) && p.CategoryPath.Contains(q, StringComparison.OrdinalIgnoreCase)));
+        }
+        if (!string.IsNullOrWhiteSpace(CategoryFilterId) && _categoryIndex != null && _policyCategoryIdMap != null)
+        {
+            var targetId = CategoryFilterId;
+            var allowed = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            if (_categoryIndex.TryGetValue(targetId, out var targetCat)) CollectCategoryAndChildren(targetCat, allowed);
+            source = source.Where(p => _policyCategoryIdMap.TryGetValue(p.Key.Name, out var catId) && allowed.Contains(catId));
+        }
+        FilteredPolicies.Clear(); foreach (var p in source) FilteredPolicies.Add(p);
+        UpdateGroupsForFilter();
+        UpdatePolicyGridFromNavigation();
+    }
+
+    private void CollectCategoryAndChildren(Category cat, HashSet<string> set)
+    {
+        if (set.Contains(cat.Id.Value)) return; set.Add(cat.Id.Value);
+        if (Catalog == null) return;
+        foreach (var child in Catalog.AdmxDocuments.SelectMany(d => d.Categories).Where(c => c.Parent.HasValue && c.Parent.Value.Id.Value == cat.Id.Value))
+            CollectCategoryAndChildren(child, set);
     }
 
     private void IndexCategories()
@@ -175,24 +240,12 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
                 var token = cat.DisplayName.Id.Value;
                 _categoryDisplayMap[cat.Id.Value] = resourceStrings.TryGetValue(token, out var display) ? display : cat.Id.Value;
             }
-    }
-
-    public void ApplySearchFilter(string? query)
-    {
-        _lastSearch = query;
-        if (Catalog == null) { FilteredPolicies.Clear(); return; }
-        FilteredPolicies.Clear();
-        IEnumerable<PolicySummary> source = Policies;
-        if (!string.IsNullOrWhiteSpace(query))
-        {
-            var q = query.Trim();
-            source = source.Where(p => (!string.IsNullOrEmpty(p.DisplayName) && p.DisplayName.Contains(q, StringComparison.OrdinalIgnoreCase)) ||
-                                       p.Key.Name.Contains(q, StringComparison.OrdinalIgnoreCase) ||
-                                       (!string.IsNullOrEmpty(p.CategoryPath) && p.CategoryPath.Contains(q, StringComparison.OrdinalIgnoreCase)));
-        }
-        foreach (var p in source) FilteredPolicies.Add(p);
-        UpdateGroupsForFilter();
-        UpdatePolicyGridFromNavigation();
+        // Populate flat category list for navigation pane
+        CategoryListItems.Clear();
+        var roots = Catalog.AdmxDocuments.SelectMany(d => d.Categories).Where(c => c.Parent is null)
+            .OrderBy(c => LocalizedCategoryName(c.Id.Value), StringComparer.OrdinalIgnoreCase);
+        foreach (var root in roots)
+            CategoryListItems.Add(new CategoryListItem(root.Id.Value, LocalizedCategoryName(root.Id.Value)));
     }
 
     private void BuildFileGroups()
@@ -314,15 +367,15 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
         SelectedPolicySettings.Clear();
         if (Catalog == null || SelectedPolicy == null) return;
         var policy = Catalog.AdmxDocuments.SelectMany(d => d.Policies).FirstOrDefault(p => p.Key.Name == SelectedPolicy.Key.Name);
-        if (policy == null) { PolicyEditorViewModelErrorLogs.SelectedPolicyMissing(_logger, SelectedPolicy.Key.Name); return; }
+        if (policy == null) { _logger.LogWarning("Selected policy key {PolicyKey} not found in catalog documents", SelectedPolicy.Key.Name); return; }
         foreach (var element in policy.Elements) SelectedPolicySettings.Add(new PolicySettingViewModel(policy, element));
-        _logger.PolicySelected(SelectedPolicy.Key.Name, SelectedPolicySettings.Count);
-        try { await _audit.PolicySelectedAsync(SelectedPolicy.Key.Name); } catch { }
+        _logger.LogInformation("Policy selected {PolicyKey} settings={SettingCount}", SelectedPolicy.Key.Name, SelectedPolicySettings.Count);
+        try { await _audit.PolicySelectedAsync(SelectedPolicy.Key.Name).ConfigureAwait(false); } catch { }
     }
 
-    private void OnOpenSearchDialog()
+    private static void OnOpenSearchDialog()
     {
-        // Intentionally blank – host will provide dialog orchestration via command or event later.
+        // Host app can implement search dialog.
     }
 
     private void OnOpenPolicyDetail(PolicyGridRow? row)
@@ -372,4 +425,6 @@ public sealed class PolicyGridRow
     public PolicySummary Summary { get; init; } = null!;
 }
 
-#endregion
+public sealed record CategoryListItem(string Id, string Name);
+
+#endregion#endregion

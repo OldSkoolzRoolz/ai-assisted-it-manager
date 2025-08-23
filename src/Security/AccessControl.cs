@@ -6,10 +6,14 @@
 // Do not remove file headers
 
 
+using System.Security;
 using System.Security.Principal;
-using System.Security; // for SecurityException
+
 using Microsoft.Extensions.Logging;
+
 using Security.Logging;
+// for SecurityException
+
 
 namespace Security;
 
@@ -64,7 +68,7 @@ public sealed class GroupMembershipAccessPolicy : IClientAccessPolicy
             this._allowedGroups.Add("Administrators");
         if (this._allowedGroups.Contains("BUILTIN\\Administrators") && !this._allowedGroups.Contains("Administrators"))
             this._allowedGroups.Add("Administrators");
-        _logger?.AccessPolicyInitialized(string.Join(';', this._allowedGroups), this._allowAny);
+        this._logger?.AccessPolicyInitialized(string.Join(';', this._allowedGroups), this._allowAny);
     }
 
 
