@@ -11,13 +11,12 @@
     <UseWinUI>true</UseWinUI>
     <EnableMsixTooling>true</EnableMsixTooling>
     <Nullable>enable</Nullable>
-    <!-- Temporarily relaxed analyzers during port -->
-    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-    <EnableNETAnalyzers>false</EnableNETAnalyzers>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <EnableDefaultPageItems>true</EnableDefaultPageItems>
   </PropertyGroup>
-  <ItemGroup>
-    <Page Remove="Controls\PolicyDetailDialog.xaml" />
-  </ItemGroup>
   <ItemGroup>
     <Content Include="Assets\SplashScreen.scale-200.png" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />
@@ -39,11 +38,5 @@
   <ItemGroup>
     <ProjectReference Include="..\CorePolicyEngine\CorePolicyEngine.csproj" />
     <ProjectReference Include="..\ClientShared\ClientShared.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Controls\PolicyDetailDialog.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </None>
   </ItemGroup>
 </Project>

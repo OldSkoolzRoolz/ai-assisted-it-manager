@@ -4,27 +4,102 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:local="using:ITCompanionClient.Controls"
     mc:Ignorable="d">
-    <Grid x:Name="RootGrid" RowSpacing="8" Padding="12">
+    <UserControl.Resources>
+        <local:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+        <DataTemplate x:Key="PolicyRowTemplate">
+            <Grid ColumnSpacing="12" Padding="4" MinHeight="36">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <StackPanel x:Name="NamePanel" Spacing="2">
+                    <TextBlock Text="{Binding DisplayName}" />
+                    <TextBlock Text="{Binding Key.Name}" FontSize="12" Opacity="0.6" />
+                </StackPanel>
+                <TextBlock x:Name="CategoryPanel" Grid.Column="1" Text="{Binding CategoryPath}" TextTrimming="CharacterEllipsis" />
+                <Button Grid.Column="2" Content="Open" Tag="{Binding}" Click="OnOpenPolicy" HorizontalAlignment="Right" />
+            </Grid>
+        </DataTemplate>
+    </UserControl.Resources>
+    <Grid RowSpacing="8" Padding="12">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <StackPanel Orientation="Horizontal" Spacing="8">
-            <TextBox x:Name="SearchBox" Width="280" PlaceholderText="Search policies..." TextChanged="OnSearchChanged" />
-            <ProgressRing x:Name="LoadingRing" IsActive="False" Width="32" Height="32" />
-            <TextBlock x:Name="ErrorText" Foreground="DarkRed" Visibility="Collapsed" />
-        </StackPanel>
-        <ListView x:Name="PoliciesList" Grid.Row="1" IsItemClickEnabled="True" ItemClick="OnItemClick">
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel Spacing="2" Padding="4">
-                        <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" />
-                        <TextBlock Text="{Binding Key.Name}" FontSize="12" Opacity="0.7" />
-                        <TextBlock Text="{Binding CategoryPath}" FontSize="12" Opacity="0.7" />
-                    </StackPanel>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
+        <InfoBar x:Name="ActionInfoBar" Grid.Row="0" IsOpen="False" Severity="Informational" />
+        <CommandBar Grid.Row="1" DefaultLabelPosition="Collapsed">
+            <AppBarElementContainer>
+                <AutoSuggestBox x:Name="SearchBox" Width="320" PlaceholderText="Search policies" TextChanged="OnSearchChanged" />
+            </AppBarElementContainer>
+            <AppBarButton Icon="Refresh" Label="Reload" Click="OnReload" />
+            <AppBarButton Icon="Filter" Label="Advanced" Click="OnAdvancedSearch" />
+            <AppBarButton Icon="View" Label="Columns">
+                <AppBarButton.Flyout>
+                    <MenuFlyout>
+                        <MenuFlyoutItem Text="Name" Tag="Name" Click="OnColumnToggle" />
+                        <MenuFlyoutItem Text="Category" Tag="Category" Click="OnColumnToggle" />
+                    </MenuFlyout>
+                </AppBarButton.Flyout>
+            </AppBarButton>
+            <AppBarToggleButton x:Name="GroupToggle" Icon="List" Label="Group By File" Checked="OnGroupingChanged" Unchecked="OnGroupingChanged" />
+            <AppBarElementContainer>
+                <ProgressRing x:Name="LoadingRing" Width="28" Height="28" IsActive="False" />
+            </AppBarElementContainer>
+        </CommandBar>
+        <Grid Grid.Row="2" ColumnSpacing="12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="280" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <!-- Category navigation -->
+            <StackPanel Grid.Column="0" Spacing="4">
+                <TextBlock Text="Categories" FontSize="14" FontWeight="SemiBold" />
+                <ListView x:Name="CategoryList" SelectionMode="Single" ItemsSource="{Binding ViewModel.CategoryListItems}" SelectionChanged="OnCategorySelectionChanged">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Name}" />
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </StackPanel>
+            <!-- Main content -->
+            <Grid Grid.Column="1">
+                <Grid x:Name="GroupedPanel" Visibility="Collapsed">
+                    <ItemsRepeater ItemsSource="{Binding ViewModel.PolicyFileGroups}">
+                        <ItemsRepeater.ItemTemplate>
+                            <DataTemplate>
+                                <Expander Header="{Binding FileName}" IsExpanded="{Binding IsExpanded}">
+                                    <ItemsRepeater ItemsSource="{Binding Policies}">
+                                        <ItemsRepeater.ItemTemplate>
+                                            <DataTemplate>
+                                                <Button Content="{Binding Summary.DisplayName}" Tag="{Binding Summary}" HorizontalAlignment="Stretch" Click="OnOpenPolicy" />
+                                            </DataTemplate>
+                                        </ItemsRepeater.ItemTemplate>
+                                    </ItemsRepeater>
+                                </Expander>
+                            </DataTemplate>
+                        </ItemsRepeater.ItemTemplate>
+                        <ItemsRepeater.Layout>
+                            <StackLayout Spacing="4" />
+                        </ItemsRepeater.Layout>
+                    </ItemsRepeater>
+                </Grid>
+                <ScrollViewer x:Name="FlatScroll" HorizontalScrollBarVisibility="Disabled">
+                    <ItemsRepeater x:Name="PoliciesRepeater" ItemsSource="{Binding ViewModel.FilteredPolicies}" ItemTemplate="{StaticResource PolicyRowTemplate}">
+                        <ItemsRepeater.Layout>
+                            <StackLayout Spacing="2" />
+                        </ItemsRepeater.Layout>
+                    </ItemsRepeater>
+                </ScrollViewer>
+                <StackPanel x:Name="EmptyStatePanel" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12" Visibility="Collapsed">
+                    <SymbolIcon Symbol="Find" />
+                    <TextBlock Text="No policies match your search." />
+                </StackPanel>
+            </Grid>
+        </Grid>
     </Grid>
 </UserControl>

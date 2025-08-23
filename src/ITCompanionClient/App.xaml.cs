@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using KC.ITCompanion.CorePolicyEngine.Parsing;
 using KC.ITCompanion.CorePolicyEngine.Storage;
 using KC.ITCompanion.CorePolicyEngine.Storage.Sql;
+using KC.ITCompanion.ClientShared;
 
 namespace ITCompanionClient;
 /// <summary>
@@ -12,6 +13,7 @@ namespace ITCompanionClient;
 public partial class App : Application
 {
     private Window? _window;
+    public static Window MainWindow { get; private set; } = null!;
     public static ServiceProvider Services { get; private set; } = null!;
 
     public App()
@@ -29,6 +31,7 @@ public partial class App : Application
     {
         Services = ConfigureServices();
         _window = new MainWindow();
+        MainWindow = _window;
         _window.Activate();
     }
 
@@ -44,6 +47,14 @@ public partial class App : Application
         sc.AddSingleton<IAuditStore, AuditStore>();
         sc.AddSingleton<IAuditWriter, AuditWriter>();
         sc.AddSingleton<ISqlConnectionFactory, SqlConnectionFactory>();
+
+        // UI adapters
+        sc.AddSingleton<IUiDispatcher, WinUiDispatcher>();
+        sc.AddSingleton<IMessagePromptService, WinUiPromptService>();
+        sc.AddSingleton<IThemeService, ThemeServiceWinUi>();
+
+        // Core view models
+        sc.AddTransient<PolicyEditorViewModel>();
         return sc.BuildServiceProvider();
     }
 }

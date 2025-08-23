@@ -1,39 +1,36 @@
-# Copilot Coding Agent – Repository Onboarding Guide
-
-READ THIS FIRST  
-These instructions are the canonical source of truth for automations working in this repository. Always follow them in the order given. ONLY perform exploratory searches (grep/code search) if the needed information is absent here or an executed command contradicts what is documented.
+# Copilot Coding Agent 
 
 **Repository CODEOWNER**: @KyleC69
 
-Version: 3.2
-Date: 2025-08-22
+Version: 3.3
+Date: 2025-08-23
 ---
 
 ## Copilot Language Guidelines:
-  clarity:
+ ### clarity:
     - Avoid academic jargon, theoretical abstractions, or overly formal phrasing.
     - Prefer plain English and real-world analogies over textbook definitions.
     - Use short, direct sentences with clear intent.
     - Explain acronyms and technical terms only when necessary.
 
-  tone_for_self_taught:
+ ### tone for self taught:
     - Write as if explaining to a smart, curious developer who learned by doing—not by sitting through lectures.
     - Assume practical experience, not formal training.
     - Celebrate resourcefulness and hands-on problem solving.
     - Avoid condescending or overly pedantic explanations.
 
-  examples_and_explanation:
+ ### examples and explanation:
     - Use relatable examples (e.g., “like organizing folders on your desktop”).
     - Break down complex ideas into digestible steps.
     - Prioritize actionable advice over theoretical depth.
     - When introducing a concept, explain *why it matters* before *how it works*.
 
-  formatting:
+  ### formatting:
     - Use bullet points, headings, and code blocks to improve readability.
     - Avoid dense paragraphs or verbose technical exposition.
     - Highlight key takeaways or “what you actually need to know.”
 
-  personality_alignment:
+  ### personality alignment:
     - Sound like a helpful peer, not a professor.
     - Inject light humor or empathy when appropriate.
     - Respect the user’s time, experience, and autonomy.
@@ -122,18 +119,6 @@ ALWAYS perform these steps in a clean clone before attempting builds:
 6. (If database features needed) Confirm local SQL Server instance reachable. Provide (or create) a local connection string in user-secrets or appsettings.Development.json if project demands it. If unsure and build fails on missing connection string, create placeholder:
    Server=(localdb)\\MSSQLLocalDB;Database=ITCompanion;Trusted_Connection=True;Encrypt=True;
 
----
-
-## 5. Build Instructions
-
-Canonical build sequence (ALWAYS in this order after bootstrap):
-
-1. dotnet restore ITCompanion.sln
-2. dotnet build ITCompanion.sln -c Debug -warnaserror /p:TreatWarningsAsErrors=true /p:AnalysisLevel=latest /p:EnforceCodeStyleInBuild=true
-3. (Optional release) dotnet build ITCompanion.sln -c Release -warnaserror /p:TreatWarningsAsErrors=true /p:AnalysisLevel=latest /p:EnforceCodeStyleInBuild=true
-4. (Analyzer formatting) dotnet format analyzers --verify-no-changes || dotnet format analyzers
-
-ALWAYS ensure zero warnings. If an upstream package triggers unavoidable warnings, add a targeted suppression with justification (never blanket disable ruleset globally without CODEOWNER approval).
 
 ---
 
@@ -152,63 +137,6 @@ DOTNET_NOLOGO=1 dotnet build ITCompanion.sln -c Debug -warnaserror /p:TreatWarni
 
 ---
 
-## 6. Running Applications
-
-(Names may map to actual csproj names; follow these patterns.)
-
-Desktop UI (ClientApp):
-- From repo root:
-  dotnet run -c Debug --project src/ClientApp/ClientApp.csproj
-If a WinUI 3 migration exists, run from its project instead (e.g., ClientApp.WinUI). Only one UI host should be active; prefer WPF if both exist unless migration notes specify otherwise.
-
-Self-Healing / Policy Engine (headless service):
-  dotnet run --project src/CorePolicyEngine/CorePolicyEngine.csproj
-
-Enterprise Dashboard (future / when implemented):
-  dotnet run --project src/EnterpriseDashboard/EnterpriseDashboard.csproj
-Expect it to host a Kestrel server; check console output for URL.
-
-ALWAYS ensure required environment variables (e.g., connection strings, feature flags) are set before running. If not defined in project docs, use localdb placeholder.
-
----
-
-## 7. Testing
-
-Standard test invocation (from README):
-  dotnet test tests/
-
-Preferred verbose form (surface all results, skip build duplicates):
-  dotnet test ITCompanion.sln --no-build --configuration Debug
-
-ALWAYS run dotnet build (with -warnaserror) first for deterministic behavior; dotnet test will otherwise restore & build implicitly, which can mask incremental issues.
-
-If integration tests (e.g., DB or WMI) exist and are slow/flaky:
-- Look for traits/categories (e.g., [Category("Integration")]) and optionally filter:
-  dotnet test --filter TestCategory!=Integration
-
-Add new tests in corresponding test project mirroring source project naming:
-- src/CorePolicyEngine/ -> tests/CorePolicyEngine.Tests/
-Ensure new test project is referenced in solution and uses the standard test framework (likely xUnit or MSTest; inspect existing test project for conventions before adding).
-
----
-
-## 8. Linting / Formatting / Quality (Assumed Defaults)
-
-If a dotnet format or analyzers configuration (Directory.Build.props / .editorconfig) exists, enforce locally:
-
-Recommended pre-commit routine:
-1. dotnet build -warnaserror
-2. dotnet test
-3. dotnet format analyzers --verify-no-changes
-4. dotnet format style --verify-no-changes || dotnet format style
-5. (Optional) dotnet pack (only for library packaging scenarios)
-
-ALWAYS fix analyzer warnings introduced by new code—treat warnings as future risk even if not failing CI yet.
-
-If no automated linting config present and you add one, keep it minimal and incremental.
-
----
-
 ## 9. Database / Migrations (If ITCompanionDB Active)
 
 Look for a project (e.g., src/ITCompanionDB or database project). Typical patterns:
@@ -220,19 +148,6 @@ ALWAYS update the solution + build before generating migrations to avoid stale m
 Always test migration application on a fresh local database instance to verify correctness.
 Always document migration procedures to outline steps for applying in production environments. migrations should be idempotent and reversible if possible. outlined in docs/migrations.md if it exists- create if it doesn't.
 
-
----
-
-## 10. Configuration & Secrets
-
-Common config file hierarchy (expected):
-- appsettings.json
-- appsettings.Development.json
-- user-secrets (for local secure credentials)
-Initialize .NET user-secrets if sensitive info needed:
-  dotnet user-secrets init --project src/<ProjectNeedingSecrets>
-
-NEVER commit credentials. Use placeholders in committed config.
 
 ---
 
@@ -256,13 +171,7 @@ XML DOCUMENTATION MANDATORY:
 
 ---
 
-## 12. Self-Healing / Policy Engine Notes
 
-The SelfHealingPolicyEngine directory at root may represent a service or library. Before refactoring its placement into src/, ensure:
-- Project reference integrity (update solution).
-- Any scripts or docs pointing to old path are adjusted.
-
----
 
 ## 13. Docs & Onboarding Resources
 
@@ -275,80 +184,13 @@ If you update architecture, reflect changes consistently across:
 
 ---
 
-## 14. Canonical Validation Sequence (Run Before Opening PR)
 
-ALWAYS execute in this exact order from a clean working tree (no uncommitted changes):
-
-1. git fetch --all --prune
-2. git switch -c feature/<short-descriptor> (or rebase from latest master before final push)
-3. pwsh onboarding/workspace-presets.ps1            (ensures local prerequisites are refreshed)
-4. dotnet restore ITCompanion.sln
-5. dotnet build ITCompanion.sln -c Debug -warnaserror /p:TreatWarningsAsErrors=true /p:AnalysisLevel=latest /p:EnforceCodeStyleInBuild=true
-6. dotnet test ITCompanion.sln --no-build
-7. dotnet format analyzers --verify-no-changes || dotnet format analyzers
-   - If formatting changes needed: dotnet format style (if formatting changes affect test files, re-run tests)
-8. (If DB changes) apply migrations locally; verify startup of affected host project
-9. Run primary executable (e.g., ClientApp) to smoke test
-10. (If adding new API/service endpoints) exercise minimal functional path
-11. git add .
-12. git commit -m "feat: <concise summary>"
-    - For complex changes, add a commit message body describing the rationale and impact:
-      git commit -m "feat: <concise summary>" -m "<detailed explanation>"
-    - If the change is breaking, include a footer in the body: BREAKING CHANGE: <description of breaking change>
-13. git push -u origin feature/<short-descriptor>
-
-NEVER skip steps 4–7. ALWAYS re-run steps 5–7 after resolving merge conflicts.
-
----
-
-## 15. CI / Workflows (General Expectations)
-
-Even though specific workflow YAML files are not enumerated here, assume CI will:
-- Restore + build solution with -warnaserror
-- Run unit tests
-- Enforce analyzers (AnalysisLevel=latest) and style (EnforceCodeStyleInBuild=true)
-Design changes so they pass non-interactively (no UI prompts). If you add steps requiring secrets or services, gate them behind conditionals (e.g., only if env var present).
-
----
-
-## 16. Common Pitfalls & Mitigations
-
-Pitfall: Using wrong SDK version → Build failure referencing target frameworks.
-Mitigation: Install matching .NET 9 SDK; run dotnet --info to verify.
-
-Pitfall: Missing local SQL instance → Runtime exception on startup.
-Mitigation: Provide fallback localdb connection string in development config.
-
-Pitfall: Adding new project but forgetting solution inclusion → Tests/build skip code.
-Mitigation: dotnet sln ITCompanion.sln list (verify presence) before pushing.
-
-Pitfall: Ignoring warnings locally → CI failure with -warnaserror.
-Mitigation: Always run local build command with flags from Section 5.
-
-Pitfall: Long restore times after minor edits.
-Mitigation: Avoid unnecessary global package version changes; keep restore deterministic.
-
-Pitfall: UI project fails due to WinUI preview mismatch.
-Mitigation: If WinUI not stabilized, keep WPF as default run target; do not upgrade without verifying docs.
-
----
-
-## 17. Naming & Branching Conventions (Recommended)
-
-- feature/<topic>, fix/<issue-number>, chore/<maintenance>
-- Commit prefixes: feat:, fix:, refactor:, test:, docs:, chore:, perf:, build:
-- Keep PRs focused (one feature/fix). Include test additions in same PR.
-
----
 
 ## 18. Extensibility Guidance
 
-When introducing AI / ONNX components:
-- Encapsulate model loading (e.g., IAnomalyDetectionService) behind interface
-- Ensure fallback (no-op) implementation when model assets absent—prevents runtime crashes in minimal developer setups.
-
-When adding policy parsing features:
+When introducing AI:
 - Maintain separation: Parsing (pure), Validation (rules), Deployment (side effects)
+ 
 
 ---
 
@@ -366,16 +208,6 @@ Root:
 
 ---
 
-## 20. When to Search Outside This File
-
-Only search the codebase if:
-- A project path or command referenced here produces an error indicating the target does not exist.
-- You need the exact name of a project inside src/ for a run/build command.
-- You are adding code and must inspect existing patterns (DI setup, config binding, test conventions).
-
-Otherwise TRUST THESE INSTRUCTIONS.
-
----
 
 ## 21. Minimal Quick Start (Copy/Paste)
 
@@ -386,20 +218,10 @@ pwsh onboarding/workspace-presets.ps1
 dotnet restore ITCompanion.sln
 dotnet build ITCompanion.sln -c Debug -warnaserror /p:TreatWarningsAsErrors=true /p:AnalysisLevel=latest /p:EnforceCodeStyleInBuild=true
 dotnet test ITCompanion.sln --no-build
-dotnet run --project src/ClientApp/ClientApp.csproj
+dotnet run --project src/ITCompanionClient/ITCompanionClient.csproj
 ```
 
 If any path differs, list src/ to identify correct project and adjust only that line.
-
----
-
-## 22. Adding a New Feature (Example Workflow)
-
-1. Create branch: git switch -c feature/policy-diff
-2. Implement parser enhancement in src/CorePolicyEngine/ (new class + tests).
-3. Add/Update tests in tests/CorePolicyEngine.Tests/
-4. Run validation sequence (Section 14).
-5. Push & open PR with concise description + affected modules.
 
 ---
 
@@ -434,4 +256,4 @@ A change is "ready" ONLY if:
 
 ---
 
-By following this guide strictly you minimize failed CI runs and reduce unnecessary repository scanning. Trust these steps first; investigate only when concrete discrepancies arise.
+

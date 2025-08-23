@@ -1,0 +1,73 @@
+<ContentDialog
+    x:Class="ITCompanionClient.Controls.PolicyDetailDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:KC.ITCompanion.ClientShared"
+    xmlns:controls="using:ITCompanionClient.Controls"
+    x:Name="RootDialog"
+    Title="Policy Detail"
+    PrimaryButtonText="Push"
+    SecondaryButtonText="Close"
+    DefaultButton="Primary">
+    <ContentDialog.Resources>
+        <DataTemplate x:Key="TextTemplate" x:DataType="vm:PolicySettingViewModel">
+            <StackPanel Spacing="4">
+                <TextBlock Text="{x:Bind PartId}" FontWeight="SemiBold" />
+                <TextBox Text="{x:Bind Value, Mode=TwoWay}" />
+            </StackPanel>
+        </DataTemplate>
+        <DataTemplate x:Key="EnumTemplate" x:DataType="vm:PolicySettingViewModel">
+            <StackPanel Spacing="4">
+                <TextBlock Text="{x:Bind PartId}" FontWeight="SemiBold" />
+                <ComboBox ItemsSource="{x:Bind EnumItems}" SelectedValuePath="Value" DisplayMemberPath="Name"
+                          SelectedValue="{x:Bind Value, Mode=TwoWay}" />
+            </StackPanel>
+        </DataTemplate>
+        <DataTemplate x:Key="BoolTemplate" x:DataType="vm:PolicySettingViewModel">
+            <StackPanel Spacing="4">
+                <TextBlock Text="{x:Bind PartId}" FontWeight="SemiBold" />
+                <ToggleSwitch IsOn="{x:Bind Value, Mode=TwoWay}" />
+            </StackPanel>
+        </DataTemplate>
+        <DataTemplate x:Key="NumericTemplate" x:DataType="vm:PolicySettingViewModel">
+            <StackPanel Spacing="4">
+                <TextBlock Text="{x:Bind PartId}" FontWeight="SemiBold" />
+                <TextBox Text="{x:Bind Value, Mode=TwoWay}" InputScope="Number" />
+            </StackPanel>
+        </DataTemplate>
+        <controls:PolicySettingTemplateSelector x:Key="SettingTemplateSelector"
+                                          TextTemplate="{StaticResource TextTemplate}"
+                                          EnumTemplate="{StaticResource EnumTemplate}"
+                                          BooleanTemplate="{StaticResource BoolTemplate}"
+                                          NumericTemplate="{StaticResource NumericTemplate}" />
+    </ContentDialog.Resources>
+    <Grid RowSpacing="12" Padding="4">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <StackPanel Spacing="2">
+            <TextBlock Text="{x:Bind PolicyDisplayName}" FontSize="20" FontWeight="SemiBold" />
+            <TextBlock Text="{x:Bind PolicyKey}" FontSize="12" Opacity="0.7" />
+            <TextBlock Text="{x:Bind CategoryPath}" FontSize="12" Opacity="0.7" />
+        </StackPanel>
+        <ScrollViewer Grid.Row="1">
+            <StackPanel Spacing="12">
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Description" FontWeight="SemiBold" />
+                    <TextBlock Text="{x:Bind Description}" TextWrapping="Wrap" />
+                </StackPanel>
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Settings" FontWeight="SemiBold" />
+                    <ItemsControl ItemsSource="{x:Bind Settings}">
+                        <ItemsControl.ItemTemplateSelector>
+                            <StaticResource ResourceKey="SettingTemplateSelector" />
+                        </ItemsControl.ItemTemplateSelector>
+                    </ItemsControl>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+        <ToggleSwitch Grid.Row="2" Header="Edit Mode" IsOn="{x:Bind IsEditMode, Mode=TwoWay}" />
+    </Grid>
+</ContentDialog>

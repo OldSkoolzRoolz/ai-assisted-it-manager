@@ -15,4 +15,3 @@
 ## Common Pitfalls
 - ADML localization mismatches
 - Registry key collisions
-- WPF binding errors from dynamic policy lists

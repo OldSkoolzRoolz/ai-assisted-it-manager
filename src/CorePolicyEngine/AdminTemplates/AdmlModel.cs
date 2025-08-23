@@ -5,6 +5,9 @@
 // License: MIT
 // Do not remove file headers
 
+using System;
+using System.Collections.Generic;
+
 namespace KC.ITCompanion.CorePolicyEngine.AdminTemplates;
 
 
