@@ -1,0 +1,47 @@
+<Window x:Class="KC.ITCompanion.ClientApp.Controls.PolicyDetailWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:conv="clr-namespace:KC.ITCompanion.ClientApp.Converters"
+        Title="Policy Detail" Height="520" Width="700" WindowStartupLocation="CenterOwner">
+    <Window.Resources>
+        <conv:InverseBoolConverter x:Key="InverseBoolConverter" />
+    </Window.Resources>
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Margin="0,0,0,8">
+            <TextBlock Text="{Binding SelectedRow.Name}" FontSize="18" FontWeight="Bold"/>
+            <TextBlock Text="{Binding SelectedRow.Key}" Style="{StaticResource Control.Text.Caption}"/>
+            <TextBlock Text="{Binding SelectedRow.CategoryPath}" Style="{StaticResource Control.Text.Caption}"/>
+        </StackPanel>
+        <ScrollViewer Grid.Row="1">
+            <StackPanel>
+                <GroupBox Header="Description" Margin="0,0,0,8">
+                    <TextBox Text="{Binding SelectedRow.Description}" IsReadOnly="True" TextWrapping="Wrap" AcceptsReturn="True"/>
+                </GroupBox>
+                <GroupBox Header="Settings">
+                    <ItemsControl ItemsSource="{Binding Settings}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Margin="0,0,0,8">
+                                    <TextBlock Text="{Binding PartId}" FontWeight="SemiBold"/>
+                                    <TextBox Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="{Binding DataContext.IsReadOnlyMode, RelativeSource={RelativeSource AncestorType=Window}}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </GroupBox>
+            </StackPanel>
+        </ScrollViewer>
+        <DockPanel Grid.Row="2" Margin="0,12,0,0">
+            <ToggleButton Width="90" Content="Edit" IsChecked="{Binding IsReadOnlyMode, Mode=TwoWay, Converter={StaticResource InverseBoolConverter}}"/>
+            <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
+                <Button Content="Push" Width="80" Margin="0,0,8,0" Click="OnPushEdits"/>
+                <Button Content="Close" Width="80" IsCancel="True"/>
+            </StackPanel>
+        </DockPanel>
+    </Grid>
+</Window>

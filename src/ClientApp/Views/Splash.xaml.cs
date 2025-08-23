@@ -1,25 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+﻿// Project Name: ClientApp
+// File Name: Splash.xaml.cs
+// Author: Kyle Crowder
+// Github:  OldSkoolzRoolz
+// License: All Rights Reserved. No use without consent.
+// Do not remove file headers
+
 
 namespace KC.ITCompanion.ClientApp.Views;
+
+
 /// <summary>
-/// Interaction logic for Splash.xaml
+///     Interaction logic for Splash.xaml
 /// </summary>
 // SplashWindow.xaml.cs
 public partial class Splash : Window
 {
-    private readonly string[] messages = new[]
+    private readonly string[] _messages = new[]
     {
         "LOADING FROM TAPE DRIVE... PLEASE WAIT",
         "> Parsing ADMX...",
@@ -29,17 +25,25 @@ public partial class Splash : Window
         "READY TO EMPOWER YOUR IT STACK."
     };
 
+
+
+
+
     public Splash()
     {
         InitializeComponent();
-        Loaded += async (s, e) => await ShowMessages();
+        this.Loaded += async (s, e) => await ShowMessages();
     }
+
+
+
+
 
     private async Task ShowMessages()
     {
-        foreach (var msg in messages)
+        foreach (var msg in this._messages)
         {
-            SplashText.Text += "\n" + msg;
+            this.SplashText.Text += "\n" + msg;
             await Task.Delay(1000); // Simulate tape delay
         }
 

@@ -1,0 +1,11 @@
+<Project>
+  <PropertyGroup>
+    <!-- Enable Roslyn analyzers at the latest ruleset level across all projects -->
+    <AnalysisLevel>latest</AnalysisLevel>
+    <!-- Optional: turn on all default analyzers (keep conservative; adjust if too noisy) -->
+    <AnalysisMode>AllEnabledByDefault</AnalysisMode>
+    <!-- Uncomment to elevate analyzer diagnostics
+    <WarningsAsErrors>$(WarningsAsErrors);CA*</WarningsAsErrors>
+    -->
+  </PropertyGroup>
+</Project>

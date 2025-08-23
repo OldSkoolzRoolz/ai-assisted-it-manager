@@ -9,7 +9,7 @@
 using System.Globalization;
 
 
-namespace ClientApp.Converters;
+namespace KC.ITCompanion.ClientApp.Converters;
 
 
 public sealed class ValueTypeToVisibilityConverter

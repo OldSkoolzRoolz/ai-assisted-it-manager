@@ -2,18 +2,21 @@
 // File Name: BehaviorPolicy.cs
 // Author: Kyle Crowder
 // Github:  OldSkoolzRoolz
-// License: MIT
+// License: All Rights Reserved. No use without consent.
 // Do not remove file headers
+
 
 namespace KC.ITCompanion.CorePolicyEngine.Models;
 
+
 /// <summary>
-/// Represents client behavior configuration centrally managed (local or distributed).
-/// Layering order (lowest precedence first): LocalDefault < OrgBaseline < SiteOverride < MachineOverride < UserOverride.
+///     Represents client behavior configuration centrally managed (local or distributed).
+///     Layering order (lowest precedence first): LocalDefault < OrgBaseline < SiteOverride < MachineOverride
+///     < UserOverride.
 /// </summary>
 public sealed record BehaviorPolicy(
     int LogRetentionDays,
-    int MaxLogFileSizeMB,
+    int MaxLogFileSizeMb,
     string MinLogLevel,
     string UiLanguage,
     bool EnableTelemetry,
@@ -44,8 +47,10 @@ public sealed record BehaviorPolicy(
     );
 }
 
+
+
 /// <summary>
-/// Snapshot returning effective merged policy and per-layer hashes for drift / change detection.
+///     Snapshot returning effective merged policy and per-layer hashes for drift / change detection.
 /// </summary>
 public sealed record BehaviorPolicySnapshot(
     BehaviorPolicy Effective,
@@ -56,6 +61,8 @@ public sealed record BehaviorPolicySnapshot(
     string UserOverrideHash,
     DateTime GeneratedUtc
 );
+
+
 
 public enum BehaviorPolicyLayer
 {

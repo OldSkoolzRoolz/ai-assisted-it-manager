@@ -1,0 +1,41 @@
+<UserControl x:Class="KC.ITCompanion.ClientApp.Controls.LogsControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d">
+    <Grid Margin="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+            <TextBox Width="220" Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,8,0"/>
+            <ComboBox Width="120" SelectedItem="{Binding SelectedLevel}" ItemsSource="{Binding Levels}" Margin="0,0,8,0"/>
+            <Button Content="Refresh" Command="{Binding RefreshCommand}" Style="{StaticResource Control.Button.Base}"/>
+        </StackPanel>
+        <ListView Grid.Row="1" ItemsSource="{Binding Entries}" VirtualizingPanel.IsVirtualizing="True" FontFamily="{StaticResource Font.Mono}" FontSize="{StaticResource FontSize.Caption}">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="Time" Width="170" DisplayMemberBinding="{Binding Timestamp}"/>
+                    <GridViewColumn Header="Level" Width="70" DisplayMemberBinding="{Binding Level}"/>
+                    <GridViewColumn Header="Category" Width="220" DisplayMemberBinding="{Binding Category}"/>
+                    <GridViewColumn Header="EventId" Width="60" DisplayMemberBinding="{Binding EventId}"/>
+                    <GridViewColumn Header="Message" Width="600" DisplayMemberBinding="{Binding Message}"/>
+                </GridView>
+            </ListView.View>
+        </ListView>
+        <DataGrid Grid.Row="2" ItemsSource="{Binding LogHealth}" AutoGenerateColumns="False" CanUserAddRows="False" HeadersVisibility="Column" Margin="0,8,0,0" Height="120">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Module" Binding="{Binding Module}" Width="*"/>
+                <DataGridTextColumn Header="Enq" Binding="{Binding Enqueued}" Width="60"/>
+                <DataGridTextColumn Header="Written" Binding="{Binding Written}" Width="70"/>
+                <DataGridTextColumn Header="Dropped" Binding="{Binding Dropped}" Width="70"/>
+                <DataGridTextColumn Header="Errors" Binding="{Binding WriteErrors}" Width="60"/>
+                <DataGridTextColumn Header="LastErrorUtc" Binding="{Binding LastErrorUtc}" Width="140"/>
+                <DataGridCheckBoxColumn Header="Circuit" Binding="{Binding CircuitOpen}" Width="60"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>

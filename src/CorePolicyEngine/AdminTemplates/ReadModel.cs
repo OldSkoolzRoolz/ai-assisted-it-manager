@@ -2,7 +2,7 @@
 // File Name: ReadModel.cs
 // Author: Kyle Crowder
 // Github:  OldSkoolzRoolz
-// License: MIT
+// License: All Rights Reserved
 // Do not remove file headers
 
 namespace KC.ITCompanion.CorePolicyEngine.AdminTemplates;
@@ -30,6 +30,9 @@ public static class Materializer
         AdmxDocument admx,
         AdmlDocument adml)
     {
+        if (admx is null) throw new ArgumentNullException(nameof(admx));
+        if (adml is null) throw new ArgumentNullException(nameof(adml));
+
         var strings = adml.StringTable;
 
         // Pre-build name + lookup maps so we can validate refs and avoid rebuilding per policy
@@ -70,7 +73,7 @@ public static class Materializer
             return string.Join("/", path);
         }
 
-        foreach (Policy p in admx.Policies)
+        foreach (AdminPolicy p in admx.Policies)
         {
             var display = strings.TryGetValue(p.DisplayName.Id, out var dn) ? dn : p.Key.Name;
             var explain = p.ExplainText is null ? null :
@@ -81,9 +84,12 @@ public static class Materializer
             {
                 catPath = ResolveCatPath(p.Category);
             }
-            catch
+            catch (KeyNotFoundException)
             {
-                // Absolute safety net – should no longer happen, but prevents single failure from halting enumeration
+                catPath = "Uncategorized";
+            }
+            catch (InvalidOperationException)
+            {
                 catPath = "Uncategorized";
             }
 
