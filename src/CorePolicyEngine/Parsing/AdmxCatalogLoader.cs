@@ -5,32 +5,19 @@
 // License: All Rights Reserved. No use without consent.
 // Do not remove file headers
 
-
 namespace KC.ITCompanion.CorePolicyEngine.Parsing;
 
-
-// Backwards compatibility shim (scheduled for removal). Now returns raw pair without Result wrapper.
-[Obsolete("Use IAdminTemplateLoader directly. This shim will be removed.")]
+/// <summary>
+/// High level convenience loader wrapping <see cref="AdmxAdmlParser"/> for caller friendly API.
+/// </summary>
 public sealed class AdmxCatalogLoader
 {
-    private readonly IAdminTemplateLoader _inner = new AdmxAdmlParser();
+    private readonly AdmxAdmlParser _inner = new();
 
-
-
-
-
-    public Task<AdminTemplatePair?> LoadSingleAsync(string admxPath, string languageTag, CancellationToken ct)
+    /// <summary>Loads a single pair returning null if errors.</summary>
+    public async Task<AdminTemplatePair?> LoadSingleAsync(string admxPath, string languageTag, CancellationToken ct)
     {
-        return LoadInternalAsync(admxPath, languageTag, ct);
-    }
-
-
-
-
-
-    private async Task<AdminTemplatePair?> LoadInternalAsync(string path, string lang, CancellationToken ct)
-    {
-        Result<AdminTemplatePair> r = await this._inner.LoadAsync(path, lang, ct);
-        return r.Success ? r.Value : null;
+        Result<AdminTemplatePair> r = await _inner.LoadAsync(admxPath, languageTag, ct).ConfigureAwait(false);
+        return r.Success && r is Result<AdminTemplatePair> pr ? pr.Value : null;
     }
 }

@@ -5,32 +5,22 @@
 // License: All Rights Reserved. No use without consent.
 // Do not remove file headers
 
-
 using System.Data;
-
 using Microsoft.Data.SqlClient;
-
 
 namespace KC.ITCompanion.CorePolicyEngine.Storage.Sql;
 
-
+/// <summary>
+/// Repository for log source definitions.
+/// </summary>
 public sealed class LogSourceRepository : ILogSourceRepository
 {
     private readonly ISqlConnectionFactory _factory;
 
+    /// <summary>Create repository.</summary>
+    public LogSourceRepository(ISqlConnectionFactory factory) => _factory = factory ?? throw new ArgumentNullException(nameof(factory));
 
-
-
-
-    public LogSourceRepository(ISqlConnectionFactory factory)
-    {
-        _factory = factory;
-    }
-
-
-
-
-
+    /// <summary>Returns enabled log sources.</summary>
     public async Task<IReadOnlyList<LogSourceDto>> GetEnabledAsync(CancellationToken token)
     {
         const string sql =
@@ -39,18 +29,17 @@ public sealed class LogSourceRepository : ILogSourceRepository
         using IDbCommand cmd = conn.CreateCommand();
         cmd.CommandText = sql;
         List<LogSourceDto> list = new();
-        using SqlDataReader? r = await ((SqlCommand)cmd).ExecuteReaderAsync(token).ConfigureAwait(false);
+        using SqlDataReader r = await ((SqlCommand)cmd).ExecuteReaderAsync(token).ConfigureAwait(false);
         while (await r.ReadAsync(token).ConfigureAwait(false))
             list.Add(new LogSourceDto(r.GetInt32(0), r.GetString(1), r.GetString(2), r.GetBoolean(3)));
         return list;
     }
 
-
-
-
-
+    /// <summary>Insert or update a log source by file path.</summary>
     public async Task UpsertAsync(string application, string filePath, bool enabled, CancellationToken token)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(application);
+        ArgumentException.ThrowIfNullOrWhiteSpace(filePath);
         const string sql = @"MERGE dbo.LogSource AS tgt
 USING (SELECT @Application AS Application, @FilePath AS FilePath) AS src
 ON tgt.FilePath = src.FilePath
@@ -59,41 +48,32 @@ WHEN NOT MATCHED THEN INSERT (Application, FilePath, Enabled, CreatedUtc, Update
         using IDbConnection conn = await _factory.OpenAsync(token).ConfigureAwait(false);
         using IDbCommand cmd = conn.CreateCommand();
         cmd.CommandText = sql;
-        IDbDataParameter p1 = cmd.CreateParameter();
-        p1.ParameterName = "@Application";
-        p1.Value = application;
-        cmd.Parameters.Add(p1);
-        IDbDataParameter p2 = cmd.CreateParameter();
-        p2.ParameterName = "@FilePath";
-        p2.Value = filePath;
-        cmd.Parameters.Add(p2);
-        IDbDataParameter p3 = cmd.CreateParameter();
-        p3.ParameterName = "@Enabled";
-        p3.Value = enabled;
-        cmd.Parameters.Add(p3);
+        cmd.Parameters.Add(Param(cmd, "@Application", application));
+        cmd.Parameters.Add(Param(cmd, "@FilePath", filePath));
+        cmd.Parameters.Add(Param(cmd, "@Enabled", enabled));
         await ((SqlCommand)cmd).ExecuteNonQueryAsync(token).ConfigureAwait(false);
+    }
+
+    private static SqlParameter Param(IDbCommand cmd, string name, object value)
+    {
+        IDbDataParameter p = cmd.CreateParameter();
+        p.ParameterName = name;
+        p.Value = value;
+        return (SqlParameter)p;
     }
 }
 
-
-
+/// <summary>
+/// Repository for log ingestion cursor persistence.
+/// </summary>
 public sealed class LogIngestionCursorRepository : ILogIngestionCursorRepository
 {
     private readonly ISqlConnectionFactory _factory;
 
+    /// <summary>Create repository.</summary>
+    public LogIngestionCursorRepository(ISqlConnectionFactory factory) => _factory = factory ?? throw new ArgumentNullException(nameof(factory));
 
-
-
-
-    public LogIngestionCursorRepository(ISqlConnectionFactory factory)
-    {
-        _factory = factory;
-    }
-
-
-
-
-
+    /// <summary>Gets a cursor for a log source if present.</summary>
     public async Task<LogIngestionCursorDto?> GetAsync(int logSourceId, CancellationToken token)
     {
         const string sql =
@@ -101,23 +81,21 @@ public sealed class LogIngestionCursorRepository : ILogIngestionCursorRepository
         using IDbConnection conn = await _factory.OpenAsync(token).ConfigureAwait(false);
         using IDbCommand cmd = conn.CreateCommand();
         cmd.CommandText = sql;
-        IDbDataParameter p = cmd.CreateParameter();
-        p.ParameterName = "@Id";
-        p.Value = logSourceId;
-        cmd.Parameters.Add(p);
-        using SqlDataReader? r = await ((SqlCommand)cmd).ExecuteReaderAsync(token).ConfigureAwait(false);
+        cmd.Parameters.Add(Param(cmd, "@Id", logSourceId));
+        using SqlDataReader r = await ((SqlCommand)cmd).ExecuteReaderAsync(token).ConfigureAwait(false);
         if (await r.ReadAsync(token).ConfigureAwait(false))
-            return new LogIngestionCursorDto(r.GetInt32(0), r.IsDBNull(1) ? null : r.GetString(1), r.GetInt64(2),
-                r.GetInt64(3), r.IsDBNull(4) ? null : (byte[])r[4], r.GetDateTime(5));
+        {
+            string? lastFile = await r.IsDBNullAsync(1, token).ConfigureAwait(false) ? null : r.GetString(1);
+            ReadOnlyMemory<byte>? hash = await r.IsDBNullAsync(4, token).ConfigureAwait(false) ? null : new ReadOnlyMemory<byte>((byte[])r[4]);
+            return new LogIngestionCursorDto(r.GetInt32(0), lastFile, r.GetInt64(2), r.GetInt64(3), hash, r.GetDateTime(5));
+        }
         return null;
     }
 
-
-
-
-
+    /// <summary>Upserts a cursor row.</summary>
     public async Task UpsertAsync(LogIngestionCursorDto cursor, CancellationToken token)
     {
+        ArgumentNullException.ThrowIfNull(cursor);
         const string sql = @"MERGE dbo.LogIngestionCursor AS tgt
 USING (SELECT @LogSourceId AS LogSourceId) AS src
 ON tgt.LogSourceId = src.LogSourceId
@@ -130,13 +108,9 @@ WHEN NOT MATCHED THEN INSERT (LogSourceId, LastFile, LastPosition, LastFileSize,
         cmd.Parameters.Add(Param(cmd, "@LastFile", (object?)cursor.LastFile ?? DBNull.Value));
         cmd.Parameters.Add(Param(cmd, "@LastPosition", cursor.LastPosition));
         cmd.Parameters.Add(Param(cmd, "@LastFileSize", cursor.LastFileSize));
-        cmd.Parameters.Add(Param(cmd, "@LastHash", (object?)cursor.LastHash ?? DBNull.Value));
+        cmd.Parameters.Add(Param(cmd, "@LastHash", cursor.LastHash.HasValue ? cursor.LastHash.Value.ToArray() : (object)DBNull.Value));
         await ((SqlCommand)cmd).ExecuteNonQueryAsync(token).ConfigureAwait(false);
     }
-
-
-
-
 
     private static SqlParameter Param(IDbCommand cmd, string name, object value)
     {
@@ -147,31 +121,24 @@ WHEN NOT MATCHED THEN INSERT (LogSourceId, LastFile, LastPosition, LastFileSize,
     }
 }
 
-
-
+/// <summary>
+/// Repository for bulk inserting log events.
+/// </summary>
 public sealed class LogEventRepository : ILogEventRepository
 {
     private readonly ISqlConnectionFactory _factory;
 
+    /// <summary>Create repository.</summary>
+    public LogEventRepository(ISqlConnectionFactory factory) => _factory = factory ?? throw new ArgumentNullException(nameof(factory));
 
-
-
-
-    public LogEventRepository(ISqlConnectionFactory factory)
-    {
-        _factory = factory;
-    }
-
-
-
-
-
+    /// <summary>Bulk inserts a batch of log events via <see cref="SqlBulkCopy"/>.</summary>
     public async Task BulkInsertAsync(IEnumerable<LogEventDto> eventsBatch, CancellationToken token)
     {
-        var table = new DataTable();
+        ArgumentNullException.ThrowIfNull(eventsBatch);
+        using var table = new DataTable();
         table.Columns.Add("LogSourceId", typeof(int));
         table.Columns.Add("Ts", typeof(DateTime));
-        table.Columns.Add("Level", typeof(byte));
+        table.Columns.Add("Level", typeof(int));
         table.Columns.Add("EventId", typeof(int));
         table.Columns.Add("Category", typeof(string));
         table.Columns.Add("Message", typeof(string));
@@ -182,11 +149,14 @@ public sealed class LogEventRepository : ILogEventRepository
         table.Columns.Add("ModuleVersion", typeof(string));
         table.Columns.Add("RawJson", typeof(string));
         foreach (LogEventDto e in eventsBatch)
-            table.Rows.Add(e.LogSourceId, e.Ts, e.Level, (object?)e.EventId ?? DBNull.Value, e.Category, e.Message,
+        {
+            object eventIdVal = e.EventId is null ? DBNull.Value : e.EventId.Value;
+            table.Rows.Add(e.LogSourceId, e.Ts, e.Level, eventIdVal, e.Category, e.Message,
                 e.Session, e.Host, e.UserName, e.AppVersion, e.ModuleVersion, null);
+        }
         using IDbConnection conn = await _factory.OpenAsync(token).ConfigureAwait(false);
         using var bulk = new SqlBulkCopy((SqlConnection)conn)
-            { DestinationTableName = "dbo.LogEvent", BatchSize = table.Rows.Count };
+        { DestinationTableName = "dbo.LogEvent", BatchSize = table.Rows.Count };
         foreach (DataColumn c in table.Columns) bulk.ColumnMappings.Add(c.ColumnName, c.ColumnName);
         await bulk.WriteToServerAsync(table, token).ConfigureAwait(false);
     }

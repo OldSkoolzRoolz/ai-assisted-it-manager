@@ -7,7 +7,9 @@
 
 namespace KC.ITCompanion.CorePolicyEngine.Validation.Rules;
 
-// Legacy rule removed pending new validation system for AdminTemplates models.
+/// <summary>
+/// Marker for legacy enum membership rule; superseded by new policy element model validation.
+/// </summary>
 public static class EnumMembershipRuleMarker
 {
 }

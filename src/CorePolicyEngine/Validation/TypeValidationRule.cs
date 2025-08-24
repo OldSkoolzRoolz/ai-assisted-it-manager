@@ -7,6 +7,9 @@
 
 namespace KC.ITCompanion.CorePolicyEngine.Validation;
 
+/// <summary>
+/// Historical marker representing legacy type validation logic; retained for source compatibility.
+/// </summary>
 public static class TypeValidationRuleMarker
 {
 }

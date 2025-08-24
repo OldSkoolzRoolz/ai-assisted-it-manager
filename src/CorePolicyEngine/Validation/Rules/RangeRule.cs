@@ -7,7 +7,9 @@
 
 namespace KC.ITCompanion.CorePolicyEngine.Validation.Rules;
 
-// Legacy range rule removed. Will be recreated for new DecimalElement semantics.
+/// <summary>
+/// Marker for former numeric range rule; retained until new AdminTemplate based validation is implemented.
+/// </summary>
 public static class RangeRuleMarker
 {
 }

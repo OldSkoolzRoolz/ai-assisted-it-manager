@@ -7,7 +7,10 @@
 
 namespace KC.ITCompanion.CorePolicyEngine.Parsing;
 
-// Legacy required-value validation rule removed.
+/// <summary>
+/// Marker preserved to indicate the previous presence of a "required when enabled" rule.
+/// Actual validation logic has migrated to the new unified validation pipeline.
+/// </summary>
 public static class RequiredEnabledValueRuleMarker
 {
 }
