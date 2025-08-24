@@ -15,12 +15,12 @@ namespace KC.ITCompanion.CorePolicyEngine.Storage.Sql;
 /// </summary>
 public interface ILogEventQueryRepository
 {
-	/// <summary>Gets most recent events (newest first).</summary>
-	/// <param name="maxRows">Maximum rows to return (1-10000).</param>
-	/// <param name="minLevel">Optional minimum level inclusive (0-5).</param>
-	/// <param name="contains">Optional substring match applied to Message or Category.</param>
-	/// <param name="token">Cancellation token.</param>
-	Task<IReadOnlyList<LogEventDto>> GetRecentAsync(int maxRows, byte? minLevel, string? contains, CancellationToken token);
+    /// <summary>Gets most recent events (newest first).</summary>
+    /// <param name="maxRows">Maximum rows to return (1-10000).</param>
+    /// <param name="minLevel">Optional minimum level inclusive (0-5).</param>
+    /// <param name="contains">Optional substring match applied to Message or Category.</param>
+    /// <param name="token">Cancellation token.</param>
+    Task<IReadOnlyList<LogEventDto>> GetRecentAsync(int maxRows, byte? minLevel, string? contains, CancellationToken token);
 	/// <summary>Gets events since a given UTC timestamp (newest first) limited by <paramref name="maxRows"/>.</summary>
 	/// <param name="sinceUtc">Lower bound exclusive UTC timestamp.</param>
 	/// <param name="maxRows">Row limit.</param>
