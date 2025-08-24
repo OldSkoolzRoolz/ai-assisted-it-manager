@@ -7,7 +7,11 @@
 
 namespace KC.ITCompanion.CorePolicyEngine.Validation;
 
-// Placeholder validation service after model migration.
+/// <summary>
+/// Facade / future composition root for policy validation rules. Currently a placeholder until
+/// the unified validation engine (covering AdminTemplate elements, behavior policy, and security policies)
+/// is implemented.
+/// </summary>
 public sealed class ValidationService
 {
 }

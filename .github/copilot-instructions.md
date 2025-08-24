@@ -89,39 +89,64 @@ Module references (from onboarding/README.md):
 Expect each implementation project to reside under src/<ProjectName>/ with a corresponding *.csproj and be included in ITCompanion.sln. The SelfHealingPolicyEngine currently sits at root (historic or experimental placement); when modifying it, ensure it remains properly referenced in the solution.
 
 ---
+## 4. Module Logging
+- Use Microsoft.Extensions.Logging for all logging.
+- Configure logging in the `Program.cs` or `Startup.cs` file of each module.
+- Use Static LoggerMessages for high-frequency log entries to improve performance.
+- Use appropriate log levels (Trace, Debug, Information, Warning, Error, Critical) based on the severity of the event.
+- Avoid logging sensitive information (e.g., passwords, personal data).
+- Log strings should be resource-based for localization support.
 
-## 4. Bootstrap / Environment Setup
+### 4.1 Logging Event ID Schema (REINSTATED)
+Each subsystem owns a numeric EventId range. Do NOT overlap ranges. When adding new events, append within the allocated block; reserve gaps for expansion. If a new subsystem emerges, allocate a fresh contiguous block and document it here.
 
-ALWAYS perform these steps in a clean clone before attempting builds:
+| Range | Subsystem / Purpose | Notes |
+|-------|---------------------|-------|
+| 1000–1099 | Security (authZ / access evaluation) | Already implemented in Security.Logging.Logger |
+| 1100–1199 | Security (future integrity / tamper) | Reserved |
+| 2000–2099 | Client UI Policy Editor (search, selection, catalog load) | Implemented in PolicyEditorLog |
+| 2100–2199 | Client UI Log Viewer & Diagnostics | To be added |
+| 3000–3099 | ADMX/ADML Parsing / Catalog Loader | Add source‑generated logger before extending |
+| 3100–3199 | Validation Engine (rules execution) | Pending implementation |
+| 4000–4099 | Deployment / Registry application | DeploymentService future |
+| 5000–5099 | Versioning / Snapshot / Diff | Future phase |
+| 6000–6099 | Storage / Repository operations (SQL / persistence) | Optional, keep low-noise |
+| 7000–7099 | Self-Healing / Drift detection | Future phase |
+| 9000–9099 | Critical / Fallback / Fatal recoverable states | Use sparingly, page operators |
 
-1. Clone:
-   git clone https://github.com/OldSkoolzRoolz/ai-assisted-it-manager.git
-   cd ai-assisted-it-manager
+Guidelines:
+- EventId ranges stable; do not renumber after release.
+- One LoggerMessage method per semantic event (avoid dynamic template changes).
+- Prefer structured properties over string concatenation.
+- Use source-generated partial static logger classes named `<Area>Log` or `Logger` in the subsystem namespace.
+- For CA1848 compliance: avoid direct `LogInformation($"...")` in new code unless one-off / low frequency (and justify in PR).
 
-2. Ensure required .NET SDK (target: .NET 9).  
-   Check:
-   dotnet --version  
-   If mismatch (older major), install latest .NET 9 (Preview if before GA).
+### 4.2 Adding a New LoggerMessage
+1. Pick the next unused EventId in the appropriate range.
+2. Add a partial static class (or extend existing) with `[LoggerMessage]` attribute.
+3. Keep parameter names descriptive (they become structured log field names).
+4. Update this table if a new range or category is needed.
+5. Include XML docs summarizing intent; mention EventId in summary when useful.
 
-3. Windows PowerShell / Terminal environment:
-   - Use PowerShell 7+ (pwsh).
-   - Set execution policy if scripts blocked:
-     Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-
-4. Run workspace setup script:
-   pwsh onboarding/workspace-presets.ps1
-   ALWAYS run this after first clone and after adding new projects requiring config.
-   (This script provisions workspace presets, applies Defender exclusions, sets up symbolic links; do NOT skip.)
-
-5. Restore solution dependencies (even if VS would auto-restore):
-   dotnet restore ITCompanion.sln
-
-6. (If database features needed) Confirm local SQL Server instance reachable. Provide (or create) a local connection string in user-secrets or appsettings.Development.json if project demands it. If unsure and build fails on missing connection string, create placeholder:
-   Server=(localdb)\\MSSQLLocalDB;Database=ITCompanion;Trusted_Connection=True;Encrypt=True;
-
+Example:
+```csharp
+[LoggerMessage(EventId = 3000, Level = LogLevel.Debug, Message = "ADMX file discovered {File} size={Bytes}")]
+internal static partial void AdmxFileDiscovered(this ILogger logger, string File, long Bytes);
+```
 
 ---
+## 5. Build Instructions
 
+Canonical build sequence (ALWAYS in this order after bootstrap):
+
+1. dotnet restore ITCompanion.sln
+2. dotnet build ITCompanion.sln -c Debug -warnaserror /p:TreatWarningsAsErrors=true /p:AnalysisLevel=latest /p:EnforceCodeStyleInBuild=true
+3. (Optional release) dotnet build ITCompanion.sln -c Release -warnaserror /p:TreatWarningsAsErrors=true /p:AnalysisLevel=latest /p:EnforceCodeStyleInBuild=true
+4. (Analyzer formatting) dotnet format analyzers --verify-no-changes || dotnet format analyzers
+
+ALWAYS ensure zero warnings. If an upstream package triggers unavoidable warnings, add a targeted suppression with justification (never blanket disable ruleset globally without CODEOWNER approval).
+
+---
 ## 5a. Warning / Analyzer Enforcement Policy
 
 Automation MUST:
@@ -136,6 +161,23 @@ DOTNET_NOLOGO=1 dotnet build ITCompanion.sln -c Debug -warnaserror /p:TreatWarni
 ```
 
 ---
+## 7. Testing
+
+Standard test invocation (from README):
+  dotnet test tests/
+
+Preferred verbose form (surface all results, skip build duplicates):
+  dotnet test ITCompanion.sln --no-build --configuration Debug
+
+ALWAYS run dotnet build (with -warnaserror) first for deterministic behavior; dotnet test will otherwise restore & build implicitly, which can mask incremental issues.
+
+If integration tests (e.g., DB or WMI) exist and are slow/flaky:
+- Look for traits/categories (e.g., [Category("Integration")]) and optionally filter:
+  dotnet test --filter TestCategory!=Integration
+
+Add new tests in corresponding test project mirroring source project naming:
+- src/CorePolicyEngine/ -> tests/CorePolicyEngine.Tests/
+Ensure new test project is referenced in solution and uses the standard test framework (likely xUnit or MSTest; inspect existing test project for conventions before adding).
 
 ## 9. Database / Migrations (If ITCompanionDB Active)
 
@@ -147,7 +189,6 @@ Look for a project (e.g., src/ITCompanionDB or database project). Typical patter
 ALWAYS update the solution + build before generating migrations to avoid stale model issues.
 Always test migration application on a fresh local database instance to verify correctness.
 Always document migration procedures to outline steps for applying in production environments. migrations should be idempotent and reversible if possible. outlined in docs/migrations.md if it exists- create if it doesn't.
-
 
 ---
 
@@ -182,15 +223,7 @@ If you update architecture, reflect changes consistently across:
 2. onboarding/ module overview
 3. This instructions file (only if foundational process changes—avoid churn for minor refactors)
 
----
-
-
-
-## 18. Extensibility Guidance
-
-When introducing AI:
-- Maintain separation: Parsing (pure), Validation (rules), Deployment (side effects)
- 
+S
 
 ---
 
@@ -247,6 +280,7 @@ If any path differs, list src/ to identify correct project and adjust only that 
 
 A change is "ready" ONLY if:
 - Builds cleanly (no warnings: enforced by -warnaserror / TreatWarningsAsErrors=true).
+- Resolves IntelliSense issues.
 - All tests pass (and new tests cover new logic).
 - No hard-coded environment-only paths or credentials.
 - UI or service still starts successfully after change.

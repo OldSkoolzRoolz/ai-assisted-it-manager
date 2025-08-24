@@ -5,14 +5,11 @@
 // License: All Rights Reserved. No use without consent.
 // Do not remove file headers
 
-
 namespace KC.ITCompanion.CorePolicyEngine.Models;
 
-
 /// <summary>
-///     Represents client behavior configuration centrally managed (local or distributed).
-///     Layering order (lowest precedence first): LocalDefault < OrgBaseline < SiteOverride < MachineOverride
-///     < UserOverride.
+/// Represents client behavior configuration centrally managed (local or distributed).
+/// Layer precedence (lowest first): LocalDefault &lt; OrgBaseline &lt; SiteOverride &lt; MachineOverride &lt; UserOverride.
 /// </summary>
 public sealed record BehaviorPolicy(
     int LogRetentionDays,
@@ -30,6 +27,7 @@ public sealed record BehaviorPolicy(
     bool LogFailoverEnabled
 )
 {
+    /// <summary>Returns a baseline default policy.</summary>
     public static BehaviorPolicy Default => new(
         7,
         5,
@@ -47,10 +45,8 @@ public sealed record BehaviorPolicy(
     );
 }
 
-
-
 /// <summary>
-///     Snapshot returning effective merged policy and per-layer hashes for drift / change detection.
+/// Snapshot returning effective merged policy and per-layer hashes for drift / change detection.
 /// </summary>
 public sealed record BehaviorPolicySnapshot(
     BehaviorPolicy Effective,
@@ -62,13 +58,19 @@ public sealed record BehaviorPolicySnapshot(
     DateTime GeneratedUtc
 );
 
-
-
+/// <summary>
+/// Policy layering levels in ascending precedence order.
+/// </summary>
 public enum BehaviorPolicyLayer
 {
+    /// <summary>Local default (hard-coded fallback).</summary>
     LocalDefault = 0,
+    /// <summary>Organization baseline (central admin baseline).</summary>
     OrgBaseline = 1,
+    /// <summary>Site level override.</summary>
     SiteOverride = 2,
+    /// <summary>Machine specific override.</summary>
     MachineOverride = 3,
+    /// <summary>User specific override.</summary>
     UserOverride = 4
 }

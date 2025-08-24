@@ -10,6 +10,17 @@ using System.Collections.Generic;
 
 namespace KC.ITCompanion.CorePolicyEngine.AdminTemplates;
 
+/// <summary>
+/// Read?model summary of a policy used for quick listing / search without loading full ADMX structures.
+/// </summary>
+/// <param name="Key">Stable policy identity (namespace + name).</param>
+/// <param name="DisplayName">Resolved localized display name.</param>
+/// <param name="ExplainText">Optional resolved explanation text.</param>
+/// <param name="CategoryPath">Fully qualified category path ("Computer Configuration/..."), or "Uncategorized".</param>
+/// <param name="Class">Policy class (machine / user / both).</param>
+/// <param name="SupportedOn">Optional support definition id (resolved reference).</param>
+/// <param name="ElementKinds">Collection of element kind descriptors for coarse filtering.</param>
+/// <param name="IndexedAtUtc">UTC timestamp when the summary was materialized.</param>
 public sealed record PolicySummary(
     PolicyKey Key,
     string DisplayName, // resolved via ADML
@@ -20,21 +31,37 @@ public sealed record PolicySummary(
     IReadOnlyList<string> ElementKinds,
     DateTimeOffset IndexedAtUtc);
 
+/// <summary>
+/// Node in a category hierarchy tree plus the associated policies for display/navigation.
+/// </summary>
+/// <param name="Path">Full hierarchical path of the node.</param>
+/// <param name="Name">Leaf name of this category.</param>
+/// <param name="Children">Child categories.</param>
+/// <param name="Policies">Policies directly under this category.</param>
 public sealed record CategoryNode(
     string Path,
     string Name,
     IReadOnlyList<CategoryNode> Children,
     IReadOnlyList<PolicySummary> Policies);
 
+/// <summary>
+/// Materializes lightweight read models (summaries) by joining an ADMX definition document with its ADML resources.
+/// </summary>
 public static class Materializer
 {
-    // Example: create summaries by joining ADMX + ADML
+    /// <summary>
+    /// Creates <see cref="PolicySummary"/> sequences from the supplied ADMX + ADML documents.
+    /// </summary>
+    /// <param name="admx">Parsed ADMX (definition) document.</param>
+    /// <param name="adml">Parsed ADML (localization) document.</param>
+    /// <returns>Enumeration of materialized summaries (evaluated lazily).</returns>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="admx"/> or <paramref name="adml"/> is null.</exception>
     public static IEnumerable<PolicySummary> Summarize(
         AdmxDocument admx,
         AdmlDocument adml)
     {
-        if (admx is null) throw new ArgumentNullException(nameof(admx));
-        if (adml is null) throw new ArgumentNullException(nameof(adml));
+        ArgumentNullException.ThrowIfNull(admx);
+        ArgumentNullException.ThrowIfNull(adml);
 
         var strings = adml.StringTable;
 

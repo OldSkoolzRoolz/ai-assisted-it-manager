@@ -4,13 +4,52 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:local="using:ITCompanionClient.Controls"
     mc:Ignorable="d">
+    <UserControl.Resources>
+        <local:LogLevelToBrushConverter x:Key="LevelBrushConverter" />
+        <Style TargetType="ListViewItem">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        </Style>
+        <DataTemplate x:Key="LogRowTemplate">
+            <Grid ColumnSpacing="8" Padding="4" MinHeight="28">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="90" />
+                    <ColumnDefinition Width="48" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="220" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="{Binding Ts}" FontFamily="Consolas" />
+                <Border Grid.Column="1" Background="{Binding Level, Converter={StaticResource LevelBrushConverter}}" CornerRadius="4" Padding="2,0" HorizontalAlignment="Left">
+                    <TextBlock Text="{Binding Level}" FontSize="12" Foreground="White" />
+                </Border>
+                <TextBlock Grid.Column="2" Text="{Binding Message}" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Column="3" Text="{Binding Category}" Opacity="0.7" />
+            </Grid>
+        </DataTemplate>
+    </UserControl.Resources>
     <Grid RowSpacing="8" Padding="12">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <TextBlock Text="Logs (placeholder)" FontSize="20" FontWeight="SemiBold" />
-        <ListView Grid.Row="1" x:Name="LogList" />
+        <CommandBar Grid.Row="0" DefaultLabelPosition="Collapsed">
+            <AppBarElementContainer>
+                <AutoSuggestBox Width="260" PlaceholderText="Search message/category" TextChanged="OnSearchChanged" />
+            </AppBarElementContainer>
+            <AppBarElementContainer>
+                <ComboBox x:Name="LevelCombo" Width="120" SelectionChanged="OnLevelChanged">
+                    <ComboBoxItem Content="All" Tag="" IsSelected="True" />
+                    <ComboBoxItem Content="Info+" Tag="2" />
+                    <ComboBoxItem Content="Warning+" Tag="3" />
+                    <ComboBoxItem Content="Error+" Tag="4" />
+                </ComboBox>
+            </AppBarElementContainer>
+            <AppBarToggleButton Icon="Play" Label="AutoScroll" IsChecked="{x:Bind AutoScroll, Mode=TwoWay}" />
+            <AppBarButton Icon="Pause" Label="Pause" Click="OnPause" />
+            <AppBarButton Icon="Play" Label="Resume" Click="OnResume" />
+            <AppBarButton Icon="Delete" Label="Clear" Click="OnClear" />
+        </CommandBar>
+        <ListView Grid.Row="1" x:Name="LogList" ItemsSource="{x:Bind Events}" ItemTemplate="{StaticResource LogRowTemplate}" IsItemClickEnabled="False" />
     </Grid>
 </UserControl>

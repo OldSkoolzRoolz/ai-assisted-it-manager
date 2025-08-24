@@ -41,12 +41,13 @@ public partial class App : Application
         sc.AddLogging(b =>
         {
             b.AddDebug();
-            b.SetMinimumLevel(LogLevel.Information);
+            b.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Information);
         });
         sc.AddSingleton<IAdminTemplateLoader, AdmxAdmlParser>();
         sc.AddSingleton<IAuditStore, AuditStore>();
         sc.AddSingleton<IAuditWriter, AuditWriter>();
         sc.AddSingleton<ISqlConnectionFactory, SqlConnectionFactory>();
+        sc.AddSingleton<ILogEventQueryRepository, LogEventQueryRepository>();
 
         // UI adapters
         sc.AddSingleton<IUiDispatcher, WinUiDispatcher>();

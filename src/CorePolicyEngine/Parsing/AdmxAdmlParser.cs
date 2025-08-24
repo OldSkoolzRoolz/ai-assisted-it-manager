@@ -5,68 +5,74 @@
 // License: All Rights Reserved. No use without consent.
 // Do not remove file headers
 
-
 using System.Globalization;
 using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
-
 using KC.ITCompanion.CorePolicyEngine.AdminTemplates;
-
-
-// for XmlException
-
 
 namespace KC.ITCompanion.CorePolicyEngine.Parsing;
 
-
-// Composite pair result for a single ADMX + ADML
+/// <summary>
+/// Composite pair of a single ADMX document and its matching ADML localization document.
+/// </summary>
+/// <param name="Admx">Parsed ADMX definition document.</param>
+/// <param name="Adml">Parsed ADML localization document.</param>
 public sealed record AdminTemplatePair(AdmxDocument Admx, AdmlDocument Adml);
 
-
-
-// Aggregated catalog (multiple ADMX files consolidated)
+/// <summary>
+/// Aggregated catalog comprising multiple ADMX / ADML pairs plus derived read models / category tree.
+/// </summary>
+/// <param name="AdmxDocuments">Collection of ADMX documents.</param>
+/// <param name="AdmlDocuments">Collection of ADML documents.</param>
+/// <param name="Summaries">Flattened policy summaries.</param>
+/// <param name="CategoryTree">Root category nodes forming a hierarchical tree.</param>
 public sealed record AdminTemplateCatalog(
     IReadOnlyList<AdmxDocument> AdmxDocuments,
     IReadOnlyList<AdmlDocument> AdmlDocuments,
     IReadOnlyList<PolicySummary> Summaries,
-    List<CategoryNode> CategoryTree);
+    IReadOnlyList<CategoryNode> CategoryTree);
 
-
-
+/// <summary>
+/// Loader interface for obtaining administrative template (ADMX/ADML) data.
+/// </summary>
 public interface IAdminTemplateLoader
 {
+    /// <summary>Loads a single ADMX + ADML pair from disk.</summary>
+    /// <param name="admxPath">Path to the .admx file.</param>
+    /// <param name="languageTag">IETF language tag (folder under PolicyDefinitions).</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Result containing the loaded pair or errors.</returns>
     Task<Result<AdminTemplatePair>> LoadAsync(string admxPath, string languageTag, CancellationToken cancellationToken);
 
-
-
-
-
+    /// <summary>Loads the local PolicyDefinitions catalog (subset) returning documents, summaries and category tree.</summary>
+    /// <param name="languageTag">Language tag (ADML folder name).</param>
+    /// <param name="maxFiles">Optional cap of files processed.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
     Task<Result<AdminTemplateCatalog>> LoadLocalCatalogAsync(string languageTag, int? maxFiles,
         CancellationToken cancellationToken);
 }
 
-
-
 /// <summary>
-///     ADMX/ADML loader building domain models close to Microsoft schemas (subset).
-///     Implemented: categories, policies (metadata + subset elements), supportedOn definitions (basic), presentations.
-///     Deferred: registry value mapping, list elements, complex supported-on logic evaluation.
+/// ADMX/ADML parser building domain models close to Microsoft schemas (subset implemented).
 /// </summary>
 public sealed class AdmxAdmlParser : IAdminTemplateLoader
 {
     private static readonly Regex PresentationToken =
         new("^\\$\\(presentation\\.(?<id>[A-Za-z0-9_]+)\\)$", RegexOptions.Compiled);
 
-
-
-
-
+    /// <summary>
+    /// Loads a single ADMX + ADML pair from disk.
+    /// </summary>
+    /// <param name="admxPath">Path to the .admx file.</param>
+    /// <param name="languageTag">IETF language tag (folder under PolicyDefinitions).</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Result containing the loaded pair or errors.</returns>
     public async Task<Result<AdminTemplatePair>> LoadAsync(string admxPath, string languageTag,
         CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(admxPath) || !File.Exists(admxPath))
-            return Result<AdminTemplatePair>.Fail("ADMX file not found");
+            return ResultFactory.Fail<AdminTemplatePair>("ADMX file not found");
 
         try
         {
@@ -94,25 +100,28 @@ public sealed class AdmxAdmlParser : IAdminTemplateLoader
                 policies,
                 Lineage(admxPath));
 
-            return Result<AdminTemplatePair>.Ok(new AdminTemplatePair(admx, adml));
+            return ResultFactory.Ok(new AdminTemplatePair(admx, adml));
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or XmlException or FormatException)
         {
-            return Result<AdminTemplatePair>.Fail($"Parse error: {ex.Message}");
+            return ResultFactory.Fail<AdminTemplatePair>($"Parse error: {ex.Message}");
         }
     }
 
-
-
-
-
+    /// <summary>
+    /// Loads the local PolicyDefinitions catalog (subset) returning documents, summaries and category tree.
+    /// </summary>
+    /// <param name="languageTag">Language tag (ADML folder name).</param>
+    /// <param name="maxFiles">Optional cap of files processed.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Result containing the loaded catalog or errors.</returns>
     public async Task<Result<AdminTemplateCatalog>> LoadLocalCatalogAsync(string languageTag, int? maxFiles,
         CancellationToken cancellationToken)
     {
         var winDir = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
         var policyDir = Path.Combine(winDir, "PolicyDefinitions");
         if (!Directory.Exists(policyDir))
-            return Result<AdminTemplateCatalog>.Fail("PolicyDefinitions directory not found");
+            return ResultFactory.Fail<AdminTemplateCatalog>("PolicyDefinitions directory not found");
 
         List<string> admxFiles = Directory.GetFiles(policyDir, "*.admx").OrderBy(f => f).Take(maxFiles ?? int.MaxValue)
             .ToList();
@@ -122,30 +131,21 @@ public sealed class AdmxAdmlParser : IAdminTemplateLoader
 
         foreach (var file in admxFiles)
         {
-            Result<AdminTemplatePair> pairResult =
-                await LoadAsync(file, languageTag, cancellationToken).ConfigureAwait(false);
-            if (!pairResult.Success || pairResult.Value is null) continue;
-            admxDocs.Add(pairResult.Value.Admx);
-            admlDocs.Add(pairResult.Value.Adml);
-            summaries.AddRange(Materializer.Summarize(pairResult.Value.Admx, pairResult.Value.Adml));
+            var pairResult = await LoadAsync(file, languageTag, cancellationToken).ConfigureAwait(false);
+            if (!pairResult.Success || pairResult is not Result<AdminTemplatePair> pr || pr.Value is null) continue;
+            admxDocs.Add(pr.Value.Admx);
+            admlDocs.Add(pr.Value.Adml);
+            summaries.AddRange(Materializer.Summarize(pr.Value.Admx, pr.Value.Adml));
         }
 
-        List<CategoryNode> tree = BuildCategoryTree(summaries);
-        return Result<AdminTemplateCatalog>.Ok(new AdminTemplateCatalog(admxDocs, admlDocs, summaries, tree));
+        var tree = BuildCategoryTree(summaries);
+        return ResultFactory.Ok(new AdminTemplateCatalog(admxDocs, admlDocs, summaries, tree));
     }
-
-
-
-
 
     private static DocumentLineage Lineage(string path)
     {
         return new DocumentLineage(new Uri(path), string.Empty, DateTimeOffset.UtcNow, null, null);
     }
-
-
-
-
 
     private static IEnumerable<Category> ParseCategories(XDocument doc, XNamespace ns, string path,
         IReadOnlyDictionary<ResourceId, string> strings)
@@ -168,10 +168,6 @@ public sealed class AdmxAdmlParser : IAdminTemplateLoader
                 Lineage(path));
         }
     }
-
-
-
-
 
     private static IEnumerable<SupportDefinition> ParseSupportDefinitions(XDocument doc, XNamespace ns, string path)
     {
@@ -207,10 +203,6 @@ public sealed class AdmxAdmlParser : IAdminTemplateLoader
                 Lineage(path));
         }
     }
-
-
-
-
 
     private static IEnumerable<AdminPolicy> ParsePolicies(XDocument doc, XNamespace ns, string path,
         IReadOnlyDictionary<ResourceId, string> strings, NamespaceBinding nsBinding)
@@ -261,39 +253,29 @@ public sealed class AdmxAdmlParser : IAdminTemplateLoader
                             elements.Add(new BooleanElement(elId, null, Array.Empty<RegistryAction>(),
                                 Array.Empty<RegistryAction>()));
                             break;
-
-
                         case "decimal":
                             var min = TryParseLong(el.Attribute("minValue")?.Value);
                             var max = TryParseLong(el.Attribute("maxValue")?.Value);
                             elements.Add(new DecimalElement(elId, null, min, max,
                                 Array.Empty<RegistryActionTemplate<long>>()));
                             break;
-
-
                         case "longDecimal":
                             var lmin = TryParseLong(el.Attribute("minValue")?.Value);
                             var lmax = TryParseLong(el.Attribute("maxValue")?.Value);
                             elements.Add(new DecimalElement(elId, null, lmin, lmax,
                                 Array.Empty<RegistryActionTemplate<long>>()));
                             break;
-
-
                         case "text":
                             var maxLen = TryParseInt(el.Attribute("maxLength")?.Value);
                             elements.Add(new TextElement(elId, null, null, maxLen,
                                 Array.Empty<RegistryActionTemplate<string>>()));
                             break;
-
-
                         case "multiText":
                             var mtMaxLen = TryParseInt(el.Attribute("maxLength")?.Value);
                             var mtStrings = TryParseInt(el.Attribute("maxStrings")?.Value);
                             elements.Add(new MultiTextElement(elId, null, mtStrings, mtMaxLen,
                                 Array.Empty<RegistryActionTemplate<IReadOnlyList<string>>>()));
                             break;
-
-
                         case "enum":
                             List<EnumItem> enumItems = new();
                             foreach (XElement item in el.Elements(ns + "item"))
@@ -303,7 +285,6 @@ public sealed class AdmxAdmlParser : IAdminTemplateLoader
                                     disp is null ? null : new LocalizedRef(new ResourceId(disp)),
                                     Array.Empty<RegistryAction>()));
                             }
-
                             elements.Add(new EnumElement(elId, null, enumItems));
                             break;
                     }
@@ -326,27 +307,11 @@ public sealed class AdmxAdmlParser : IAdminTemplateLoader
         }
     }
 
+    private static long? TryParseLong(string? v) =>
+        long.TryParse(v, NumberStyles.Integer, CultureInfo.InvariantCulture, out var r) ? r : null;
 
-
-
-
-    private static long? TryParseLong(string? v)
-    {
-        return long.TryParse(v, NumberStyles.Integer, CultureInfo.InvariantCulture, out var r) ? r : null;
-    }
-
-
-
-
-
-    private static int? TryParseInt(string? v)
-    {
-        return int.TryParse(v, NumberStyles.Integer, CultureInfo.InvariantCulture, out var r) ? r : null;
-    }
-
-
-
-
+    private static int? TryParseInt(string? v) =>
+        int.TryParse(v, NumberStyles.Integer, CultureInfo.InvariantCulture, out var r) ? r : null;
 
     private static AdmlDocument CreateEmptyAdml(string admxPath, string languageTag)
     {
@@ -359,10 +324,6 @@ public sealed class AdmxAdmlParser : IAdminTemplateLoader
             new Dictionary<string, AdmlPresentation>(),
             lineage);
     }
-
-
-
-
 
     private static async Task<AdmlDocument> LoadAdmlForAdmxAsync(string admxPath, string languageTag,
         CancellationToken ct)
@@ -409,13 +370,10 @@ public sealed class AdmxAdmlParser : IAdminTemplateLoader
                             PresentationElement pe = BuildPresentationElement(kind, refId, child, stringTable);
                             parts.Add(pe);
                             break;
-
-
                         case "text":
                             break; // ignored free text
                     }
                 }
-
                 presentations[idAttr] = new AdmlPresentation(idAttr, parts);
             }
 
@@ -432,10 +390,6 @@ public sealed class AdmxAdmlParser : IAdminTemplateLoader
             return CreateEmptyAdml(admxPath, languageTag);
         }
     }
-
-
-
-
 
     private static PresentationElement BuildPresentationElement(string kind, string refId, XElement el,
         IReadOnlyDictionary<ResourceId, string> strings)
@@ -474,7 +428,7 @@ public sealed class AdmxAdmlParser : IAdminTemplateLoader
             label = el.Element(el.Name.Namespace + "label")?.Value;
             defaultValue = el.Element(el.Name.Namespace + "default")?.Value;
             suggestions = el.Elements(el.Name.Namespace + "suggestion").Select(e => e.Value).ToList();
-            if (!suggestions.Any()) suggestions = null;
+            if (suggestions.Count == 0) suggestions = null;
             noSort = TryParseBool(el.Attribute("noSort")?.Value);
         }
         else if (k == PresentationElementKind.DropdownList)
@@ -502,27 +456,8 @@ public sealed class AdmxAdmlParser : IAdminTemplateLoader
             spinStep, showAsDialog, defaultHeight, suggestions);
     }
 
-
-
-
-
-    private static bool? TryParseBool(string? v)
-    {
-        return bool.TryParse(v, out var b) ? b : null;
-    }
-
-
-
-
-
-    private static uint? TryParseUInt(string? v)
-    {
-        return uint.TryParse(v, NumberStyles.Integer, CultureInfo.InvariantCulture, out var u) ? u : null;
-    }
-
-
-
-
+    private static bool? TryParseBool(string? v) => bool.TryParse(v, out var b) ? b : null;
+    private static uint? TryParseUInt(string? v) => uint.TryParse(v, NumberStyles.Integer, CultureInfo.InvariantCulture, out var u) ? u : null;
 
     private static List<CategoryNode> BuildCategoryTree(IEnumerable<PolicySummary> summaries)
     {
@@ -550,7 +485,6 @@ public sealed class AdmxAdmlParser : IAdminTemplateLoader
                     current = current.GetOrAddChild(pathAccum, seg);
                 }
             }
-
             current?.Policies.Add(s);
         }
 
@@ -559,51 +493,31 @@ public sealed class AdmxAdmlParser : IAdminTemplateLoader
             .Select(v => v.Build()).ToList();
     }
 
-
-
-
-
     private sealed class CategoryNodeBuilder
     {
         public CategoryNodeBuilder(string path, string name)
         {
-            this.Path = path;
-            this.Name = name;
+            Path = path;
+            Name = name;
         }
-
-
-
-
 
         public string Path { get; }
         public string Name { get; }
         public Dictionary<string, CategoryNodeBuilder> Children { get; } = new(StringComparer.OrdinalIgnoreCase);
         public List<PolicySummary> Policies { get; } = new();
 
-
-
-
-
         public CategoryNodeBuilder GetOrAddChild(string path, string name)
         {
-            if (!this.Children.TryGetValue(path, out CategoryNodeBuilder? child))
+            if (!Children.TryGetValue(path, out CategoryNodeBuilder? child))
             {
                 child = new CategoryNodeBuilder(path, name);
-                this.Children[path] = child;
+                Children[path] = child;
             }
-
             return child;
         }
 
-
-
-
-
-        public CategoryNode Build()
-        {
-            return new CategoryNode(this.Path, this.Name,
-                this.Children.Values.OrderBy(c => c.Name).Select(c => c.Build()).ToList(),
-                this.Policies.OrderBy(p => p.DisplayName).ToList());
-        }
+        public CategoryNode Build() => new(Path, Name,
+            Children.Values.OrderBy(c => c.Name).Select(c => c.Build()).ToList(),
+            Policies.OrderBy(p => p.DisplayName).ToList());
     }
 }

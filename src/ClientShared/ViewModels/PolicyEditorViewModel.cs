@@ -25,8 +25,8 @@ using Microsoft.Extensions.Logging;
 namespace KC.ITCompanion.ClientShared;
 
 /// <summary>
-///     ViewModel orchestrating policy catalog loading, filtering, navigation and selection.
-///     Framework-neutral (no direct WPF / WinUI references) – UI hosts supply dispatcher & prompt services.
+/// ViewModel orchestrating policy catalog loading, filtering, navigation and selection.
+/// Framework-neutral (no direct WPF / WinUI references) – UI hosts supply dispatcher & prompt services.
 /// </summary>
 public class PolicyEditorViewModel : INotifyPropertyChanged
 {
@@ -48,6 +48,7 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
     private string? _categoryFilterId;
     private Dictionary<string, string>? _policyCategoryIdMap;
 
+    /// <summary>Create a new policy editor ViewModel.</summary>
     public PolicyEditorViewModel(
         IAdminTemplateLoader loader,
         ILogger<PolicyEditorViewModel> logger,
@@ -67,39 +68,53 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
         RefreshPolicyGroupsCommand = new RelayCommand(async _ => await LoadPolicyGroupsAsync(), _ => _policyGroups != null);
         OpenSearchDialogCommand = new RelayCommand(_ => OnOpenSearchDialog(), _ => Catalog != null);
         OpenPolicyDetailCommand = new RelayCommand(p => OnOpenPolicyDetail(p as PolicyGridRow), p => p is PolicyGridRow);
-        _logger.LogInformation("PolicyEditor initialized");
+        _logger.PolicyEditorInitialized();
     }
 
+    /// <summary>All loaded policy summaries.</summary>
     public ObservableCollection<PolicySummary> Policies { get; } = new();
+    /// <summary>Policies passing the current filters.</summary>
     public ObservableCollection<PolicySummary> FilteredPolicies { get; } = new();
+    /// <summary>UI-bound collection of selected policy element settings.</summary>
     public ObservableCollection<PolicySettingViewModel> SelectedPolicySettings { get; } = new();
+    /// <summary>Loaded policy groups (server-defined sets).</summary>
     public ObservableCollection<PolicyGroupDto> PolicyGroups { get; } = new();
+    /// <summary>Grouping by ADMX file.</summary>
     public ObservableCollection<PolicyFileGroup> PolicyFileGroups { get; } = new();
+    /// <summary>Hierarchical navigation levels (category tree).</summary>
     public ObservableCollection<CategoryNavLevel> CategoryLevels { get; } = new();
+    /// <summary>Rows displayed for selected navigation node.</summary>
     public ObservableCollection<PolicyGridRow> CategoryPolicyRows { get; } = new();
+    /// <summary>Visibility model for policy grid columns.</summary>
     public PolicyGridColumnVisibility ColumnVisibility { get; } = new();
+    /// <summary>Flat root categories list for quick navigation.</summary>
     public ObservableCollection<CategoryListItem> CategoryListItems { get; } = new();
 
+    /// <summary>Current loaded catalog or null until loaded.</summary>
     public AdminTemplateCatalog? Catalog
     {
         get => _catalog;
         private set { _catalog = value; OnPropertyChanged(); OnPropertyChanged(nameof(PolicyFileCount)); }
     }
 
+    /// <summary>Number of ADMX files in catalog.</summary>
     public int PolicyFileCount => Catalog?.AdmxDocuments.Count ?? 0;
 
+    /// <summary>Breadcrumb path of currently selected navigation node.</summary>
     public string? Breadcrumb
     {
         get => _breadcrumb;
         private set { if (_breadcrumb != value) { _breadcrumb = value; OnPropertyChanged(); } }
     }
 
+    /// <summary>Currently selected policy summary (for details pane).</summary>
     public PolicySummary? SelectedPolicy
     {
         get => _selectedPolicy;
         set { if (_selectedPolicy != value) { _selectedPolicy = value; OnSelectedPolicyChanged(); OnPropertyChanged(); } }
     }
 
+    /// <summary>Search query string applied to name / key / category path.</summary>
     public string? SearchText
     {
         get => _searchText;
@@ -111,26 +126,35 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
                 OnPropertyChanged();
                 ApplySearchFilter(_searchText);
                 RebuildNavigation();
-                _logger.LogDebug("Search filter applied '{Query}'", _searchText ?? string.Empty);
+                _logger.SearchFilterApplied(_searchText ?? string.Empty);
             }
         }
     }
 
+    /// <summary>Currently selected category filter or null.</summary>
     public string? CategoryFilterId
     {
         get => _categoryFilterId;
         private set { if (_categoryFilterId != value) { _categoryFilterId = value; OnPropertyChanged(); ReapplyFilters(); } }
     }
 
+    /// <summary>Command to load initial subset of policies.</summary>
     public ICommand LoadPoliciesCommand { get; }
+    /// <summary>Command to apply search text filter.</summary>
     public ICommand SearchLocalPoliciesCommand { get; }
+    /// <summary>Command to refresh policy groups from server.</summary>
     public ICommand RefreshPolicyGroupsCommand { get; }
+    /// <summary>Command to open search dialog UI.</summary>
     public ICommand OpenSearchDialogCommand { get; }
+    /// <summary>Command to open detail panel for a selected policy row.</summary>
     public ICommand OpenPolicyDetailCommand { get; }
 
+    /// <summary>Raised when a policy row requests opening a detailed view.</summary>
     public event EventHandler<PolicyGridRow>? PolicyDetailRequested;
+    /// <inheritdoc />
     public event PropertyChangedEventHandler? PropertyChanged;
 
+    /// <summary>Ensures catalog is loaded (idempotent) using default language.</summary>
     public async Task EnsureCatalogLoadedAsync()
     { if (Catalog != null) return; await LoadEntireCatalogAsync("en-US", CancellationToken.None); }
 
@@ -146,7 +170,7 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
                 foreach (var g in groups) PolicyGroups.Add(g);
             });
         }
-        catch (Exception ex) { _logger.LogError(ex, "Failed loading policy groups"); }
+        catch (Exception ex) { _logger.PolicyGroupsLoadFailed(ex); }
     }
 
     private async Task LoadDefaultSubsetAsync()
@@ -159,7 +183,7 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
         try { result = await _loader.LoadLocalCatalogAsync(languageTag, 50, token).ConfigureAwait(false); }
         catch (Exception ex) { _logger.LogError(ex, "Unexpected exception loading catalog language {LanguageTag}", languageTag); return; }
         sw.Stop();
-        if (!result.Success || result.Value is null) { _logger.LogWarning("Catalog load failed for language {LanguageTag}", languageTag); return; }
+        if (!result.Success || result.Value is null) { _logger.CatalogLoadFailed(languageTag); return; }
         Catalog = result.Value;
         IndexCategories();
         _policyCategoryIdMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -168,12 +192,11 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
         {
             Policies.Add(s);
         }
-        // build key->category id map from documents
         foreach (var pol in Catalog.AdmxDocuments.SelectMany(d => d.Policies))
         {
             try
             {
-                var catId = pol.Category.Id.Value; // CategoryId underlying string
+                var catId = pol.Category.Id.Value;
                 if (!string.IsNullOrWhiteSpace(catId))
                     _policyCategoryIdMap[pol.Key.Name] = catId;
             }
@@ -181,12 +204,14 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
         }
         FilteredPolicies.Clear(); foreach (var p in Policies) FilteredPolicies.Add(p);
         BuildFileGroups(); RebuildNavigation(); Breadcrumb = null;
-        _logger.LogInformation("Catalog loaded language {LanguageTag} policies={PolicyCount} in {ElapsedMs}ms", languageTag, Policies.Count, sw.ElapsedMilliseconds);
+        _logger.CatalogLoaded(languageTag, Policies.Count, sw.ElapsedMilliseconds);
     }
 
+    /// <summary>Apply a category filter by id (null clears).</summary>
     public void SetCategoryFilter(string? categoryId)
     { CategoryFilterId = string.IsNullOrWhiteSpace(categoryId) ? null : categoryId; }
 
+    /// <summary>Applies a text search filter.</summary>
     public void ApplySearchFilter(string? query)
     {
         _lastSearch = query;
@@ -367,9 +392,9 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
         SelectedPolicySettings.Clear();
         if (Catalog == null || SelectedPolicy == null) return;
         var policy = Catalog.AdmxDocuments.SelectMany(d => d.Policies).FirstOrDefault(p => p.Key.Name == SelectedPolicy.Key.Name);
-        if (policy == null) { _logger.LogWarning("Selected policy key {PolicyKey} not found in catalog documents", SelectedPolicy.Key.Name); return; }
+        if (policy == null) { _logger.PolicyKeyNotFound(SelectedPolicy.Key.Name); return; }
         foreach (var element in policy.Elements) SelectedPolicySettings.Add(new PolicySettingViewModel(policy, element));
-        _logger.LogInformation("Policy selected {PolicyKey} settings={SettingCount}", SelectedPolicy.Key.Name, SelectedPolicySettings.Count);
+        _logger.PolicySelected(SelectedPolicy.Key.Name, SelectedPolicySettings.Count);
         try { await _audit.PolicySelectedAsync(SelectedPolicy.Key.Name).ConfigureAwait(false); } catch { }
     }
 
@@ -388,43 +413,67 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
 
 #region Helper Types
 
+/// <summary>Column visibility flags for policy grid.</summary>
 public sealed class PolicyGridColumnVisibility : INotifyPropertyChanged
 {
     private bool _name = true, _key = true, _scope = true, _category = true, _description = true, _supportedOn = true;
+    /// <summary>Show Name column.</summary>
     public bool Name { get => _name; set { if (_name != value) { _name = value; OnPropertyChanged(); } } }
+    /// <summary>Show Key column.</summary>
     public bool Key { get => _key; set { if (_key != value) { _key = value; OnPropertyChanged(); } } }
+    /// <summary>Show Scope column.</summary>
     public bool Scope { get => _scope; set { if (_scope != value) { _scope = value; OnPropertyChanged(); } } }
+    /// <summary>Show Category column.</summary>
     public bool Category { get => _category; set { if (_category != value) { _category = value; OnPropertyChanged(); } } }
+    /// <summary>Show Description column.</summary>
     public bool Description { get => _description; set { if (_description != value) { _description = value; OnPropertyChanged(); } } }
+    /// <summary>Show SupportedOn column.</summary>
     public bool SupportedOn { get => _supportedOn; set { if (_supportedOn != value) { _supportedOn = value; OnPropertyChanged(); } } }
+    /// <inheritdoc />
     public event PropertyChangedEventHandler? PropertyChanged;
     private void OnPropertyChanged([CallerMemberName] string? n = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n));
 }
 
+/// <summary>Navigation level (column) in hierarchical category navigation.</summary>
 public sealed class CategoryNavLevel : INotifyPropertyChanged
 {
+    /// <summary>Category options at this level.</summary>
     public ObservableCollection<CategoryNavOption> Options { get; } = new();
     private CategoryNavOption? _selected;
+    /// <summary>Currently selected option.</summary>
     public CategoryNavOption? Selected { get => _selected; set { if (_selected != value) { _selected = value; OnPropertyChanged(); } } }
+    /// <summary>Depth (root = 0).</summary>
     public int Depth { get; }
+    /// <summary>Create level with depth.</summary>
     public CategoryNavLevel(int depth) { Depth = depth; }
+    /// <inheritdoc />
     public event PropertyChangedEventHandler? PropertyChanged;
     private void OnPropertyChanged([CallerMemberName] string? n = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n));
 }
 
+/// <summary>Navigation option for a single category.</summary>
 public sealed record CategoryNavOption(string Id, string Name, Category Category);
 
+/// <summary>Grid row DTO for category policy listing.</summary>
 public sealed class PolicyGridRow
 {
+    /// <summary>Display name (fallback to key).</summary>
     public required string Name { get; init; }
+    /// <summary>Policy key name.</summary>
     public required string Key { get; init; }
+    /// <summary>Policy scope (Machine/User/Both).</summary>
     public required string Scope { get; init; }
+    /// <summary>Category path string.</summary>
     public required string CategoryPath { get; init; }
+    /// <summary>Supported platform text.</summary>
     public string? SupportedOn { get; init; }
+    /// <summary>Policy description / explain text (short form).</summary>
     public string? Description { get; init; }
+    /// <summary>Underlying summary reference.</summary>
     public PolicySummary Summary { get; init; } = null!;
 }
 
+/// <summary>Simple list item for root category listing.</summary>
 public sealed record CategoryListItem(string Id, string Name);
 
 #endregion#endregion
