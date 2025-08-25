@@ -4,27 +4,31 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:app="using:ITCompanionClient"
     mc:Ignorable="d">
     <Grid RowSpacing="16" Padding="16">
+        <Grid.Resources>
+            <app:LocalizedStrings x:Key="Loc" />
+        </Grid.Resources>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal" Spacing="12">
             <StackPanel Width="180" Spacing="4">
-                <TextBlock Text="Overall Health" FontWeight="SemiBold" />
+                <TextBlock Text="{Binding Provider.[UI_OverallHealth], Source={StaticResource Loc}}" FontWeight="SemiBold" />
                 <Border Background="{StaticResource Brush.Surface.Mid}" Padding="8" CornerRadius="6">
                     <TextBlock Text="OK" FontSize="24" FontWeight="Bold" />
                 </Border>
             </StackPanel>
             <StackPanel Width="180" Spacing="4">
-                <TextBlock Text="Active Alerts" FontWeight="SemiBold" />
+                <TextBlock Text="{Binding Provider.[UI_ActiveAlerts], Source={StaticResource Loc}}" FontWeight="SemiBold" />
                 <Border Background="{StaticResource Brush.Surface.Mid}" Padding="8" CornerRadius="6">
                     <TextBlock Text="0" FontSize="24" FontWeight="Bold" />
                 </Border>
             </StackPanel>
             <StackPanel Width="180" Spacing="4">
-                <TextBlock Text="Policy Drift" FontWeight="SemiBold" />
+                <TextBlock Text="{Binding Provider.[UI_PolicyDrift], Source={StaticResource Loc}}" FontWeight="SemiBold" />
                 <Border Background="{StaticResource Brush.Surface.Mid}" Padding="8" CornerRadius="6">
                     <TextBlock Text="0" FontSize="24" FontWeight="Bold" />
                 </Border>
@@ -35,10 +39,10 @@
                 <ColumnDefinition Width="2*" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <Expander Header="Recent High Importance Events" IsExpanded="True" Grid.Column="0">
+            <Expander Header="{Binding Provider.[UI_RecentHighEvents], Source={StaticResource Loc}}" IsExpanded="True" Grid.Column="0">
                 <ListView />
             </Expander>
-            <Expander Header="Active Alerts" IsExpanded="True" Grid.Column="1">
+            <Expander Header="{Binding Provider.[UI_ActiveAlerts], Source={StaticResource Loc}}" IsExpanded="True" Grid.Column="1">
                 <ListView />
             </Expander>
         </Grid>

@@ -5,9 +5,11 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:local="using:ITCompanionClient.Controls"
+    xmlns:app="using:ITCompanionClient"
     mc:Ignorable="d">
     <UserControl.Resources>
         <local:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+        <app:LocalizedStrings x:Key="Loc" />
         <DataTemplate x:Key="PolicyRowTemplate">
             <Grid ColumnSpacing="12" Padding="4" MinHeight="36">
                 <Grid.ColumnDefinitions>
@@ -20,7 +22,7 @@
                     <TextBlock Text="{Binding Key.Name}" FontSize="12" Opacity="0.6" />
                 </StackPanel>
                 <TextBlock x:Name="CategoryPanel" Grid.Column="1" Text="{Binding CategoryPath}" TextTrimming="CharacterEllipsis" />
-                <Button Grid.Column="2" Content="Open" Tag="{Binding}" Click="OnOpenPolicy" HorizontalAlignment="Right" />
+                <Button Grid.Column="2" Content="{Binding Provider.[UI_Open], Source={StaticResource Loc}}" Tag="{Binding}" Click="OnOpenPolicy" HorizontalAlignment="Right" />
             </Grid>
         </DataTemplate>
     </UserControl.Resources>
@@ -33,19 +35,19 @@
         <InfoBar x:Name="ActionInfoBar" Grid.Row="0" IsOpen="False" Severity="Informational" />
         <CommandBar Grid.Row="1" DefaultLabelPosition="Collapsed">
             <AppBarElementContainer>
-                <AutoSuggestBox x:Name="SearchBox" Width="320" PlaceholderText="Search policies" TextChanged="OnSearchChanged" />
+                <AutoSuggestBox x:Name="SearchBox" Width="320" PlaceholderText="{Binding Provider.[UI_SearchPolicies], Source={StaticResource Loc}}" TextChanged="OnSearchChanged" />
             </AppBarElementContainer>
-            <AppBarButton Icon="Refresh" Label="Reload" Click="OnReload" />
-            <AppBarButton Icon="Filter" Label="Advanced" Click="OnAdvancedSearch" />
-            <AppBarButton Icon="View" Label="Columns">
+            <AppBarButton Icon="Refresh" Label="{Binding Provider.[UI_Reload], Source={StaticResource Loc}}" Click="OnReload" />
+            <AppBarButton Icon="Filter" Label="{Binding Provider.[UI_Advanced], Source={StaticResource Loc}}" Click="OnAdvancedSearch" />
+            <AppBarButton Icon="View" Label="{Binding Provider.[UI_Columns], Source={StaticResource Loc}}">
                 <AppBarButton.Flyout>
                     <MenuFlyout>
-                        <MenuFlyoutItem Text="Name" Tag="Name" Click="OnColumnToggle" />
-                        <MenuFlyoutItem Text="Category" Tag="Category" Click="OnColumnToggle" />
+                        <MenuFlyoutItem Text="{Binding Provider.[UI_Name], Source={StaticResource Loc}}" Tag="Name" Click="OnColumnToggle" />
+                        <MenuFlyoutItem Text="{Binding Provider.[UI_Category], Source={StaticResource Loc}}" Tag="Category" Click="OnColumnToggle" />
                     </MenuFlyout>
                 </AppBarButton.Flyout>
             </AppBarButton>
-            <AppBarToggleButton x:Name="GroupToggle" Icon="List" Label="Group By File" Checked="OnGroupingChanged" Unchecked="OnGroupingChanged" />
+            <AppBarToggleButton x:Name="GroupToggle" Icon="List" Label="{Binding Provider.[UI_GroupByFile], Source={StaticResource Loc}}" Checked="OnGroupingChanged" Unchecked="OnGroupingChanged" />
             <AppBarElementContainer>
                 <ProgressRing x:Name="LoadingRing" Width="28" Height="28" IsActive="False" />
             </AppBarElementContainer>
@@ -57,7 +59,7 @@
             </Grid.ColumnDefinitions>
             <!-- Category navigation -->
             <StackPanel Grid.Column="0" Spacing="4">
-                <TextBlock Text="Categories" FontSize="14" FontWeight="SemiBold" />
+                <TextBlock Text="{Binding Provider.[UI_CategoriesHeader], Source={StaticResource Loc}}" FontSize="14" FontWeight="SemiBold" />
                 <ListView x:Name="CategoryList" SelectionMode="Single" ItemsSource="{Binding ViewModel.CategoryListItems}" SelectionChanged="OnCategorySelectionChanged">
                     <ListView.ItemTemplate>
                         <DataTemplate>
@@ -97,7 +99,7 @@
                 </ScrollViewer>
                 <StackPanel x:Name="EmptyStatePanel" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12" Visibility="Collapsed">
                     <SymbolIcon Symbol="Find" />
-                    <TextBlock Text="No policies match your search." />
+                    <TextBlock Text="{Binding Provider.[UI_NoPoliciesMatch], Source={StaticResource Loc}}" />
                 </StackPanel>
             </Grid>
         </Grid>

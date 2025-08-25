@@ -4,8 +4,7 @@
     <!-- WinUI 3 currently officially supports up to .NET 8; use net8 for the WinUI head during migration -->
     <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
-    <RootNamespace>ITCompanionClient</RootNamespace>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <RootNamespace>KC.ITCompanionClient</RootNamespace>
     <Platforms>x86;x64;ARM64</Platforms>
     <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
     <UseWinUI>true</UseWinUI>
@@ -16,6 +15,16 @@
     <AnalysisLevel>latest-recommended</AnalysisLevel>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <EnableDefaultPageItems>true</EnableDefaultPageItems>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <Authors>Kyle Crowder</Authors>
+    <Description>IT Companion client. An AI assisted IT manager for policy and security management</Description>
+    <Copyright>2025</Copyright>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/OldSkoolzRoolz/ai-assisted-it-manager.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>system management;IT;GPO;AI;</PackageTags>
+    <PackageReleaseNotes>..\RELEASENOTES.md</PackageReleaseNotes>
+    <NeutralLanguage>en</NeutralLanguage>
   </PropertyGroup>
   <ItemGroup>
     <Content Include="Assets\SplashScreen.scale-200.png" />
@@ -25,6 +34,12 @@
     <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
     <Content Include="Assets\StoreLogo.png" />
     <Content Include="Assets\Wide310x150Logo.scale-200.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
@@ -38,5 +53,20 @@
   <ItemGroup>
     <ProjectReference Include="..\CorePolicyEngine\CorePolicyEngine.csproj" />
     <ProjectReference Include="..\ClientShared\ClientShared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>

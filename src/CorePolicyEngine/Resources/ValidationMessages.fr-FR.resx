@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="VR_LOG_RETENTION_RANGE" xml:space="preserve"><value>Jours de retention des journaux {0} hors plage; ajustement [{1},{2}].</value></data>
+  <data name="VR_MAX_LOG_FILE_SIZE" xml:space="preserve"><value>Taille max fichier journal {0}Mo invalide; doit etre entre {1} et {2} Mo.</value></data>
+  <data name="VR_LOGLEVEL_ENUM" xml:space="preserve"><value>Niveau de log '{0}' non reconnu; retour a {1}.</value></data>
+  <data name="VR_CULTURE_TAG" xml:space="preserve"><value>Tag culture '{0}' invalide; utilisation de {1}.</value></data>
+  <data name="VR_BOOL" xml:space="preserve"><value>Valeur booleenne pour parametre '{0}' invalide; utilisation valeur par defaut {1}.</value></data>
+  <data name="VR_POLL_INTERVAL_RANGE" xml:space="preserve"><value>Intervalle de sondage {0}s hors plage; ajuste [{1},{2}].</value></data>
+  <data name="VR_PATH_ABSOLUTE" xml:space="preserve"><value>Chemin pour '{0}' doit etre absolu; valeur '{1}' rejetee.</value></data>
+  <data name="VR_URI_OPTIONAL" xml:space="preserve"><value>Point de terminaison telemetrie '{0}' URI invalide; ignore.</value></data>
+</root>

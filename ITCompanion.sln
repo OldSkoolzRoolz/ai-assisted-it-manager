@@ -32,21 +32,21 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		.gitignore = .gitignore
+		control-lexicon.md = control-lexicon.md
 		.github\obsolete-copilot-instructions.md = .github\obsolete-copilot-instructions.md
 		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{96061940-41CD-4A25-A924-353A325559AE}"
 	ProjectSection(SolutionItems) = preProject
-		AI-CommandSemantics.md = AI-CommandSemantics.md
 		docs\ARCHITECTURE.md = docs\ARCHITECTURE.md
 		docs\BehaviorSettingsRegistry.md = docs\BehaviorSettingsRegistry.md
 		docs\ConfigSettings.md = docs\ConfigSettings.md
-		control-lexicon.md = control-lexicon.md
-		copilot-instructions.md = copilot-instructions.md
 		docs\DOCUMENTATION_VERSION_MANIFEST.md = docs\DOCUMENTATION_VERSION_MANIFEST.md
+		docs\LOCALIZATION_STEPS_TEMP.md = docs\LOCALIZATION_STEPS_TEMP.md
 		docs\Log-file-interface-design.md = docs\Log-file-interface-design.md
 		docs\PhaseOne.md = docs\PhaseOne.md
+		docs\Resource strategy.md = docs\Resource strategy.md
 		docs\SECURITY-HARDENING.md = docs\SECURITY-HARDENING.md
 		docs\WinUITheming.md = docs\WinUITheming.md
 	EndProjectSection
@@ -72,6 +72,23 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SelfHealingPolicyEngine.Tests", "tests\SelfHealingPolicyEngine.Tests\SelfHealingPolicyEngine.Tests.csproj", "{B7F70DCF-844F-F876-284A-2EBE47D3B4D5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared.Tests", "tests\Shared.Tests\Shared.Tests.csproj", "{21EB3E7C-4CB0-42C4-937E-21323A1A53C3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+	ProjectSection(SolutionItems) = preProject
+		.github\CODEOWNERS = .github\CODEOWNERS
+		.github\copilot-instructions.md = .github\copilot-instructions.md
+		.github\dependabot.yml = .github\dependabot.yml
+		.github\SECURITY.md = .github\SECURITY.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "coverage", "coverage", "{8CE98FA9-ED47-4E3C-A52A-439D94F9B189}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{57A943B1-7C8B-40F3-B308-155D676DCF48}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\doc-version-validation.yml = .github\workflows\doc-version-validation.yml
+		.github\workflows\dotnet-ci.yml = .github\workflows\dotnet-ci.yml
+		.github\workflows\dotnet.yml = .github\workflows\dotnet.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -282,6 +299,7 @@ Global
 		{93D3AC51-B211-0860-F05A-E958DD41EA36} = {7F4C6E06-962F-4507-B7E3-52279842BB82}
 		{B7F70DCF-844F-F876-284A-2EBE47D3B4D5} = {7F4C6E06-962F-4507-B7E3-52279842BB82}
 		{21EB3E7C-4CB0-42C4-937E-21323A1A53C3} = {7F4C6E06-962F-4507-B7E3-52279842BB82}
+		{57A943B1-7C8B-40F3-B308-155D676DCF48} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {05B8EB68-E610-4318-9C6F-13F6DC0C6D71}

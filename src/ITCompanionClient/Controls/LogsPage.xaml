@@ -5,9 +5,11 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:local="using:ITCompanionClient.Controls"
+    xmlns:app="using:ITCompanionClient"
     mc:Ignorable="d">
     <UserControl.Resources>
         <local:LogLevelToBrushConverter x:Key="LevelBrushConverter" />
+        <app:LocalizedStrings x:Key="Loc" />
         <Style TargetType="ListViewItem">
             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
         </Style>
@@ -35,20 +37,20 @@
         </Grid.RowDefinitions>
         <CommandBar Grid.Row="0" DefaultLabelPosition="Collapsed">
             <AppBarElementContainer>
-                <AutoSuggestBox Width="260" PlaceholderText="Search message/category" TextChanged="OnSearchChanged" />
+                <AutoSuggestBox Width="260" PlaceholderText="{Binding Provider.[UI_SearchLogPlaceholder], Source={StaticResource Loc}}" TextChanged="OnSearchChanged" />
             </AppBarElementContainer>
             <AppBarElementContainer>
                 <ComboBox x:Name="LevelCombo" Width="120" SelectionChanged="OnLevelChanged">
-                    <ComboBoxItem Content="All" Tag="" IsSelected="True" />
-                    <ComboBoxItem Content="Info+" Tag="2" />
-                    <ComboBoxItem Content="Warning+" Tag="3" />
-                    <ComboBoxItem Content="Error+" Tag="4" />
+                    <ComboBoxItem Content="{Binding Provider.[UI_All], Source={StaticResource Loc}}" Tag="" IsSelected="True" />
+                    <ComboBoxItem Content="{Binding Provider.[UI_InfoPlus], Source={StaticResource Loc}}" Tag="2" />
+                    <ComboBoxItem Content="{Binding Provider.[UI_WarningPlus], Source={StaticResource Loc}}" Tag="3" />
+                    <ComboBoxItem Content="{Binding Provider.[UI_ErrorPlus], Source={StaticResource Loc}}" Tag="4" />
                 </ComboBox>
             </AppBarElementContainer>
-            <AppBarToggleButton Icon="Play" Label="AutoScroll" IsChecked="{x:Bind AutoScroll, Mode=TwoWay}" />
-            <AppBarButton Icon="Pause" Label="Pause" Click="OnPause" />
-            <AppBarButton Icon="Play" Label="Resume" Click="OnResume" />
-            <AppBarButton Icon="Delete" Label="Clear" Click="OnClear" />
+            <AppBarToggleButton Icon="Play" Label="{Binding Provider.[UI_AutoScroll], Source={StaticResource Loc}}" IsChecked="{x:Bind AutoScroll, Mode=TwoWay}" />
+            <AppBarButton Icon="Pause" Label="{Binding Provider.[UI_Pause], Source={StaticResource Loc}}" Click="OnPause" />
+            <AppBarButton Icon="Play" Label="{Binding Provider.[UI_Resume], Source={StaticResource Loc}}" Click="OnResume" />
+            <AppBarButton Icon="Delete" Label="{Binding Provider.[UI_Clear], Source={StaticResource Loc}}" Click="OnClear" />
         </CommandBar>
         <ListView Grid.Row="1" x:Name="LogList" ItemsSource="{x:Bind Events}" ItemTemplate="{StaticResource LogRowTemplate}" IsItemClickEnabled="False" />
     </Grid>

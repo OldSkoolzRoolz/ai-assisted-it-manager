@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -22,6 +23,8 @@ using KC.ITCompanion.CorePolicyEngine.Storage;
 using KC.ITCompanion.CorePolicyEngine.Storage.Sql;
 using Microsoft.Extensions.Logging;
 using KC.ITCompanion.ClientShared.Logging;
+using System.Resources;
+using KC.ITCompanion.ClientShared.Localization;
 
 namespace KC.ITCompanion.ClientShared;
 
@@ -40,6 +43,8 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
     private readonly ILogger<PolicyEditorViewModel> _logger;
     private readonly IPolicyGroupRepository? _policyGroups;
     private readonly IMessagePromptService? _prompt;
+    private readonly ResourceManager _logRm = new("KC.ITCompanion.ClientShared.Resources.PolicyEditorLog", typeof(PolicyEditorViewModel).Assembly);
+    private readonly ILocalizationService? _locService;
 
     private string? _breadcrumb;
     private AdminTemplateCatalog? _catalog;
@@ -58,7 +63,8 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
         IAuditWriter audit,
         IUiDispatcher dispatcher,
         IMessagePromptService? prompt = null,
-        IPolicyGroupRepository? policyGroupRepository = null)
+        IPolicyGroupRepository? policyGroupRepository = null,
+        ILocalizationService? locService = null)
     {
         _loader = loader;
         _logger = logger;
@@ -66,12 +72,27 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
         _dispatcher = dispatcher;
         _prompt = prompt;
         _policyGroups = policyGroupRepository;
+        _locService = locService;
         LoadPoliciesCommand = new RelayCommand(async _ => await LoadDefaultSubsetAsync(), _ => true);
         SearchLocalPoliciesCommand = new RelayCommand(_ => ApplySearchFilter(SearchText), _ => Catalog != null);
         RefreshPolicyGroupsCommand = new RelayCommand(async _ => await LoadPolicyGroupsAsync(), _ => _policyGroups != null);
         OpenSearchDialogCommand = new RelayCommand(_ => OnOpenSearchDialog(), _ => Catalog != null);
         OpenPolicyDetailCommand = new RelayCommand(p => OnOpenPolicyDetail(p as PolicyGridRow), p => p is PolicyGridRow);
-        _logger.PolicyEditorInitialized();
+        LogTemplate("PolicyEditorInitialized_Template");
+    }
+
+    private CultureInfo CurrentCulture => _locService?.CurrentUICulture ?? CultureInfo.CurrentUICulture;
+
+    private void LogTemplate(string key, params object[] args)
+    {
+        try
+        {
+            var template = _logRm.GetString(key, CurrentCulture);
+            if (string.IsNullOrEmpty(template)) return;
+            string message = args.Length > 0 ? string.Format(CurrentCulture, template!, args) : template!;
+            _logger.LogPolicyEditorTemplate(key, message);
+        }
+        catch { /* swallow logging failures */ }
     }
 
     /// <summary>All loaded policy summaries.</summary>
@@ -130,7 +151,7 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
                 OnPropertyChanged();
                 ApplySearchFilter(_searchText);
                 RebuildNavigation();
-                _logger.SearchFilterApplied(_searchText ?? string.Empty);
+                LogTemplate("SearchFilterApplied_Template", _searchText ?? string.Empty);
             }
         }
     }
@@ -174,7 +195,11 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
                 foreach (var g in groups) PolicyGroups.Add(g);
             });
         }
-        catch (Exception ex) { _logger.PolicyGroupsLoadFailed(ex); }
+        catch (Exception ex)
+        {
+            LogTemplate("PolicyGroupsLoadFailed_Template");
+            _logger.LogError(ex, "Unexpected exception loading policy groups.");
+        }
     }
 
     private async Task LoadDefaultSubsetAsync()
@@ -185,15 +210,13 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
         var sw = System.Diagnostics.Stopwatch.StartNew();
         Result<AdminTemplateCatalog> result;
         try { result = await _loader.LoadLocalCatalogAsync(languageTag, 50, token).ConfigureAwait(false); }
-        catch (Exception ex) { _logger.LogError(ex, "Unexpected exception loading catalog language {LanguageTag}", languageTag); return; }
+        catch (Exception ex) { LogTemplate("CatalogLoadFailed_Template", languageTag); _logger.LogError(ex, "Unexpected exception loading catalog language {LanguageTag}", languageTag); return; }
         sw.Stop();
-        if (!result.Success || result.Value is null) { _logger.CatalogLoadFailed(languageTag); return; }
-
-        // Marshal full initialization to UI thread (thread-affinity for observable collections).
+        if (!result.Success || result.Value is null) { LogTemplate("CatalogLoadFailed_Template", languageTag); return; }
         _dispatcher.Post(() =>
         {
             InitializeCatalog(result.Value);
-            _logger.CatalogLoaded(languageTag, Policies.Count, sw.ElapsedMilliseconds);
+            LogTemplate("CatalogLoaded_Template", languageTag, Policies.Count, sw.ElapsedMilliseconds);
         });
     }
 
@@ -408,9 +431,9 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
         SelectedPolicySettings.Clear();
         if (Catalog == null || SelectedPolicy == null) return;
         var policy = Catalog.AdmxDocuments.SelectMany(d => d.Policies).FirstOrDefault(p => p.Key.Name == SelectedPolicy.Key.Name);
-        if (policy == null) { _logger.PolicyKeyNotFound(SelectedPolicy.Key.Name); return; }
+        if (policy == null) { LogTemplate("PolicyKeyNotFound_Template", SelectedPolicy.Key.Name); return; }
         foreach (var element in policy.Elements) SelectedPolicySettings.Add(new PolicySettingViewModel(policy, element));
-        _logger.PolicySelected(SelectedPolicy.Key.Name, SelectedPolicySettings.Count);
+        LogTemplate("PolicySelected_Template", SelectedPolicy.Key.Name, SelectedPolicySettings.Count);
         try { await _audit.PolicySelectedAsync(SelectedPolicy.Key.Name).ConfigureAwait(false); } catch { }
     }
 

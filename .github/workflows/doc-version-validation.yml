@@ -1,0 +1,64 @@
+permissions:
+  contents: read
+name: Validate Documentation Versions
+
+on:
+  pull_request:
+    paths:
+      - 'docs/**.md'
+      - '.github/copilot-instructions.md'
+      - 'scripts/validate-doc-versions.ps1'
+      - 'docs/DOCUMENTATION_VERSION_MANIFEST.md'
+  push:
+    branches: [ main, master ]
+    paths:
+      - 'docs/**.md'
+      - '.github/copilot-instructions.md'
+      - 'scripts/validate-doc-versions.ps1'
+      - 'docs/DOCUMENTATION_VERSION_MANIFEST.md'
+
+jobs:
+  validate-doc-versions:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET (for parity with repo build expectations)
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Run validation script (JSON mode)
+        id: validate
+        shell: pwsh
+        run: |
+          $json = ./scripts/validate-doc-versions.ps1 -Json | Out-String
+          Write-Host $json
+          $obj = $json | ConvertFrom-Json
+          "Checked: $($obj.checked)" | Out-File summary.txt
+          if (-not $obj.success) {
+            "Failures:" | Out-File -Append summary.txt
+            $obj.failures | Out-File -Append summary.txt
+          }
+          # Add to GitHub job summary
+          Add-Content $env:GITHUB_STEP_SUMMARY "## Documentation Version Validation`n" 
+          Add-Content $env:GITHUB_STEP_SUMMARY "Status: **$($obj.status)**  `nChecked: $($obj.checked)  "
+          if (-not $obj.success) { 
+            Add-Content $env:GITHUB_STEP_SUMMARY "### Failures`n" 
+            $obj.failures | ForEach-Object { Add-Content $env:GITHUB_STEP_SUMMARY "- $_" }
+          }
+
+      - name: Upload JSON report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: doc-version-validation
+          path: artifacts/doc-version-validation.json
+          if-no-files-found: warn
+
+      - name: Upload text summary artifact
+        uses: actions/upload-artifact@v4
+        with:
+            name: doc-version-validation-summary
+            path: summary.txt
+            if-no-files-found: warn

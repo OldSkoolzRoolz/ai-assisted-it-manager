@@ -20,12 +20,19 @@
         </Grid.Resources>
         <controls:NavigationView x:Name="RootNav" PaneDisplayMode="Left" IsBackButtonVisible="Collapsed" IsSettingsVisible="True" SelectionChanged="OnNavSelectionChanged">
             <controls:NavigationView.MenuItems>
-                <controls:NavigationViewItem Content="{Binding Provider.[Nav_Status], Source={StaticResource Loc}}" Icon="Home" Tag="status" />
-                <controls:NavigationViewItem Content="{Binding Provider.[Nav_Policies], Source={StaticResource Loc}}" Icon="Library" Tag="policies" />
-                <controls:NavigationViewItem Content="{Binding Provider.[Nav_Logs], Source={StaticResource Loc}}" Icon="Document" Tag="logs" />
-                <controls:NavigationViewItem Content="{Binding Provider.[Nav_Watchers], Source={StaticResource Loc}}" Icon="Contact" Tag="watchers" />
-                <controls:NavigationViewItem Content="{Binding Provider.[Nav_DevDiag], Source={StaticResource Loc}}" Icon="Edit" Tag="devdiag" />
+                <controls:NavigationViewItem Content="{Binding Provider[Nav_Status], Source={StaticResource Loc}}" Icon="Home" Tag="status" />
+                <controls:NavigationViewItem Content="{Binding Provider[Nav_Policies], Source={StaticResource Loc}}" Icon="Library" Tag="policies" />
+                <controls:NavigationViewItem Content="{Binding Provider[Nav_Logs], Source={StaticResource Loc}}" Icon="Document" Tag="logs" />
+                <controls:NavigationViewItem Content="{Binding Provider[Nav_Watchers], Source={StaticResource Loc}}" Icon="Contact" Tag="watchers" />
+                <controls:NavigationViewItem Content="{Binding Provider[Nav_DevDiag], Source={StaticResource Loc}}" Icon="Edit" Tag="devdiag" />
             </controls:NavigationView.MenuItems>
+            <controls:NavigationView.PaneFooter>
+                <StackPanel Orientation="Horizontal" Spacing="8" Padding="8" VerticalAlignment="Bottom">
+                    <TextBlock Text="{Binding Provider[UI_ChangeLanguage], Source={StaticResource Loc}}" Margin="0,0,4,0" />
+                    <ComboBox x:Name="CultureCombo" Width="140" SelectionChanged="OnCultureSelectionChanged" />
+                    <Button Content="{Binding Provider[UI_ApplyLanguage], Source={StaticResource Loc}}" Click="OnApplyLanguage" />
+                </StackPanel>
+            </controls:NavigationView.PaneFooter>
             <Frame x:Name="ContentFrame" />
         </controls:NavigationView>
     </Grid>

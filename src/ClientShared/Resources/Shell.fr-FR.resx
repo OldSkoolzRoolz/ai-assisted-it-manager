@@ -35,4 +35,36 @@
   <data name="Nav_Logs" xml:space="preserve"><value>Journaux</value></data>
   <data name="Nav_Watchers" xml:space="preserve"><value>Surveillants</value></data>
   <data name="Nav_DevDiag" xml:space="preserve"><value>Diagnostics dev</value></data>
+  <data name="UI_Open" xml:space="preserve"><value>Ouvrir</value></data>
+  <data name="UI_SearchPolicies" xml:space="preserve"><value>Rechercher des strategies</value></data>
+  <data name="UI_Reload" xml:space="preserve"><value>Rafraichir</value></data>
+  <data name="UI_Advanced" xml:space="preserve"><value>Avance</value></data>
+  <data name="UI_Columns" xml:space="preserve"><value>Colonnes</value></data>
+  <data name="UI_Name" xml:space="preserve"><value>Nom</value></data>
+  <data name="UI_Category" xml:space="preserve"><value>Categorie</value></data>
+  <data name="UI_GroupByFile" xml:space="preserve"><value>Grouper par fichier</value></data>
+  <data name="UI_CategoriesHeader" xml:space="preserve"><value>Categories</value></data>
+  <data name="UI_NoPoliciesMatch" xml:space="preserve"><value>Aucune strategie ne correspond a votre recherche.</value></data>
+  <data name="UI_SearchLogPlaceholder" xml:space="preserve"><value>Rechercher message/categorie</value></data>
+  <data name="UI_All" xml:space="preserve"><value>Tous</value></data>
+  <data name="UI_InfoPlus" xml:space="preserve"><value>Info+</value></data>
+  <data name="UI_WarningPlus" xml:space="preserve"><value>Avert.+</value></data>
+  <data name="UI_ErrorPlus" xml:space="preserve"><value>Erreur+</value></data>
+  <data name="UI_AutoScroll" xml:space="preserve"><value>Defil.Autom.</value></data>
+  <data name="UI_Pause" xml:space="preserve"><value>Pause</value></data>
+  <data name="UI_Resume" xml:space="preserve"><value>Reprendre</value></data>
+  <data name="UI_Clear" xml:space="preserve"><value>Effacer</value></data>
+  <data name="UI_OverallHealth" xml:space="preserve"><value>Sante globale</value></data>
+  <data name="UI_ActiveAlerts" xml:space="preserve"><value>Alertes actives</value></data>
+  <data name="UI_PolicyDrift" xml:space="preserve"><value>Derive de strategie</value></data>
+  <data name="UI_RecentHighEvents" xml:space="preserve"><value>Evenements recents importants</value></data>
+  <data name="UI_PolicyDetailTitle" xml:space="preserve"><value>Detail de la strategie</value></data>
+  <data name="UI_Push" xml:space="preserve"><value>Pousser</value></data>
+  <data name="UI_Close" xml:space="preserve"><value>Fermer</value></data>
+  <data name="UI_Description" xml:space="preserve"><value>Description</value></data>
+  <data name="UI_Settings" xml:space="preserve"><value>Parametres</value></data>
+  <data name="UI_EditMode" xml:space="preserve"><value>Mode edition</value></data>
+  <data name="UI_ChangeLanguage" xml:space="preserve"><value>Changer de langue</value></data>
+  <data name="UI_SelectLanguage" xml:space="preserve"><value>Selectionnez une langue</value></data>
+  <data name="UI_ApplyLanguage" xml:space="preserve"><value>Appliquer</value></data>
 </root>
