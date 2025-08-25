@@ -195,9 +195,10 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
                 foreach (var g in groups) PolicyGroups.Add(g);
             });
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             LogTemplate("PolicyGroupsLoadFailed_Template");
+            _logger.LogError(ex, "Unexpected exception loading policy groups.");
         }
     }
 
