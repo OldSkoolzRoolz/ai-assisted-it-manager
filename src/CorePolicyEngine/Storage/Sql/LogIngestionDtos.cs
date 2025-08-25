@@ -87,6 +87,6 @@ public enum LogLevel
     Warning = 3,
     /// <summary>Error level (recoverable failures affecting operations).</summary>
     Error = 4,
-    /// <summary>Critical level (non?recoverable / application or service failure conditions).</summary>
+    /// <summary>Critical level (non-recoverable / application or service failure conditions).</summary>
     Critical = 5
 }

@@ -1,3 +1,16 @@
+| 🗂️ **Field**           | **Value**                          |
+|-------------------------|------------------------------------|
+| **Date**                | 2025-08-25                         |
+| **Modified By**         | @copilot                           |
+| **Last Modified**       | 2025-08-25                         |
+| **Title**               | *Security Hardening Guide*         |
+| **Author**              | Security Team                      |
+| **Document ID**         | SEC-HARDEN-001                     |
+| **Document Authority**  | @KyleC69                           |
+| **Version**             | 2025-08-25.v3                      |
+
+---
+
 # Security Hardening Guide
 
 This document provides comprehensive guidance for implementing repository security features and branch protection settings for the ai-assisted-it-manager repository.
@@ -210,7 +223,7 @@ For enterprise deployments:
 
 ---
 
-**Document Version:** 2024-12-19.v1  
-**Last Updated:** 2024-12-19  
 **Maintained By:** @KyleC69 (Repository CODEOWNER)  
 **Review Schedule:** Quarterly security audit
+
+<!-- End Document -->

@@ -2,8 +2,32 @@
 
 **Repository CODEOWNER**: @KyleC69
 
-Version: 3.3
-Date: 2025-08-23
+Version: 3.6
+Date: 2025-08-24
+---
+
+## 0. Operational Directives (Enforced)
+These directives override any prior ambiguity. The assistant MUST:
+- Execute requested engineering tasks end-to-end without asking for confirmation once the user has stated or re-stated intent ("proceed" / explicit instruction).
+- Avoid speculative prompts or meta-questions; only ask if a critical blocker (missing file, ambiguous target) prevents safe implementation.
+- Prefer direct implementation (edit, create, remove) over advisory prose when changes are required.
+- Never reintroduce removed technologies (SQLite, deprecated repositories) unless explicitly re-approved by CODEOWNER.
+- Treat build warnings (analyzers, CS1591) as failures: fix or apply narrowly-scoped suppression with justification comment.
+- Keep answers concise, in the prescribed tone (peer, practical, no fluff). No marketing language.
+- When user mandates completion of enumerated tasks (e.g., Policy Viewer, Log Viewer), do not defer—produce concrete code changes until functional baseline exists (UI wired + data binding active, empty states handled, error surfacing, interaction commands).
+- For UI components: ensure DataContext set, bindings resolved, and feature toggles (grouping, filtering, search) connected to underlying view models.
+- For test coverage directives: add or extend tests without prompting until coverage for targeted public surface is present or limitations (e.g., platform UI constraints) are documented inline in test class comments.
+- Use reflection-based smoke tests only as supplementary; prefer behavior/assertion tests for core logic.
+- Do not downgrade framework targets or platform-specific properties without explicit instruction.
+- When removing code (e.g., legacy stores), also purge related docs, stray references, and comments mentioning the removed component.
+- Maintain Logging Event ID schema stability; adding IDs requires updating the schema table.
+- Ensure each edit batch ends with a verification build (run_build) unless only documentation changed.
+- APPLY ASYNC GUIDELINES: Prefer async/await for all I/O, DB, file, network, and long-running operations; never block with .Result, .Wait(), Task.Run() on async call chains; propagate CancellationToken; avoid async void (except event handlers). Refactor synchronous wrappers to delegate to async core methods.
+
+Escalation Guidelines:
+- If a required dependency or file is truly absent, perform a targeted search (code/text) first; only then notify with exact missing artifact name.
+- If a request conflicts with security/integrity (e.g., logging secrets), refuse and cite policy succinctly.
+
 ---
 
 ## Copilot Language Guidelines:
@@ -54,14 +78,12 @@ Current emphasis (Phase 1) = Core Policy Manager & foundational modules, minimal
 
 - Primary language: C# (.NET 9 target as per README – expect preview SDK until GA).
 - Solution file: ITCompanion.sln at repo root (multi-project structure).
-- Platform focus: Windows 10/11 (WPF UI; registry / WMI interactions).
+- Platform focus: Windows 10/11 (WinUI; registry / WMI interactions).
 - Database: SQL Server (local developer instance likely required for DB-related features).
-- AI Layer (future / scaffolding): ONNX runtime integration (not necessarily active yet).
+- AI Layer (ure / scaffolding): ONNX runtime integration (not necessarily active yet).
 - Scripts & Docs:
-  - docs/ (architecture drafts, versioned documentation with audit trails via DOCUMENTATION_VERSION_MANIFEST.md).
+  - docs/ (architecture drafts, versioned documentation with audit trails via DOCUMENTATION_VERSION_MANIFEST.md, Internal setting standards `ConfigSettings.md`).
   - onboarding/ (module descriptions, setup guide, workspace-presets.ps1).
-- Tests directory: tests/ (dotnet test entry per README).
-- Additional engines / future: Blazor Server (Phase 3), WinUI 3 migration path, security integrations.
 
 ---
 
@@ -97,7 +119,7 @@ Expect each implementation project to reside under src/<ProjectName>/ with a cor
 - Avoid logging sensitive information (e.g., passwords, personal data).
 - Log strings should be resource-based for localization support.
 
-### 4.1 Logging Event ID Schema (REINSTATED)
+### 4.1 Logging Event ID Schema (ENFORCED)
 Each subsystem owns a numeric EventId range. Do NOT overlap ranges. When adding new events, append within the allocated block; reserve gaps for expansion. If a new subsystem emerges, allocate a fresh contiguous block and document it here.
 
 | Range | Subsystem / Purpose | Notes |
@@ -120,6 +142,7 @@ Guidelines:
 - Prefer structured properties over string concatenation.
 - Use source-generated partial static logger classes named `<Area>Log` or `Logger` in the subsystem namespace.
 - For CA1848 compliance: avoid direct `LogInformation($"...")` in new code unless one-off / low frequency (and justify in PR).
+- Static LoggerMessage methods should be `internal static partial void` and reside in a static class `Logger` in sub folder `Logging` one off project root a single file. -ALWAYS
 
 ### 4.2 Adding a New LoggerMessage
 1. Pick the next unused EventId in the appropriate range.
@@ -135,6 +158,7 @@ internal static partial void AdmxFileDiscovered(this ILogger logger, string File
 ```
 
 ---
+
 ## 5. Build Instructions
 
 Canonical build sequence (ALWAYS in this order after bootstrap):
@@ -161,6 +185,42 @@ DOTNET_NOLOGO=1 dotnet build ITCompanion.sln -c Debug -warnaserror /p:TreatWarni
 ```
 
 ---
+## 6. Coding Standards
+- Follow .NET naming conventions (PascalCase for types/methods, camelCase for parameters/locals).
+- Use async/await for any potentially blocking operation (disk, network, IPC, DB, process, heavy CPU offload). Never introduce new sync-over-async patterns.
+- Always provide a CancellationToken on public async APIs; pass through to lower layers.
+- Avoid async void (except UI/event handlers). Library/internal logic uses Task / Task<T>.
+- Do not wrap synchronous work in Task.Run just to appear async; only offload CPU-bound work that would otherwise block UI thread.
+- Avoid fire-and-forget; if unavoidable (telemetry), capture/log exceptions safely.
+- Propagate ConfigureAwait(false) ONLY in pure library code not touching UI; omit in UI-layer code to keep context.
+- Prefer ValueTask/ValueTask<T> only when profiling proves allocation benefit and method frequently returns synchronously.
+- Use SemaphoreSlim (async) not lock for awaiting asynchronous critical sections.
+- Stream large payloads instead of buffering whole content in memory.
+- Validate arguments early; throw ArgumentException derivatives with nameof().
+- Prefer dependency injection (DI) for service registration and resolution.
+- Use interfaces for abstractions; avoid concrete types in public APIs.
+- Leverage LINQ for collections; prefer immutable collections where feasible.
+- Use pattern matching and switch expressions for clarity.
+- Handle exceptions gracefully; avoid catch-all blocks.
+- Write XML documentation comments for all public members (see Section 11).
+- Adhere to SOLID principles and clean architecture patterns.
+
+- Use regions sparingly; prefer small, focused classes/methods.
+- Keep methods under 30 lines where possible; single responsibility principle.
+- Use meaningful variable/method names; avoid abbreviations unless widely recognized.
+- Organize usings: System namespaces first, then third-party, then project-specific.
+- Avoid deep nesting; refactor into helper methods or classes.
+- Use expression-bodied members for simple getters/setters.
+- Prefer composition over inheritance unless a clear "is-a" relationship exists.
+- Use nameof() for parameter names in exceptions/logging to avoid magic strings.
+- Leverage modern C# features (records, init-only, required members, pattern matching).
+- Avoid premature optimization; profile before optimizing.
+- Write unit tests for new logic (see Section 7).
+
+
+
+
+
 ## 7. Testing
 
 Standard test invocation (from README):
@@ -223,7 +283,7 @@ If you update architecture, reflect changes consistently across:
 2. onboarding/ module overview
 3. This instructions file (only if foundational process changes—avoid churn for minor refactors)
 
-S
+
 
 ---
 
@@ -236,7 +296,6 @@ Root:
 - onboarding/ (module overview, setup guide, workspace-presets.ps1)
 - src/ (primary implementation projects – enumerate before modifying)
 - tests/ (test projects – ensure new tests land here)
-- SelfHealingPolicyEngine/ (special-case module, root-level)
 - .gitignore / .gitattributes (respect line endings & attribute normalization)
 
 ---
@@ -276,18 +335,34 @@ If any path differs, list src/ to identify correct project and adjust only that 
 
 ---
 
-## 24. Quality Bar
+## 24. **Change Validation Checklist (ENFORCED)**
 
 A change is "ready" ONLY if:
-- Builds cleanly (no warnings: enforced by -warnaserror / TreatWarningsAsErrors=true).
-- Resolves IntelliSense issues.
-- All tests pass (and new tests cover new logic).
-- No hard-coded environment-only paths or credentials.
-- UI or service still starts successfully after change.
-- Documentation changes include manifest updates and maintain technical accuracy.
-- Analyzer + code style passes: dotnet format analyzers/style --verify-no-changes.
-- XML documentation headers exist for all new or modified members (see Section 11).
-
----
+[ ] Builds cleanly (no warnings: enforced by -warnaserror / TreatWarningsAsErrors=true).
+[ ] Resolves all intellisense issues using best practices as guide.
+[ ] All tests pass (and new tests cover new logic).
+[ ] No hard-coded environment-only paths or credentials.
+[ ] UI or service still starts successfully after change.
+[ ] Documentation changes include manifest updates and maintain technical accuracy.
+[ ] Analyzer + code style passes: dotnet format analyzers/style --verify-no-changes.
+[ ] XML documentation headers exist for all new or modified members (see Section 11).
+[ ] Logging changes follow EventId schema (Section 4) and use static LoggerMessage.
+[ ] No sync-over-async patterns introduced; async/await used properly with CancellationToken.
+[ ] DI registrations updated if new services added.
+[ ] No sensitive data logged or exposed.
+[ ] Code adheres to coding standards (Section 6).
+[ ] Relevant docs (architecture, onboarding) updated if design changes.
+[ ] PR description includes summary of changes and references any related issues.
+[ ] All steps outlined and requested by user completed fully (no deferrals). No unnecessary prompts.
+[ ] If new dependencies added, ensure they are actively maintained and secure.
+[ ] If DB changes, migrations tested on fresh instance and documented.
+[ ] If new public APIs, XML docs added for all members.
+[ ] If existing public APIs modified, XML docs updated accordingly.
+[ ] If performance impact likely, profiling or benchmarks included.
+[ ] If security impact likely, threat model or risk assessment included.
+[ ] If config changes, defaults documented and validated.
+[ ] If UI changes, DataContext set and bindings verified.
+[ ] If DB changes, migrations tested on fresh instance and documented.
+[ ] If new dependencies added, ensure they are actively maintained and secure.
 
 

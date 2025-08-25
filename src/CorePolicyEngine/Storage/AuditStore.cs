@@ -9,6 +9,7 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Text.Json; // added for safe JSON encoding
 
 namespace KC.ITCompanion.CorePolicyEngine.Storage;
 
@@ -118,6 +119,7 @@ public interface IAuditWriter
 /// </summary>
 public sealed class AuditWriter : IAuditWriter
 {
+    private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.General);
     private readonly IAuditStore _store;
 
     /// <summary>Create a new writer.</summary>
@@ -145,40 +147,81 @@ public sealed class AuditWriter : IAuditWriter
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(policyKey);
         ArgumentException.ThrowIfNullOrWhiteSpace(elementId);
-        return WriteAsync("PolicyEdited", policyKey, $"{BuildJsonKV("elementId", elementId)},{BuildJsonKV("value", newValue, allowNull:true)}", token);
+        return WriteAsync("PolicyEdited", policyKey,
+            CombineDetails(
+                ("elementId", elementId, false),
+                ("value", newValue, true)), token);
     }
 
     /// <inheritdoc/>
     public Task PolicyEditPushedAsync(int changeCount, CancellationToken token = default)
     {
-        return WriteAsync("PolicyPush", null, $"{BuildJsonKV("changeCount", changeCount.ToString(System.Globalization.CultureInfo.InvariantCulture))}", token);
+        return WriteAsync("PolicyPush", null,
+            CombineDetails(("changeCount", changeCount, false)), token);
     }
 
     /// <inheritdoc/>
     public Task AccessDeniedAsync(string reason, CancellationToken token = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(reason);
-        var safeReason = reason.Replace("\"", "'", StringComparison.Ordinal);
-        return WriteAsync("AccessDenied", null, $"{BuildJsonKV("reason", safeReason)}", token);
+        return WriteAsync("AccessDenied", null,
+            CombineDetails(("reason", reason, false)), token);
     }
 
     private static string Actor() => Environment.UserName;
 
-    private Task WriteAsync(string eventType, string? policyKey, string? detailsInnerJson, CancellationToken token)
+    private Task WriteAsync(string eventType, string? policyKey, string? detailsJson, CancellationToken token)
     {
-        string? details = detailsInnerJson is null ? null : "{" + detailsInnerJson + "}";
         return _store.WriteAsync(
-            new AuditRecord(Guid.NewGuid().ToString("N"), eventType, Actor(), "User", policyKey, details,
+            new AuditRecord(Guid.NewGuid().ToString("N"), eventType, Actor(), "User", policyKey, detailsJson,
                 DateTime.UtcNow), token);
     }
 
-    private static string BuildJsonKV(string key, string? value, bool allowNull = false)
+    /// <summary>
+    /// Safely builds a JSON object string from key/value tuples using <see cref="Utf8JsonWriter"/> for escaping.
+    /// </summary>
+    /// <param name="pairs">Tuples of (key, value, allowNull). Value may be any primitive or string; non-primitive is serialized.</param>
+    /// <returns>JSON object text or null if no pairs.</returns>
+    private static string? CombineDetails(params (string Key, object? Value, bool AllowNull)[] pairs)
     {
-        if (value is null)
+        if (pairs is null || pairs.Length == 0) return null;
+        var buffer = new System.Buffers.ArrayBufferWriter<byte>();
+        using (var writer = new Utf8JsonWriter(buffer))
         {
-            if (!allowNull) value = string.Empty; else return $"\"{key}\":null";
+            writer.WriteStartObject();
+            foreach (var (key, value, allowNull) in pairs)
+            {
+                if (key is null) continue; // skip invalid
+                if (value is null)
+                {
+                    if (allowNull) { writer.WriteNull(key); continue; }
+                    writer.WriteString(key, string.Empty);
+                    continue;
+                }
+                switch (value)
+                {
+                    case string s:
+                        writer.WriteString(key, s);
+                        break;
+                    case int i:
+                        writer.WriteNumber(key, i);
+                        break;
+                    case long l:
+                        writer.WriteNumber(key, l);
+                        break;
+                    case bool b:
+                        writer.WriteBoolean(key, b);
+                        break;
+                    case double d:
+                        writer.WriteNumber(key, d);
+                        break;
+                    default:
+                        JsonSerializer.Serialize(writer, value, value.GetType(), JsonOptions);
+                        break;
+                }
+            }
+            writer.WriteEndObject();
         }
-        var escaped = value.Replace("\"", "'", StringComparison.Ordinal);
-        return $"\"{key}\":\"{escaped}\"";
+        return System.Text.Encoding.UTF8.GetString(buffer.WrittenSpan);
     }
 }
