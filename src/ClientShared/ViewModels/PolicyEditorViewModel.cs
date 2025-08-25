@@ -240,7 +240,9 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
                 _policyCategoryIdMap[pol.Key.Name] = catId;
         }
 
-        FilteredPolicies.Clear(); foreach (var p in Policies) FilteredPolicies.Add(p);
+        FilteredPolicies.Clear();
+        foreach (var p in Policies)
+            FilteredPolicies.Add(p);
 
         BuildFileGroups(); RebuildNavigation(); Breadcrumb = null;
 
