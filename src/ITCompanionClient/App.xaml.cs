@@ -9,25 +9,30 @@ using KC.ITCompanion.ClientShared.Localization;
 
 namespace ITCompanionClient;
 /// <summary>
-/// WinUI application bootstrapper configuring DI and showing the main window.
+/// WinUI application bootstrapper configuring dependency injection container and launching the main window.
 /// </summary>
 public partial class App : Application
 {
     private Window? _window;
+    /// <summary>Main application window instance.</summary>
     public static Window MainWindow { get; private set; } = null!;
+    /// <summary>Root service provider for the client process lifecycle.</summary>
     public static ServiceProvider Services { get; private set; } = null!;
 
+    /// <summary>Constructs the application object and attaches global exception handlers.</summary>
     public App()
     {
         InitializeComponent();
         UnhandledException += OnUnhandledException;
     }
 
+    /// <summary>Global unhandled exception hook (placeholder for logging integration).</summary>
     private void OnUnhandledException(object sender, Microsoft.UI.Xaml.UnhandledExceptionEventArgs e)
     {
         // TODO: Add logging hookup
     }
 
+    /// <summary>Called by framework when application is launched.</summary>
     protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
     {
         Services = ConfigureServices();
@@ -36,13 +41,14 @@ public partial class App : Application
         _window.Activate();
     }
 
+    /// <summary>Configures the DI container with core services, repositories, and view models.</summary>
     private static ServiceProvider ConfigureServices()
     {
         var sc = new ServiceCollection();
         sc.AddLogging(b =>
         {
             b.AddDebug();
-            b.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Information);
+            b.SetMinimumLevel(LogLevel.Information);
         });
         // Core services
         sc.AddSingleton<IAdminTemplateLoader, AdmxAdmlParser>();

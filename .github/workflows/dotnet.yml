@@ -1,6 +1,4 @@
-# This workflow will build a .NET project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
-
+# This workflow builds and tests the .NET solution (excluding DB project)
 name: .NET
 
 permissions:
@@ -14,17 +12,25 @@ on:
 
 jobs:
   build:
-
     runs-on: windows-latest
-
     steps:
-    - uses: actions/checkout@v4
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 9.0.x
-    - name: Restore dependencies
-      run: dotnet restore ITCompanion.sln
-    - name: Build
-      run: dotnet build ITCompanion.sln --no-restore
- 
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install pinned .NET SDK 8.0.100
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.100
+      - name: Display SDK version
+        run: dotnet --info
+      - name: Install Windows App SDK workload
+        run: dotnet workload install windowsappsdk
+      - name: Restore (solution)
+        run: dotnet restore ITCompanion.sln
+      - name: Build (selected projects)
+        run: >-
+          dotnet build src/ClientShared/ClientShared.csproj -c Debug --no-restore
+          && dotnet build src/CorePolicyEngine/CorePolicyEngine.csproj -c Debug --no-restore
+          && dotnet build src/ITCompanionClient/ITCompanionClient.csproj -c Debug --no-restore
+          && dotnet build src/Security/Security.csproj -c Debug --no-restore
+      - name: Test
+        run: dotnet test ITCompanion.sln --no-build --configuration Debug --verbosity normal --filter FullyQualifiedName~Tests

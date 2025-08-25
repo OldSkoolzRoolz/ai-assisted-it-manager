@@ -503,3 +503,4 @@ $RECYCLE.BIN/
 /onboarding/copilot-personality.md
 /.gitignore
 /docs/LOCALIZATION_STEPS_TEMP.md
+/src/CleanBuild.ps1

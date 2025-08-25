@@ -3,10 +3,12 @@
     <!-- Enable Roslyn analyzers at the latest ruleset level across all projects -->
     <AnalysisLevel>latest</AnalysisLevel>
     <!-- Optional: turn on all default analyzers (keep conservative; adjust if too noisy) -->
+	  <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
     <AnalysisMode>AllEnabledByDefault</AnalysisMode>
-    <!-- Uncomment to elevate analyzer diagnostics
-    <WarningsAsErrors>$(WarningsAsErrors);CA*</WarningsAsErrors>
-    -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <WarningsAsErrors>$(WarningsAsErrors);CS1591</WarningsAsErrors>
   </PropertyGroup>
  <PropertyGroup Condition="'$(IsTestProject)'=='true'"> <BuildProjectReferences>false</BuildProjectReferences> </PropertyGroup>
 </Project>

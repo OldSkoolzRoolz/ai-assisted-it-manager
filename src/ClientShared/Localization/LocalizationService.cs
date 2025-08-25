@@ -23,7 +23,7 @@ public sealed class LocalizationService : ILocalizationService
     public CultureInfo CurrentUICulture => _current;
 
     /// <inheritdoc />
-    public event EventHandler<CultureInfo>? CultureChanged;
+    public event EventHandler<LocalizationCultureChangedEventArgs>? CultureChanged;
 
     /// <summary>Create with initial culture (defaults to <see cref="CultureInfo.CurrentUICulture"/>).</summary>
     public LocalizationService(CultureInfo? initial = null)
@@ -43,6 +43,6 @@ public sealed class LocalizationService : ILocalizationService
             CultureInfo.CurrentUICulture = newCulture;
             CultureInfo.CurrentCulture = newCulture; // align formatting
         }
-        CultureChanged?.Invoke(this, newCulture);
+        CultureChanged?.Invoke(this, new LocalizationCultureChangedEventArgs(newCulture));
     }
 }

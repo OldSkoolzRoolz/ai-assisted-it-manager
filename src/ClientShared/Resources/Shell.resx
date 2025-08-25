@@ -69,4 +69,13 @@
   <data name="UI_ChangeLanguage" xml:space="preserve"><value>Change Language</value></data>
   <data name="UI_SelectLanguage" xml:space="preserve"><value>Select a language</value></data>
   <data name="UI_ApplyLanguage" xml:space="preserve"><value>Apply</value></data>
+  <!-- Added for log interface -->
+  <data name="UI_Summary" xml:space="preserve"><value>Summary</value></data>
+  <data name="UI_Source" xml:space="preserve"><value>Source</value></data>
+  <data name="UI_AllSources" xml:space="preserve"><value>All Sources</value></data>
+  <data name="UI_From" xml:space="preserve"><value>From</value></data>
+  <data name="UI_To" xml:space="preserve"><value>To</value></data>
+  <data name="UI_Filter" xml:space="preserve"><value>Filter</value></data>
+  <data name="UI_Reset" xml:space="preserve"><value>Reset</value></data>
+  <data name="UI_Severity" xml:space="preserve"><value>Severity</value></data>
 </root>

@@ -1,9 +1,34 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net8.0-windows10.0.19041.0;net9.0-windows</TargetFrameworks>
-    <ImplicitUsings>enable</ImplicitUsings>
+	  <!-- Target .NET 6 or later for WinUI compatibility -->
+	  <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+
+	  <!-- Enable WinUI 3 support -->
+	  <UseWinUI>true</UseWinUI>
+
+	  <!-- Optional: if you're using Windows App SDK features -->
+	  <EnableMsixTooling>false</EnableMsixTooling>
+	  <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+
+	  <!-- Ensure Windows-specific APIs are available -->
+	  <EnableWindowsTargetPlatform>true</EnableWindowsTargetPlatform>
+
+	  <!-- Optional: if you want to suppress implicit NuGet restore -->
+	  <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
+
+	  <!-- Optional: if you're building reusable UI components -->
+	  <GenerateLibraryLayout>true</GenerateLibraryLayout>
+
+	  <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
+    <RootNamespace>KC.ITCompanion.ClientShared</RootNamespace>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0-windows|AnyCPU'">
+    <IsPublishable>False</IsPublishable>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0-windows|AnyCPU'">
+    <IsPublishable>False</IsPublishable>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\CorePolicyEngine\CorePolicyEngine.csproj" />

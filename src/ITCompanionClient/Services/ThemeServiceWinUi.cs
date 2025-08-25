@@ -16,10 +16,9 @@ public sealed class ThemeServiceWinUi : IThemeService
 {
     private AppTheme _explicit = AppTheme.Auto;
     public AppTheme Current { get; private set; } = AppTheme.Light;
-    public event EventHandler<AppTheme>? ThemeChanged;
+    public event EventHandler<ThemeChangedEventArgs>? ThemeChanged;
 
-    public void Initialize()
-    { Apply(AppTheme.Auto, force: true); }
+    public void Initialize() => Apply(AppTheme.Auto, force: true);
 
     public void Apply(AppTheme theme, bool force = false)
     {
@@ -28,14 +27,13 @@ public sealed class ThemeServiceWinUi : IThemeService
         if (!force && resolved == Current) return;
         Current = resolved;
         ApplyToRoot(resolved);
-        ThemeChanged?.Invoke(this, Current);
+        ThemeChanged?.Invoke(this, new ThemeChangedEventArgs(Current));
     }
 
     private static AppTheme Resolve(AppTheme requested)
     {
         if (requested == AppTheme.Auto)
         {
-            // Use current root element theme if available, else default Light
             if (App.MainWindow?.Content is FrameworkElement fe)
             {
                 return fe.ActualTheme switch
