@@ -499,3 +499,5 @@ $RECYCLE.BIN/
 *.DotSettings
 /onboarding/policy-cheatsheet.md
 /scripts/coverage.ps1
+/.github/obsolete-copilot-instructions.md
+/onboarding/copilot-personality.md

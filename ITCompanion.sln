@@ -3,6 +3,21 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{7F4C6E06-964F-5507-B7E3-52279842BB82}"
+	ProjectSection(SolutionItems) = preProject
+		scripts\coverage.ps1 = scripts\coverage.ps1
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "onboarding", "onboarding", "{12345678-962F-4507-B7E3-52279842BB82}"
+	ProjectSection(SolutionItems) = preProject
+		onboarding\copilot-personality.md = onboarding\copilot-personality.md
+		onboarding\README.md = onboarding\README.md
+		onboarding\retro-easter-eggs.md = onboarding\retro-easter-eggs.md
+		onboarding\setup-guide.md = onboarding\setup-guide.md
+		onboarding\troubleshooting.md = onboarding\troubleshooting.md
+		onboarding\workspace-presets.ps1 = onboarding\workspace-presets.ps1
+	EndProjectSection
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{7F4C6E06-962F-4507-B7E3-52279842BB82}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{827E0CD3-B72D-47B6-A68D-7590B98EB39B}"
@@ -17,15 +32,18 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		.gitignore = .gitignore
-		.github\Copilot-Instructions.md = .github\Copilot-Instructions.md
+		.github\obsolete-copilot-instructions.md = .github\obsolete-copilot-instructions.md
 		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{96061940-41CD-4A25-A924-353A325559AE}"
 	ProjectSection(SolutionItems) = preProject
+		AI-CommandSemantics.md = AI-CommandSemantics.md
 		docs\ARCHITECTURE.md = docs\ARCHITECTURE.md
 		docs\BehaviorSettingsRegistry.md = docs\BehaviorSettingsRegistry.md
 		docs\ConfigSettings.md = docs\ConfigSettings.md
+		control-lexicon.md = control-lexicon.md
+		copilot-instructions.md = copilot-instructions.md
 		docs\DOCUMENTATION_VERSION_MANIFEST.md = docs\DOCUMENTATION_VERSION_MANIFEST.md
 		docs\Log-file-interface-design.md = docs\Log-file-interface-design.md
 		docs\PhaseOne.md = docs\PhaseOne.md
