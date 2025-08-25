@@ -192,7 +192,7 @@ Guidelines:
 
 A change is "ready" ONLY if:
 [ ] Builds cleanly (no warnings: enforced by -warnaserror / TreatWarningsAsErrors=true).
-[ ] Resolve all intellisense issues using best practices as guide.
+[ ] Resolve all IntelliSense issues using best practices as guide.
 [ ] All tests pass (and new tests cover new logic).
 [ ] No hard-coded environment-only paths or credentials.
 [ ] UI or service still starts successfully after change.
@@ -234,7 +234,7 @@ A change is "ready" ONLY if:
 	- Use shared styles and resources to ensure consistency across modules.
 	- Test UI changes in both light and dark modes if applicable.
 	- Ensure accessibility standards are met (e.g., contrast ratios, keyboard navigation).
-	- Refer to `docs/winuitheming.md` for detailed theming and accessibility standards.
+	- Refer to `docs/winuitheming.md` for detailed theming and accessibility standards. **(REFERENCE)**
 	---
 
 ## **Redundancy & Conflict Notes**
