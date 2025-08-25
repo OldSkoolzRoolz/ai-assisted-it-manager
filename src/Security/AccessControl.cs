@@ -43,7 +43,10 @@ public sealed class GroupMembershipAccessPolicy : IClientAccessPolicy
         _allowAny = list.Any(g => g == "*");
         _allowedGroups = list.Where(g => g != "*").ToHashSet(StringComparer.OrdinalIgnoreCase);
         if (_allowedGroups.Contains(AdminSidString) && !_allowedGroups.Contains("Administrators")) _allowedGroups.Add("Administrators");
-        if (_allowedGroups.Contains("BUILTIN\\Administrators") && !_allowedGroups.Contains("Administrators")) _allowedGroups.Add("Administrators");
+        if (_allowedGroups.Contains("BUILTIN\\Administrators") && !_allowedGroups.Contains("Administrators"))
+        {
+            _allowedGroups.Add("Administrators");
+        }
         _logger?.AccessPolicyInitialized(string.Join(';', _allowedGroups), _allowAny);
     }
 
