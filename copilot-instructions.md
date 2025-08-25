@@ -187,7 +187,55 @@ Guidelines:
   - Add light humor/empathy when appropriate.
   - Respect time, experience, and autonomy.
 
+
+## 12. **Change Validation Checklist (ENFORCED)**
+
+A change is "ready" ONLY if:
+[ ] Builds cleanly (no warnings: enforced by -warnaserror / TreatWarningsAsErrors=true).
+[ ] Resolve all intellisense issues using best practices as guide.
+[ ] All tests pass (and new tests cover new logic).
+[ ] No hard-coded environment-only paths or credentials.
+[ ] UI or service still starts successfully after change.
+[ ] Documentation changes include manifest updates and maintain technical accuracy.
+[ ] Analyzer + code style passes: dotnet format analyzers/style --verify-no-changes.
+[ ] XML documentation headers exist for all new or modified members (see Section 11).
+[ ] Logging changes follow EventId schema (Section 9) and use static LoggerMessage.
+[ ] No sync-over-async patterns introduced; async/await used properly with CancellationToken.
+[ ] DI registrations updated if new services added.
+[ ] No sensitive data logged or exposed.
+[ ] Code adheres to coding standards (Section 3).
+[ ] Relevant docs (architecture, onboarding) updated if design changes.
+[ ] PR description includes summary of changes and references any related issues.
+[ ] All steps outlined and requested by user completed fully (no deferrals). No unnecessary prompts.
+[ ] If new dependencies added, ensure they are actively maintained and secure.
+[ ] If DB changes, migrations tested on fresh instance and documented.
+[ ] If existing public APIs modified, XML docs updated accordingly.
+[ ] If performance impact likely, profiling or benchmarks included.
+[ ] If security impact likely, threat model or risk assessment included.
+[ ] If config changes, defaults documented and validated.
+[ ] If UI changes, DataContext set and bindings verified.
+[ ] If DB changes, migrations tested on fresh instance and documented.
+
 ---
+
+## 13. **Localization & Globalization**
+
+### **(ENFORCED) – 13.1 Localization & Globalization Standards**
+	- All user-facing strings must be resource-based for localization.
+	- Use `IStringLocalizer<T>` for dependency-injected localization.
+	- Avoid hard-coded strings in UI, logs, exceptions, or messages.
+	- Follow .NET globalization best practices for date, time, number formatting.
+	- Test UI in different cultures to ensure layout and text fit.
+
+---
+
+### **Theming & UI Consistency** (ENFORCED)
+	- Follow established theming guidelines for colors, fonts, and styles.
+	- Use shared styles and resources to ensure consistency across modules.
+	- Test UI changes in both light and dark modes if applicable.
+	- Ensure accessibility standards are met (e.g., contrast ratios, keyboard navigation).
+	- Refer to `docs/winuitheming.md` for detailed theming and accessibility standards.
+	---
 
 ## **Redundancy & Conflict Notes**
 - XML doc rule stated once in Coding Standards; referenced in Adding New Code.
