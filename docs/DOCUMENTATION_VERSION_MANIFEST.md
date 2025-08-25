@@ -1,5 +1,9 @@
 # Documentation Version Manifest
 
+| **Field** | **Value** |
+|-----------|-----------|
+| **Version** | 2025-08-25.v11 |
+
 **Purpose**: This document maintains version control and audit trails for all documentation files in the `/docs` folder.
 
 **Last Updated**: 2025-08-25  
@@ -12,27 +16,31 @@
 
 | Document | Current Version | Last Modified | Status | Description |
 |----------|----------------|---------------|---------|-------------|
-| `ARCHITECTURE.md` | 2025-08-25.v5 | 2025-08-25 | Active | Architecture + async & localization strategies |
-| `PhaseOne.md` | 2025-08-25.v3 | 2025-08-25 | Active | Phase 1 scope, feature list, and implementation planning |
-| `BehaviorSettingsRegistry.md` | 2025-08-25.v3 | 2025-08-25 | Active | Registry mapping and ADMX behavior settings documentation |
-| `DOCUMENTATION_VERSION_MANIFEST.md` | 2025-08-25.v9 | 2025-08-25 | Active | This versioning manifest document |
-| `SECURITY-HARDENING.md` | 2025-08-25.v3 | 2025-08-25 | Active | Repository security hardening and branch protection guidance |
-| `ConfigSettings.md` | 2025-08-25.v3 | 2025-08-25 | Active | Client application configurable settings and registry mappings |
-| `copilot-instructions.md` | 2025-08-24.v3.6 | 2025-08-24 | Active | Instructions for AI code generation and behavior |
-| `LOCALIZATION_STEPS_TEMP.md` | 2025-08-24.v1 | 2025-08-24 | Temp | Transitional localization checklist |
-| `WinUITheming.md` | 2025-08-25.v2 | 2025-08-25 | Active | WinUI theming standards for AI code generation |
-| `Log-file-interface-design.md` | 2025-08-25.v1 | 2025-08-25 | Draft | Log file interface design specification |
+| `ARCHITECTURE.md` | v5.0 | 2025-08-25 | Active | Architecture + async & localization strategies |
+| `PhaseOne.md` | v3.0 | 2025-08-25 | Active | Phase 1 scope, feature list, and implementation planning |
+| `BehaviorSettingsRegistry.md` | v3.0 | 2025-08-25 | Active | Registry mapping and ADMX behavior settings documentation |
+| `DOCUMENTATION_VERSION_MANIFEST.md` | v11.0 | 2025-08-25 | Active | This versioning manifest document |
+| `SECURITY-HARDENING.md` | v3.0 | 2025-08-25 | Active | Repository security hardening and branch protection guidance |
+| `ConfigSettings.md` | v3.0 | 2025-08-25 | Active | Client application configurable settings and registry mappings |
+| `.github/copilot-instructions.md` | v3.7 | 2025-08-25 | Active | Instructions for AI code generation and behavior |
+| `WinUITheming.md` | v2.0 | 2025-08-25 | Active | WinUI theming standards for AI code generation |
+| `Log-file-interface-design.md` | v1.0 | 2025-08-25 | Draft | Log file interface design specification |
 
 ---
 
 ## Change Log
 
-### 2025-08-25.v5
-**Modified By**: @KyleC69
-**Change Type**: Minor - Updated Copilot instructions and localization steps
-**Files Affected**: `copilot-instructions.md`
-**Description**: Revised AI assistance instructions and added copilot task completion checklist.
+### 2025-08-25.v11
+**Modified By**: @copilot  
+**Change Type**: Removal  
+**Files Affected**: `DOCUMENTATION_VERSION_MANIFEST.md`, removed `LOCALIZATION_STEPS_TEMP.md`  
+**Description**: Removed temporary localization steps document after integration; updated manifest inventory and version.
 
+### 2025-08-25.v10
+**Modified By**: @copilot  
+**Change Type**: Minor - Added version metadata row & aligned manifest table versions (vX.Y pattern)  
+**Files Affected**: `DOCUMENTATION_VERSION_MANIFEST.md`  
+**Description**: Introduced explicit version row for manifest; updated manifest entry to v10.0; corrected Last Modified date for `.github/copilot-instructions.md` to 2025-08-25.
 
 ### 2025-08-25.v9
 **Modified By**: @copilot  
@@ -46,4 +54,4 @@
 **Files Affected**: `PhaseOne.md`, `BehaviorSettingsRegistry.md`, `SECURITY-HARDENING.md`, `ConfigSettings.md`, `DOCUMENTATION_VERSION_MANIFEST.md`  
 **Description**: Added unified Document Metadata header block and bumped versions accordingly.
 
-<!-- Older entries retained -->
+<!-- Older entries retained --><!-- Older entries retained -->
