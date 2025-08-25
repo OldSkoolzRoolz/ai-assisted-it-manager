@@ -8,12 +8,14 @@ using System.Linq;
 using System.Resources;
 
 namespace ITCompanionClient;
+/// <summary>Main application window hosting navigation and content frame.</summary>
 public sealed partial class MainWindow : Window
 {
     private readonly ILocalizationService _loc;
     private string[] _cultures = [];
     private static readonly ResourceManager ShellRm = new("KC.ITCompanion.ClientShared.Resources.Shell", typeof(MainWindow).Assembly);
 
+    /// <summary>Create main window and initialize culture list + default page.</summary>
     public MainWindow()
     {
         InitializeComponent();
@@ -25,6 +27,7 @@ public sealed partial class MainWindow : Window
         ContentFrame.Content = new StatusView();
     }
 
+    /// <summary>Discovers available UI cultures and populates selector.</summary>
     private void LoadCultures()
     {
         var discovered = CultureCatalog.Discover(ShellRm, "Nav_Status");
@@ -37,6 +40,7 @@ public sealed partial class MainWindow : Window
         _cultures = discovered.Distinct().OrderBy(c => c, System.StringComparer.OrdinalIgnoreCase).ToArray();
     }
 
+    /// <summary>Navigation selection changed handler.</summary>
     private void OnNavSelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
     {
         if (args.SelectedItem is not NavigationViewItem nvi || nvi.Tag is not string tag) return;
@@ -48,8 +52,10 @@ public sealed partial class MainWindow : Window
         };
     }
 
+    /// <summary>Culture selection change placeholder (future dynamic preview).</summary>
     private void OnCultureSelectionChanged(object sender, SelectionChangedEventArgs e) { }
 
+    /// <summary>Apply selected culture and refresh current content pages.</summary>
     private void OnApplyLanguage(object sender, RoutedEventArgs e)
     {
         if (CultureCombo.SelectedItem is string culture && culture != _loc.CurrentUICulture.Name)

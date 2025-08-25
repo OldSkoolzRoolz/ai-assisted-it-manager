@@ -1,20 +1,45 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net9.0-windows;net8.0-windows10.0.19041.0</TargetFrameworks>
+	  	<TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+	<IsPackable>false</IsPackable>
+	<UseWinUI>true</UseWinUI>
+	  <Authors>Kyle Crowder</Authors>
+	  <EnableMsixTooling>false</EnableMsixTooling>
+	  <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+
+	  <!-- Ensure Windows-specific APIs are available -->
+	  <EnableWindowsTargetPlatform>true</EnableWindowsTargetPlatform>
+
+	  <!-- Optional: if you want to suppress implicit NuGet restore -->
+	  <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
+
+	  <!-- Optional: if you're building reusable UI components -->
+	  <GenerateLibraryLayout>true</GenerateLibraryLayout>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>KC.ITCompanion.CorePolicyEngine</RootNamespace>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
 	  <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+	  <ProduceReferenceAssembly>True</ProduceReferenceAssembly>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net8.0windows|AnyCPU'">
+    <WarningLevel>8</WarningLevel>
+    <IsPublishable>False</IsPublishable>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net8.0windows|AnyCPU'">
+    <WarningLevel>8</WarningLevel>
+    <IsPublishable>False</IsPublishable>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.0" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.8" />
-    <PackageReference Include="Polly" Version="8.6.2" />
+    <PackageReference Include="Polly" Version="8.6.3" />
   </ItemGroup>
 
 </Project>

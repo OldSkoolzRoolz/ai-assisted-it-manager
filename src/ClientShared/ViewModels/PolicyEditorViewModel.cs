@@ -23,16 +23,21 @@ using KC.ITCompanion.CorePolicyEngine.Storage;
 using KC.ITCompanion.CorePolicyEngine.Storage.Sql;
 using Microsoft.Extensions.Logging;
 using KC.ITCompanion.ClientShared.Logging;
-using System.Resources;
 using KC.ITCompanion.ClientShared.Localization;
 
 namespace KC.ITCompanion.ClientShared;
 
+public sealed class PolicyDetailRequestedEventArgs : EventArgs
+{
+    /// <summary>Create event args for a policy detail request.</summary>
+    /// <param name="row">Row associated with request.</param>
+    public PolicyDetailRequestedEventArgs(PolicyGridRow row) { Row = row; }
+    /// <summary>The policy grid row that triggered detail request.</summary>
+    public PolicyGridRow Row { get; }
+}
+
 /// <summary>
 /// ViewModel orchestrating policy catalog loading, filtering, navigation and selection.
-/// NOTE: All ObservableCollection mutations must occur on the UI thread. Background loading operations
-/// parse/construct data then dispatch to UI via <see cref="IUiDispatcher"/>. Do NOT mutate the collections
-/// from background continuations.
 /// </summary>
 public class PolicyEditorViewModel : INotifyPropertyChanged
 {
@@ -43,7 +48,6 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
     private readonly ILogger<PolicyEditorViewModel> _logger;
     private readonly IPolicyGroupRepository? _policyGroups;
     private readonly IMessagePromptService? _prompt;
-    private readonly ResourceManager _logRm = new("KC.ITCompanion.ClientShared.Resources.PolicyEditorLog", typeof(PolicyEditorViewModel).Assembly);
     private readonly ILocalizationService? _locService;
 
     private string? _breadcrumb;
@@ -73,27 +77,15 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
         _prompt = prompt;
         _policyGroups = policyGroupRepository;
         _locService = locService;
-        LoadPoliciesCommand = new RelayCommand(async _ => await LoadDefaultSubsetAsync(), _ => true);
+        LoadPoliciesCommand = new RelayCommand(async _ => await LoadDefaultSubsetAsync().ConfigureAwait(false), _ => true);
         SearchLocalPoliciesCommand = new RelayCommand(_ => ApplySearchFilter(SearchText), _ => Catalog != null);
-        RefreshPolicyGroupsCommand = new RelayCommand(async _ => await LoadPolicyGroupsAsync(), _ => _policyGroups != null);
+        RefreshPolicyGroupsCommand = new RelayCommand(async _ => await LoadPolicyGroupsAsync().ConfigureAwait(false), _ => _policyGroups != null);
         OpenSearchDialogCommand = new RelayCommand(_ => OnOpenSearchDialog(), _ => Catalog != null);
         OpenPolicyDetailCommand = new RelayCommand(p => OnOpenPolicyDetail(p as PolicyGridRow), p => p is PolicyGridRow);
-        LogTemplate("PolicyEditorInitialized_Template");
+        _logger.PolicyEditorInitialized();
     }
 
     private CultureInfo CurrentCulture => _locService?.CurrentUICulture ?? CultureInfo.CurrentUICulture;
-
-    private void LogTemplate(string key, params object[] args)
-    {
-        try
-        {
-            var template = _logRm.GetString(key, CurrentCulture);
-            if (string.IsNullOrEmpty(template)) return;
-            string message = args.Length > 0 ? string.Format(CurrentCulture, template!, args) : template!;
-            _logger.LogPolicyEditorTemplate(key, message);
-        }
-        catch { /* swallow logging failures */ }
-    }
 
     /// <summary>All loaded policy summaries.</summary>
     public ObservableCollection<PolicySummary> Policies { get; } = new();
@@ -151,7 +143,7 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
                 OnPropertyChanged();
                 ApplySearchFilter(_searchText);
                 RebuildNavigation();
-                LogTemplate("SearchFilterApplied_Template", _searchText ?? string.Empty);
+                _logger.SearchFilterApplied(_searchText ?? string.Empty);
             }
         }
     }
@@ -175,48 +167,52 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
     public ICommand OpenPolicyDetailCommand { get; }
 
     /// <summary>Raised when a policy row requests opening a detailed view.</summary>
-    public event EventHandler<PolicyGridRow>? PolicyDetailRequested;
+    public event EventHandler<PolicyDetailRequestedEventArgs>? PolicyDetailRequested;
     /// <inheritdoc />
     public event PropertyChangedEventHandler? PropertyChanged;
 
     /// <summary>Ensures catalog is loaded (idempotent) using default language.</summary>
     public async Task EnsureCatalogLoadedAsync()
-    { if (Catalog != null) return; await LoadEntireCatalogAsync("en-US", CancellationToken.None); }
+    { if (Catalog != null) return; await LoadEntireCatalogAsync("en-US", CancellationToken.None).ConfigureAwait(false); }
 
     private async Task LoadPolicyGroupsAsync()
     {
         if (_policyGroups == null) return;
         try
         {
-            IReadOnlyList<PolicyGroupDto> groups = await _policyGroups.GetGroupsAsync(CancellationToken.None).ConfigureAwait(false);
+            var groups = await _policyGroups.GetGroupsAsync(CancellationToken.None).ConfigureAwait(false);
             _dispatcher.Post(() =>
             {
                 PolicyGroups.Clear();
                 foreach (var g in groups) PolicyGroups.Add(g);
             });
         }
-        catch (Exception ex)
-        {
-            LogTemplate("PolicyGroupsLoadFailed_Template");
-            _logger.LogError(ex, "Unexpected exception loading policy groups.");
-        }
+        catch (OperationCanceledException) { }
+        catch (IOException ex) { _logger.PolicyGroupsLoadFailed(ex); }
+        catch (UnauthorizedAccessException ex) { _logger.PolicyGroupsLoadFailed(ex); }
+        catch (Exception ex) { _logger.PolicyGroupsLoadFailed(ex); }
     }
 
     private async Task LoadDefaultSubsetAsync()
-    { await EnsureCatalogLoadedAsync(); await LoadPolicyGroupsAsync(); }
+    {
+        await EnsureCatalogLoadedAsync().ConfigureAwait(false);
+        await LoadPolicyGroupsAsync().ConfigureAwait(false);
+    }
 
     private async Task LoadEntireCatalogAsync(string languageTag, CancellationToken token)
     {
         var sw = System.Diagnostics.Stopwatch.StartNew();
         Result<AdminTemplateCatalog> result;
         try { result = await _loader.LoadLocalCatalogAsync(languageTag, 50, token).ConfigureAwait(false); }
-        catch (Exception ex) { LogTemplate("CatalogLoadFailed_Template", languageTag); _logger.LogError(ex, "Unexpected exception loading catalog language {LanguageTag}", languageTag); return; }
+        catch (IOException ex) { _logger.CatalogLoadFailed(languageTag, ex); return; }
+        catch (UnauthorizedAccessException ex) { _logger.CatalogLoadFailed(languageTag, ex); return; }
+        catch (Exception ex) { _logger.CatalogLoadFailed(languageTag, ex); return; }
         sw.Stop();
-        if (!result.Success || result.Value is null) { LogTemplate("CatalogLoadFailed_Template", languageTag); return; }
+        if (!result.Success || result.Value is null) { _logger.CatalogLoadFailed(languageTag); return; }
         _dispatcher.Post(() =>
         {
             InitializeCatalog(result.Value);
-            LogTemplate("CatalogLoaded_Template", languageTag, Policies.Count, sw.ElapsedMilliseconds);
+            _logger.CatalogLoaded(languageTag, Policies.Count, sw.ElapsedMilliseconds);
         });
     }
 
@@ -239,20 +235,14 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
 
         foreach (var pol in Catalog.AdmxDocuments.SelectMany(d => d.Policies))
         {
-            try
-            {
-                var catId = pol.Category.Id.Value;
-                if (!string.IsNullOrWhiteSpace(catId))
-                    _policyCategoryIdMap[pol.Key.Name] = catId;
-            }
-            catch
-            {
-                // Swallow per original intent; malformed policy entries ignored.
-            }
+            var catId = pol.Category.Id.Value;
+            if (!string.IsNullOrWhiteSpace(catId))
+                _policyCategoryIdMap[pol.Key.Name] = catId;
         }
 
         FilteredPolicies.Clear();
-        foreach (var p in Policies) FilteredPolicies.Add(p);
+        foreach (var p in Policies)
+            FilteredPolicies.Add(p);
 
         BuildFileGroups();
         RebuildNavigation();
@@ -278,35 +268,28 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
         Dictionary<string, string> resourceStrings = new(StringComparer.OrdinalIgnoreCase);
         foreach (var adml in Catalog.AdmlDocuments)
             foreach (var kv in adml.StringTable)
-                if (!string.IsNullOrEmpty(kv.Key.Value))
-                    resourceStrings[kv.Key.Value] = kv.Value;
+                if (!string.IsNullOrEmpty(kv.Key.Value)) resourceStrings[kv.Key.Value] = kv.Value;
         foreach (var doc in Catalog.AdmxDocuments)
             foreach (var cat in doc.Categories)
             {
                 try
                 {
-                    var catId = cat.Id.Value; // Category.Id is value type; cannot be null, but value string may be empty.
-                    if (string.IsNullOrWhiteSpace(catId)) { _logger.LogWarning("Skipping category with empty Id (source {Source})", doc.Lineage.SourceUri); continue; }
+                    var catId = cat.Id.Value;
+                    if (string.IsNullOrWhiteSpace(catId)) { _logger.SkippingEmptyCategory(doc.Lineage.SourceUri); continue; }
                     _categoryIndex[catId] = cat;
-                    string? token = null;
-                    if (cat.DisplayName != null)
-                    {
-                        var resId = cat.DisplayName.Id; // value type
-                        token = resId.Value;
-                    }
+                    string? token = cat.DisplayName?.Id.Value;
                     _categoryDisplayMap[catId] = !string.IsNullOrWhiteSpace(token) && resourceStrings.TryGetValue(token, out var display) ? display : catId;
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "Failed processing category (continuing). Source={Source}", doc.Lineage.SourceUri);
+                    _logger.CategoryProcessFailed(ex, doc.Lineage.SourceUri);
                 }
             }
         // Populate flat category list for navigation pane
         CategoryListItems.Clear();
         var roots = Catalog.AdmxDocuments.SelectMany(d => d.Categories).Where(c => c.Parent is null)
             .OrderBy(c => LocalizedCategoryName(c.Id.Value), StringComparer.OrdinalIgnoreCase);
-        foreach (var root in roots)
-            CategoryListItems.Add(new CategoryListItem(root.Id.Value, LocalizedCategoryName(root.Id.Value)));
+        foreach (var root in roots) CategoryListItems.Add(new CategoryListItem(root.Id.Value, LocalizedCategoryName(root.Id.Value)));
     }
 
     private void BuildFileGroups()
@@ -316,7 +299,7 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
         foreach (var doc in Catalog.AdmxDocuments)
         {
             var path = doc.Lineage.SourceUri.LocalPath;
-            var group = new PolicyFileGroup(Path.GetFileName(path), path);
+            var group = new PolicyFileGroup(System.IO.Path.GetFileName(path), path);
             foreach (var pol in doc.Policies)
                 if (summaryByName.TryGetValue(pol.Key.Name, out var summary))
                     group.Policies.Add(new PolicyItemViewModel(summary));
@@ -408,9 +391,7 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
     }
 
     private string LocalizedCategoryName(string id)
-    {
-        return _categoryDisplayMap != null && _categoryDisplayMap.TryGetValue(id, out var name) ? name : id;
-    }
+        => _categoryDisplayMap != null && _categoryDisplayMap.TryGetValue(id, out var name) ? name : id;
 
     private string? BuildBreadcrumb(Category? category)
     {
@@ -431,26 +412,23 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
         SelectedPolicySettings.Clear();
         if (Catalog == null || SelectedPolicy == null) return;
         var policy = Catalog.AdmxDocuments.SelectMany(d => d.Policies).FirstOrDefault(p => p.Key.Name == SelectedPolicy.Key.Name);
-        if (policy == null) { LogTemplate("PolicyKeyNotFound_Template", SelectedPolicy.Key.Name); return; }
+        if (policy == null) { _logger.PolicyKeyNotFound(SelectedPolicy.Key.Name); return; }
         foreach (var element in policy.Elements) SelectedPolicySettings.Add(new PolicySettingViewModel(policy, element));
-        LogTemplate("PolicySelected_Template", SelectedPolicy.Key.Name, SelectedPolicySettings.Count);
-        try { await _audit.PolicySelectedAsync(SelectedPolicy.Key.Name).ConfigureAwait(false); } catch { }
+        _logger.PolicySelected(SelectedPolicy.Key.Name, SelectedPolicySettings.Count);
+        try { await _audit.PolicySelectedAsync(SelectedPolicy.Key.Name).ConfigureAwait(false); }
+        catch (IOException) { }
+        catch (UnauthorizedAccessException) { }
     }
 
-    private static void OnOpenSearchDialog()
-    {
-        // Host app can implement search dialog.
-    }
+    private static void OnOpenSearchDialog() { }
 
     private void OnOpenPolicyDetail(PolicyGridRow? row)
     {
-        if (row == null) return; SelectedPolicy = row.Summary; PolicyDetailRequested?.Invoke(this, row);
+        if (row == null) return; SelectedPolicy = row.Summary; PolicyDetailRequested?.Invoke(this, new PolicyDetailRequestedEventArgs(row));
     }
 
     private void OnPropertyChanged([CallerMemberName] string? name = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-    }
+        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
     /// <summary>
     /// Apply a category filter by id (null clears). Thread-affine: UI thread recommended because triggers collection updates.

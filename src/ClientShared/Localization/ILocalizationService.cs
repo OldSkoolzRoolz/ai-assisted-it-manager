@@ -18,10 +18,19 @@ public interface ILocalizationService
     /// <summary>Current UI culture in effect.</summary>
     CultureInfo CurrentUICulture { get; }
     /// <summary>Raised after culture successfully changed.</summary>
-    event EventHandler<CultureInfo>? CultureChanged;
+    event EventHandler<LocalizationCultureChangedEventArgs>? CultureChanged;
     /// <summary>
     /// Attempts to change UI culture. Implementations should throw if culture name invalid.
     /// </summary>
     /// <param name="cultureName">IETF culture tag.</param>
     void ChangeCulture(string cultureName);
+}
+
+/// <summary>Event args for culture change notifications.</summary>
+public sealed class LocalizationCultureChangedEventArgs : EventArgs
+{
+    /// <summary>Create event args.</summary>
+    public LocalizationCultureChangedEventArgs(CultureInfo culture) => Culture = culture;
+    /// <summary>New culture now active.</summary>
+    public CultureInfo Culture { get; }
 }

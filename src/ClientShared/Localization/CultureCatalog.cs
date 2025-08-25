@@ -20,8 +20,11 @@ public static class CultureCatalog
     /// <summary>
     /// Returns ordered culture names (e.g. en-US, fr-FR) that supply a value for the probe key.
     /// </summary>
+    /// <exception cref="ArgumentNullException">rm or probeKey null.</exception>
     public static IReadOnlyList<string> Discover(ResourceManager rm, string probeKey)
     {
+        ArgumentNullException.ThrowIfNull(rm);
+        ArgumentException.ThrowIfNullOrWhiteSpace(probeKey);
         var list = new List<(string name, int sort)>();
         foreach (var c in CultureInfo.GetCultures(CultureTypes.SpecificCultures))
         {
@@ -33,7 +36,10 @@ public static class CultureCatalog
                     list.Add((c.Name, c.Name.Equals("en-US", StringComparison.OrdinalIgnoreCase) ? 0 : 1));
                 }
             }
-            catch { }
+            catch (MissingManifestResourceException)
+            {
+                // ignore missing resource sets
+            }
         }
         return list
             .Distinct()

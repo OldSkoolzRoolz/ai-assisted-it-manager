@@ -7,11 +7,11 @@
 | **Author**              | @KyleC69                          |
 | **Document ID**         | AI-CODING-STD-001                                 |
 | **Document Authority**  | @KyleC69                                          |
-| **Version**             | 2025-08-25.v3.7                                     |
+| **Version**             | 2025-08-25.v3.9                                   |
 
 
 
-## **(ENFORCED) – 1. Build Instructions**
+## ** 1. Build Instructions**
 Canonical build sequence (ALWAYS in this order after bootstrap):
 
 1. `dotnet restore ITCompanion.sln`  
@@ -45,16 +45,12 @@ DOTNET_NOLOGO=1 dotnet build ITCompanion.sln -c Debug -warnaserror /p:TreatWarni
 - Only use `Task.Run` for genuine CPU‑bound offload.  
 - Avoid fire‑and‑forget; if unavoidable, safely log exceptions.  
 - Use `ConfigureAwait(false)` only in pure libraries.  
-- Use `ValueTask` only when profiling shows benefit.  
 - Prefer `SemaphoreSlim` for async critical sections.  
-- Stream large payloads.  
 - Validate arguments early with `nameof()`.  
 - Prefer DI and interfaces; avoid concrete types in public APIs.  
 - Use LINQ and immutable collections where feasible.  
 - Follow SOLID; keep methods under ~30 lines.  
-- Organize `using` statements: System → third‑party → project.  
-- XML docs required for all members — see Adding New Code for tags.  
-- Profile before optimizing.  
+- XML docs required for all members — see Adding New Code for tags. 
 - Unit tests required for new logic — see Testing.
 
 ---
@@ -62,7 +58,6 @@ DOTNET_NOLOGO=1 dotnet build ITCompanion.sln -c Debug -warnaserror /p:TreatWarni
 ## **(ENFORCED) – 4. Testing**
 - Build first with `-warnaserror` before running tests.  
 - Preferred: `dotnet test ITCompanion.sln --no-build --configuration Debug`  
-- Filter slow/flaky integration tests with traits if needed.  
 - Mirror test project names/structure with source — see Adding New Code.
 
 ---
@@ -79,12 +74,14 @@ DOTNET_NOLOGO=1 dotnet build ITCompanion.sln -c Debug -warnaserror /p:TreatWarni
 
 ## **(ENFORCED) – 6. Adding New Code / Features**
 1. Identify correct module.  
-2. Match namespace to folder structure.  
+2. Match namespace to folder structure.  Ensure RootNamespace in .csproj follows pattern `KC.ITCompanion.<Module>`.  
+   - New modules need a new .csproj in `src/` and solution update.  
+   - New module must have a README.md in its folder with purpose, dependencies, and build/test instructions.  
+   - New module must have a corresponding test project in `tests/` named `<Module>.Tests.csproj`.  
 3. Update DI registration.  
 4. Add tests per Testing section.  
 5. Run full validation sequence.  
 6. Avoid blocking UI thread.  
-7. Extend rather than modify shared logic.  
 8. **XML docs mandatory** — `<summary>`, `<param>`, `<returns>`, `<exception>`; update docs with signature/behavior changes; missing docs block PR.
 
 ---
@@ -113,6 +110,8 @@ Root:
 - src/
 - tests/
 - .gitignore / .gitattributes
+- .editorconfig
+- .github/copilot-instructions.md
 ```
 
 ---
@@ -124,7 +123,7 @@ Root:
 - Select log levels based on event severity.
 - Avoid logging sensitive data; log strings should be resource‑based for localization.
 - Prefer structured properties over string concatenation.
-- Use source‑generated partial static logger classes named `<Area>Log` or `Logger` in the subsystem namespace.
+- Use source‑generated partial static logger classes named `<Area>Logger` in the subsystem namespace. Files must be in a `Logging` folder.
 
 ### **9.1 Logging Event ID Schema (ENFORCED)**
 Each subsystem owns a numeric EventId range; no overlaps. Update the schema when adding a subsystem.
@@ -162,7 +161,7 @@ Guidelines:
 
 ---
 
-## **(FLEXIBLE) – 11. Copilot Language Guidelines**
+## ** 11. Copilot Language Guidelines**
 ### clarity:
   - Avoid academic jargon; prefer plain English and analogies.
   - Short, direct sentences.
@@ -173,7 +172,7 @@ Guidelines:
   - Celebrate resourcefulness.
   - Avoid condescension.
 
-### examples and explanation:
+### **(ENFORCED)** examples and explanation:
   - Use relatable, real‑world examples.
   - Break complex ideas into steps.
   - Lead with why before how.
@@ -182,7 +181,7 @@ Guidelines:
   - Bullets, headings, and code blocks over dense text.
   - Highlight key takeaways.
 
-### personality alignment:
+### **(MANDATORY)** personality alignment:
   - Sound like a helpful peer.
   - Add light humor/empathy when appropriate.
   - Respect time, experience, and autonomy.
@@ -191,30 +190,16 @@ Guidelines:
 ## 12. **Change Validation Checklist (ENFORCED)**
 
 A change is "ready" ONLY if:
-[ ] Builds cleanly (no warnings: enforced by -warnaserror / TreatWarningsAsErrors=true).
-[ ] Resolve all IntelliSense issues using best practices as guide.
-[ ] All tests pass (and new tests cover new logic).
-[ ] No hard-coded environment-only paths or credentials.
-[ ] UI or service still starts successfully after change.
 [ ] Documentation changes include manifest updates and maintain technical accuracy.
 [ ] Analyzer + code style passes: dotnet format analyzers/style --verify-no-changes.
 [ ] XML documentation headers exist for all new or modified members (see Section 11).
 [ ] Logging changes follow EventId schema (Section 9) and use static LoggerMessage.
-[ ] No sync-over-async patterns introduced; async/await used properly with CancellationToken.
-[ ] DI registrations updated if new services added.
-[ ] No sensitive data logged or exposed.
 [ ] Code adheres to coding standards (Section 3).
 [ ] Relevant docs (architecture, onboarding) updated if design changes.
-[ ] PR description includes summary of changes and references any related issues.
 [ ] All steps outlined and requested by user completed fully (no deferrals). No unnecessary prompts.
-[ ] If new dependencies added, ensure they are actively maintained and secure.
-[ ] If DB changes, migrations tested on fresh instance and documented.
-[ ] If existing public APIs modified, XML docs updated accordingly.
 [ ] If performance impact likely, profiling or benchmarks included.
 [ ] If security impact likely, threat model or risk assessment included.
 [ ] If config changes, defaults documented and validated.
-[ ] If UI changes, DataContext set and bindings verified.
-[ ] If DB changes, migrations tested on fresh instance and documented.
 
 ---
 

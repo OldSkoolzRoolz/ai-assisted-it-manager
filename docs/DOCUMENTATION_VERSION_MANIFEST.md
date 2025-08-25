@@ -22,13 +22,19 @@
 | `DOCUMENTATION_VERSION_MANIFEST.md` | v11.0 | 2025-08-25 | Active | This versioning manifest document |
 | `SECURITY-HARDENING.md` | v3.0 | 2025-08-25 | Active | Repository security hardening and branch protection guidance |
 | `ConfigSettings.md` | v3.0 | 2025-08-25 | Active | Client application configurable settings and registry mappings |
-| `.github/copilot-instructions.md` | v3.7 | 2025-08-25 | Active | Instructions for AI code generation and behavior |
+| `.github/copilot-instructions.md` | v3.9 | 2025-08-25 | Active | Instructions for AI code generation and behavior |
 | `WinUITheming.md` | v2.0 | 2025-08-25 | Active | WinUI theming standards for AI code generation |
 | `Log-file-interface-design.md` | v1.0 | 2025-08-25 | Draft | Log file interface design specification |
 
 ---
 
 ## Change Log
+
+### 2025-08-25.v12
+**Modified By**: @KyleC69
+**Change Type**: Minor 
+**Files Affected**: `DOCUMENTATION_VERSION_MANIFEST.md`, `copilot-instructions.md`
+**Description**: Relaxed AI code generation instructions to allow for more creative solutions; updated manifest version.
 
 ### 2025-08-25.v11
 **Modified By**: @copilot  

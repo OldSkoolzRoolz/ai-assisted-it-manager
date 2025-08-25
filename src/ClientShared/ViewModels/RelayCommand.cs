@@ -41,6 +41,10 @@ public sealed class RelayCommand : ICommand
 
     /// <inheritdoc />
     public event EventHandler? CanExecuteChanged;
-    /// <summary>Notifies the UI to re-query <see cref="CanExecute"/>.</summary>
-    public void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+
+    /// <summary>
+    /// Triggers re-evaluation of <see cref="CanExecute"/> for UI bindings.
+    /// Named with 'On' prefix to communicate event-raising semantics.
+    /// </summary>
+    public void OnCanExecuteChanged() => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
 }

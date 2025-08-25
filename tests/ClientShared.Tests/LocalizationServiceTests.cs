@@ -21,7 +21,7 @@ public sealed class LocalizationServiceTests
     {
         var svc = new LocalizationService(CultureInfo.GetCultureInfo("en-US"));
         CultureInfo? raised = null;
-        svc.CultureChanged += (_, c) => raised = c;
+        svc.CultureChanged += (_, e) => raised = e.Culture;
         svc.ChangeCulture("fr-FR");
         Assert.Equal("fr-FR", svc.CurrentUICulture.Name);
         Assert.NotNull(raised);

@@ -12,8 +12,11 @@ using System.Runtime.CompilerServices;
 
 namespace ITCompanionClient.Controls;
 
+/// <summary>Dialog providing advanced search options for policies.</summary>
 public sealed partial class AdvancedPolicySearchDialog : ContentDialog, INotifyPropertyChanged
 {
+    /// <summary>Create dialog with initial query text.</summary>
+    /// <param name="initial">Initial search text.</param>
     public AdvancedPolicySearchDialog(string? initial)
     {
         QueryText = initial ?? string.Empty;
@@ -24,6 +27,7 @@ public sealed partial class AdvancedPolicySearchDialog : ContentDialog, INotifyP
         BuildContent();
         DataContext = this;
     }
+    /// <summary>Builds dynamic dialog content.</summary>
     private void BuildContent()
     {
         var stack = new StackPanel { Spacing = 12, Width = 400 };
@@ -35,9 +39,15 @@ public sealed partial class AdvancedPolicySearchDialog : ContentDialog, INotifyP
         var whole = new CheckBox { Content = "Match whole word", IsChecked = WholeWord }; whole.Checked += (_, __) => WholeWord = true; whole.Unchecked += (_, __) => WholeWord = false; stack.Children.Add(whole);
         Content = stack;
     }
-    private string _queryText = string.Empty; public string QueryText { get => _queryText; set { if (_queryText != value) { _queryText = value; OnPropertyChanged(); } } }
-    private bool _includeKeys = true; public bool IncludeKeys { get => _includeKeys; set { if (_includeKeys != value) { _includeKeys = value; OnPropertyChanged(); } } }
-    private bool _includeDescriptions; public bool IncludeDescriptions { get => _includeDescriptions; set { if (_includeDescriptions != value) { _includeDescriptions = value; OnPropertyChanged(); } } }
-    private bool _wholeWord; public bool WholeWord { get => _wholeWord; set { if (_wholeWord != value) { _wholeWord = value; OnPropertyChanged(); } } }
-    public event PropertyChangedEventHandler? PropertyChanged; private void OnPropertyChanged([CallerMemberName] string? n = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n));
+    private string _queryText = string.Empty; /// <summary>Search query text.</summary>
+    public string QueryText { get => _queryText; set { if (_queryText != value) { _queryText = value; OnPropertyChanged(); } } }
+    private bool _includeKeys = true; /// <summary>Include policy keys in search.</summary>
+    public bool IncludeKeys { get => _includeKeys; set { if (_includeKeys != value) { _includeKeys = value; OnPropertyChanged(); } } }
+    private bool _includeDescriptions; /// <summary>Include description text in search.</summary>
+    public bool IncludeDescriptions { get => _includeDescriptions; set { if (_includeDescriptions != value) { _includeDescriptions = value; OnPropertyChanged(); } } }
+    private bool _wholeWord; /// <summary>Enable whole-word matching.</summary>
+    public bool WholeWord { get => _wholeWord; set { if (_wholeWord != value) { _wholeWord = value; OnPropertyChanged(); } } }
+    /// <summary>Property changed notification event.</summary>
+    public event PropertyChangedEventHandler? PropertyChanged; /// <summary>Raise property changed event.</summary>
+    private void OnPropertyChanged([CallerMemberName] string? n = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n));
 }

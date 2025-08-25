@@ -12,7 +12,7 @@ namespace KC.ITCompanion.CorePolicyEngine.Validation;
 /// <summary>Central registry mapping known validation rule ids to rule instances.</summary>
 public static class RuleRegistry
 {
-    private static readonly Dictionary<string, IValidationRule> _rules = new()
+    private static readonly Dictionary<string, IValidationRule> Rules = new()
     {
         ["VR_LOG_RETENTION_RANGE"] = new RangeClampRule("VR_LOG_RETENTION_RANGE", 1, 365),
         ["VR_MAX_LOG_FILE_SIZE"] = new RangeClampRule("VR_MAX_LOG_FILE_SIZE", 1, 512),
@@ -22,5 +22,5 @@ public static class RuleRegistry
     };
 
     /// <summary>Gets a rule instance for id or null.</summary>
-    public static IValidationRule? Get(string ruleId) => _rules.TryGetValue(ruleId, out var r) ? r : null;
+    public static IValidationRule? Get(string ruleId) => Rules.TryGetValue(ruleId, out var r) ? r : null;
 }

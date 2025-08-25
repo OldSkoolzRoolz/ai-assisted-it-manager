@@ -8,13 +8,17 @@ using System.ComponentModel;
 using Microsoft.UI.Xaml.Media;
 
 namespace ITCompanionClient.Controls;
+
+/// <summary>Policies page hosting policy browser and filtering UI.</summary>
 public sealed partial class PoliciesPage : UserControl
 {
+    /// <summary>Shared policy editor view model.</summary>
     public PolicyEditorViewModel ViewModel { get; }
     private InfoBar? _actionInfoBar;
     private Grid? _groupedPanel;
     private ScrollViewer? _flatScroll;
 
+    /// <summary>Create page instance.</summary>
     public PoliciesPage()
     {
         InitializeComponent();
@@ -22,7 +26,7 @@ public sealed partial class PoliciesPage : UserControl
         _groupedPanel = (Grid)FindName("GroupedPanel");
         _flatScroll = (ScrollViewer)FindName("FlatScroll");
         ViewModel = (PolicyEditorViewModel)App.Services.GetService(typeof(PolicyEditorViewModel))!;
-        DataContext = this; // expose ViewModel.* to XAML bindings referencing ViewModel
+        DataContext = this;
         ViewModel.ColumnVisibility.PropertyChanged += OnColumnVisibilityChanged;
         Loaded += OnLoaded;
     }
@@ -30,7 +34,7 @@ public sealed partial class PoliciesPage : UserControl
     private async void OnLoaded(object sender, RoutedEventArgs e)
     {
         LoadingRing.IsActive = true;
-        await ViewModel.EnsureCatalogLoadedAsync();
+        await ViewModel.EnsureCatalogLoadedAsync().ConfigureAwait(true);
         LoadingRing.IsActive = false;
         RefreshEmptyState();
         UpdateColumnVisibility();
@@ -43,7 +47,7 @@ public sealed partial class PoliciesPage : UserControl
     {
         LoadingRing.IsActive = true;
         ViewModel.ApplySearchFilter(null);
-        await ViewModel.EnsureCatalogLoadedAsync();
+        await ViewModel.EnsureCatalogLoadedAsync().ConfigureAwait(true);
         LoadingRing.IsActive = false;
         ShowInfo("Catalog reloaded.");
         RefreshEmptyState();
@@ -60,6 +64,7 @@ public sealed partial class PoliciesPage : UserControl
             RefreshEmptyState();
         }
     }
+
     private void OnColumns(object sender, RoutedEventArgs e) { }
 
     private void OnGroupingChanged(object sender, RoutedEventArgs e)
@@ -71,10 +76,10 @@ public sealed partial class PoliciesPage : UserControl
     }
 
     private async void OnItemClick(object sender, ItemClickEventArgs e)
-    { if (e.ClickedItem is PolicySummary summary) await OpenPolicyAsync(summary); }
+    { if (e.ClickedItem is PolicySummary summary) await OpenPolicyAsync(summary).ConfigureAwait(true); }
 
     private async void OnOpenPolicy(object sender, RoutedEventArgs e)
-    { if ((sender as FrameworkElement)?.Tag is PolicySummary summary) await OpenPolicyAsync(summary); }
+    { if ((sender as FrameworkElement)?.Tag is PolicySummary summary) await OpenPolicyAsync(summary).ConfigureAwait(true); }
 
     private async System.Threading.Tasks.Task OpenPolicyAsync(PolicySummary summary)
     {
@@ -137,7 +142,7 @@ public sealed partial class PoliciesPage : UserControl
         if (CategoryList.SelectedItem is CategoryListItem item)
             ViewModel.SetCategoryFilter(item.Id);
         else
-            ViewModel.SetCategoryFilter(null!); // ViewModel not null; SetCategoryFilter accepts nullable
+            ViewModel.SetCategoryFilter(null!);
         RefreshEmptyState();
         UpdateColumnVisibility();
     }
