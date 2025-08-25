@@ -244,7 +244,9 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
         foreach (var p in Policies)
             FilteredPolicies.Add(p);
 
-        BuildFileGroups(); RebuildNavigation(); Breadcrumb = null;
+        BuildFileGroups();
+        RebuildNavigation();
+        Breadcrumb = null;
 
         // Now notify that Catalog + dependent counts changed.
         OnPropertyChanged(nameof(Catalog));
