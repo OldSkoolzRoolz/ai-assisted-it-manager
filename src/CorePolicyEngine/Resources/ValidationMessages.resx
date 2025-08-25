@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <!-- Validation message templates -->
+  <data name="VR_LOG_RETENTION_RANGE" xml:space="preserve"><value>Log retention days {0} is out of range; clamping to [{1},{2}].</value></data>
+  <data name="VR_MAX_LOG_FILE_SIZE" xml:space="preserve"><value>Max log file size {0}MB invalid; must be between {1} and {2} MB.</value></data>
+  <data name="VR_LOGLEVEL_ENUM" xml:space="preserve"><value>Min log level '{0}' not recognized; falling back to {1}.</value></data>
+  <data name="VR_CULTURE_TAG" xml:space="preserve"><value>Culture tag '{0}' invalid; using {1} instead.</value></data>
+  <data name="VR_BOOL" xml:space="preserve"><value>Boolean value for setting '{0}' invalid; using default {1}.</value></data>
+  <data name="VR_POLL_INTERVAL_RANGE" xml:space="preserve"><value>Policy poll interval {0}s out of range; clamped to [{1},{2}].</value></data>
+  <data name="VR_PATH_ABSOLUTE" xml:space="preserve"><value>Path for '{0}' must be absolute; value '{1}' rejected.</value></data>
+  <data name="VR_URI_OPTIONAL" xml:space="preserve"><value>Telemetry endpoint '{0}' invalid URI; ignoring.</value></data>
+</root>

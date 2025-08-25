@@ -4,12 +4,14 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:vm="using:KC.ITCompanion.ClientShared"
     xmlns:controls="using:ITCompanionClient.Controls"
+    xmlns:app="using:ITCompanionClient"
     x:Name="RootDialog"
-    Title="Policy Detail"
-    PrimaryButtonText="Push"
-    SecondaryButtonText="Close"
+    Title="{Binding Provider.[UI_PolicyDetailTitle], Source={StaticResource Loc}}"
+    PrimaryButtonText="{Binding Provider.[UI_Push], Source={StaticResource Loc}}"
+    SecondaryButtonText="{Binding Provider.[UI_Close], Source={StaticResource Loc}}"
     DefaultButton="Primary">
     <ContentDialog.Resources>
+        <app:LocalizedStrings x:Key="Loc" />
         <DataTemplate x:Key="TextTemplate" x:DataType="vm:PolicySettingViewModel">
             <StackPanel Spacing="4">
                 <TextBlock Text="{x:Bind PartId}" FontWeight="SemiBold" />
@@ -55,11 +57,11 @@
         <ScrollViewer Grid.Row="1">
             <StackPanel Spacing="12">
                 <StackPanel Spacing="4">
-                    <TextBlock Text="Description" FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding Provider.[UI_Description], Source={StaticResource Loc}}" FontWeight="SemiBold" />
                     <TextBlock Text="{x:Bind Description}" TextWrapping="Wrap" />
                 </StackPanel>
                 <StackPanel Spacing="4">
-                    <TextBlock Text="Settings" FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding Provider.[UI_Settings], Source={StaticResource Loc}}" FontWeight="SemiBold" />
                     <ItemsControl ItemsSource="{x:Bind Settings}">
                         <ItemsControl.ItemTemplateSelector>
                             <StaticResource ResourceKey="SettingTemplateSelector" />
@@ -68,6 +70,6 @@
                 </StackPanel>
             </StackPanel>
         </ScrollViewer>
-        <ToggleSwitch Grid.Row="2" Header="Edit Mode" IsOn="{x:Bind IsEditMode, Mode=TwoWay}" />
+        <ToggleSwitch Grid.Row="2" Header="{Binding Provider.[UI_EditMode], Source={StaticResource Loc}}" IsOn="{x:Bind IsEditMode, Mode=TwoWay}" />
     </Grid>
 </ContentDialog>

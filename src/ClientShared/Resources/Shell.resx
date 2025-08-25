@@ -35,4 +35,38 @@
   <data name="Nav_Logs" xml:space="preserve"><value>Logs</value></data>
   <data name="Nav_Watchers" xml:space="preserve"><value>Watchers</value></data>
   <data name="Nav_DevDiag" xml:space="preserve"><value>Dev Diagnostics</value></data>
+  <!-- Newly added UI strings -->
+  <data name="UI_Open" xml:space="preserve"><value>Open</value></data>
+  <data name="UI_SearchPolicies" xml:space="preserve"><value>Search policies</value></data>
+  <data name="UI_Reload" xml:space="preserve"><value>Reload</value></data>
+  <data name="UI_Advanced" xml:space="preserve"><value>Advanced</value></data>
+  <data name="UI_Columns" xml:space="preserve"><value>Columns</value></data>
+  <data name="UI_Name" xml:space="preserve"><value>Name</value></data>
+  <data name="UI_Category" xml:space="preserve"><value>Category</value></data>
+  <data name="UI_GroupByFile" xml:space="preserve"><value>Group By File</value></data>
+  <data name="UI_CategoriesHeader" xml:space="preserve"><value>Categories</value></data>
+  <data name="UI_NoPoliciesMatch" xml:space="preserve"><value>No policies match your search.</value></data>
+  <data name="UI_SearchLogPlaceholder" xml:space="preserve"><value>Search message/category</value></data>
+  <data name="UI_All" xml:space="preserve"><value>All</value></data>
+  <data name="UI_InfoPlus" xml:space="preserve"><value>Info+</value></data>
+  <data name="UI_WarningPlus" xml:space="preserve"><value>Warning+</value></data>
+  <data name="UI_ErrorPlus" xml:space="preserve"><value>Error+</value></data>
+  <data name="UI_AutoScroll" xml:space="preserve"><value>AutoScroll</value></data>
+  <data name="UI_Pause" xml:space="preserve"><value>Pause</value></data>
+  <data name="UI_Resume" xml:space="preserve"><value>Resume</value></data>
+  <data name="UI_Clear" xml:space="preserve"><value>Clear</value></data>
+  <data name="UI_OverallHealth" xml:space="preserve"><value>Overall Health</value></data>
+  <data name="UI_ActiveAlerts" xml:space="preserve"><value>Active Alerts</value></data>
+  <data name="UI_PolicyDrift" xml:space="preserve"><value>Policy Drift</value></data>
+  <data name="UI_RecentHighEvents" xml:space="preserve"><value>Recent High Importance Events</value></data>
+  <data name="UI_PolicyDetailTitle" xml:space="preserve"><value>Policy Detail</value></data>
+  <data name="UI_Push" xml:space="preserve"><value>Push</value></data>
+  <data name="UI_Close" xml:space="preserve"><value>Close</value></data>
+  <data name="UI_Description" xml:space="preserve"><value>Description</value></data>
+  <data name="UI_Settings" xml:space="preserve"><value>Settings</value></data>
+  <data name="UI_EditMode" xml:space="preserve"><value>Edit Mode</value></data>
+  <!-- New keys for culture switching -->
+  <data name="UI_ChangeLanguage" xml:space="preserve"><value>Change Language</value></data>
+  <data name="UI_SelectLanguage" xml:space="preserve"><value>Select a language</value></data>
+  <data name="UI_ApplyLanguage" xml:space="preserve"><value>Apply</value></data>
 </root>
