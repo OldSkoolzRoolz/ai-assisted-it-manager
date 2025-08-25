@@ -5,6 +5,7 @@ using KC.ITCompanion.CorePolicyEngine.Parsing;
 using KC.ITCompanion.CorePolicyEngine.Storage;
 using KC.ITCompanion.CorePolicyEngine.Storage.Sql;
 using KC.ITCompanion.ClientShared;
+using KC.ITCompanion.ClientShared.Localization;
 
 namespace ITCompanionClient;
 /// <summary>
@@ -43,18 +44,22 @@ public partial class App : Application
             b.AddDebug();
             b.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Information);
         });
+        // Core services
         sc.AddSingleton<IAdminTemplateLoader, AdmxAdmlParser>();
         sc.AddSingleton<IAuditStore, AuditStore>();
         sc.AddSingleton<IAuditWriter, AuditWriter>();
         sc.AddSingleton<ISqlConnectionFactory, SqlConnectionFactory>();
         sc.AddSingleton<ILogEventQueryRepository, LogEventQueryRepository>();
+        sc.AddSingleton<IPolicyDefinitionRepository, PolicyDefinitionRepository>();
+        sc.AddSingleton<IPolicyGroupRepository, PolicyGroupRepository>();
 
         // UI adapters
         sc.AddSingleton<IUiDispatcher, WinUiDispatcher>();
         sc.AddSingleton<IMessagePromptService, WinUiPromptService>();
         sc.AddSingleton<IThemeService, ThemeServiceWinUi>();
+        sc.AddSingleton<ILocalizationService, LocalizationService>();
 
-        // Core view models
+        // ViewModels
         sc.AddTransient<PolicyEditorViewModel>();
         return sc.BuildServiceProvider();
     }

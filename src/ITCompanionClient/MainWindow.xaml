@@ -14,14 +14,19 @@
         <MicaBackdrop />
     </Window.SystemBackdrop>
 
-    <controls:NavigationView x:Name="RootNav" PaneDisplayMode="Left" IsBackButtonVisible="Collapsed" IsSettingsVisible="True" SelectionChanged="OnNavSelectionChanged">
-        <controls:NavigationView.MenuItems>
-            <controls:NavigationViewItem Content="Status" Icon="Home" Tag="status" />
-            <controls:NavigationViewItem Content="Policies" Icon="Library" Tag="policies" />
-            <controls:NavigationViewItem Content="Logs" Icon="Document" Tag="logs" />
-            <controls:NavigationViewItem Content="Watchers" Icon="Contact" Tag="watchers" />
-            <controls:NavigationViewItem Content="DevDiag" Icon="Edit" Tag="devdiag" />
-        </controls:NavigationView.MenuItems>
-        <Frame x:Name="ContentFrame" />
-    </controls:NavigationView>
+    <Grid>
+        <Grid.Resources>
+            <local:LocalizedStrings x:Key="Loc" />
+        </Grid.Resources>
+        <controls:NavigationView x:Name="RootNav" PaneDisplayMode="Left" IsBackButtonVisible="Collapsed" IsSettingsVisible="True" SelectionChanged="OnNavSelectionChanged">
+            <controls:NavigationView.MenuItems>
+                <controls:NavigationViewItem Content="{Binding Provider.[Nav_Status], Source={StaticResource Loc}}" Icon="Home" Tag="status" />
+                <controls:NavigationViewItem Content="{Binding Provider.[Nav_Policies], Source={StaticResource Loc}}" Icon="Library" Tag="policies" />
+                <controls:NavigationViewItem Content="{Binding Provider.[Nav_Logs], Source={StaticResource Loc}}" Icon="Document" Tag="logs" />
+                <controls:NavigationViewItem Content="{Binding Provider.[Nav_Watchers], Source={StaticResource Loc}}" Icon="Contact" Tag="watchers" />
+                <controls:NavigationViewItem Content="{Binding Provider.[Nav_DevDiag], Source={StaticResource Loc}}" Icon="Edit" Tag="devdiag" />
+            </controls:NavigationView.MenuItems>
+            <Frame x:Name="ContentFrame" />
+        </controls:NavigationView>
+    </Grid>
 </Window>

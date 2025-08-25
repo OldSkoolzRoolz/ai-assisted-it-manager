@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+              <xsd:attribute name="xml:space" use="required" fixed="preserve" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <!-- Template-based resource keys (fully localizable sentences). -->
+  <data name="PolicyEditorInitialized_Template" xml:space="preserve"><value>Policy editor initialized</value><comment>EventId 2000</comment></data>
+  <data name="SearchFilterApplied_Template" xml:space="preserve"><value>Search filter applied: '{0}'</value><comment>EventId 2001 arg0=query</comment></data>
+  <data name="CatalogLoadFailed_Template" xml:space="preserve"><value>Catalog load failed for language '{0}'</value><comment>EventId 2002 arg0=languageTag</comment></data>
+  <data name="CatalogLoaded_Template" xml:space="preserve"><value>Catalog '{0}' loaded: {1} policies in {2} ms</value><comment>EventId 2003 arg0=languageTag arg1=policyCount arg2=elapsedMs</comment></data>
+  <data name="PolicyKeyNotFound_Template" xml:space="preserve"><value>Policy key not found: {0}</value><comment>EventId 2004 arg0=policyKey</comment></data>
+  <data name="PolicySelected_Template" xml:space="preserve"><value>Policy selected: {0} settings={1}</value><comment>EventId 2005 arg0=policyKey arg1=settingCount</comment></data>
+  <data name="PolicyGroupsLoadFailed_Template" xml:space="preserve"><value>Failed loading policy groups</value><comment>EventId 2006</comment></data>
+</root>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="PolicyEditorInitialized_Template" xml:space="preserve"><value>[!! Policy editor initialized !!]</value></data>
+  <data name="SearchFilterApplied_Template" xml:space="preserve"><value>[!! Search filter applied: '{0}' !!]</value></data>
+  <data name="CatalogLoadFailed_Template" xml:space="preserve"><value>[!! Catalog load failed for language '{0}' !!]</value></data>
+  <data name="CatalogLoaded_Template" xml:space="preserve"><value>[!! Catalog '{0}' loaded: {1} policies in {2} ms !!]</value></data>
+  <data name="PolicyKeyNotFound_Template" xml:space="preserve"><value>[!! Policy key not found: {0} !!]</value></data>
+  <data name="PolicySelected_Template" xml:space="preserve"><value>[!! Policy selected: {0} settings={1} !!]</value></data>
+  <data name="PolicyGroupsLoadFailed_Template" xml:space="preserve"><value>[!! Failed loading policy groups !!]</value></data>
+</root>

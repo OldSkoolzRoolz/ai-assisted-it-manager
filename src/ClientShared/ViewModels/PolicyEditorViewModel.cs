@@ -21,12 +21,15 @@ using KC.ITCompanion.CorePolicyEngine.Parsing;
 using KC.ITCompanion.CorePolicyEngine.Storage;
 using KC.ITCompanion.CorePolicyEngine.Storage.Sql;
 using Microsoft.Extensions.Logging;
+using KC.ITCompanion.ClientShared.Logging;
 
 namespace KC.ITCompanion.ClientShared;
 
 /// <summary>
 /// ViewModel orchestrating policy catalog loading, filtering, navigation and selection.
-/// Framework-neutral (no direct WPF / WinUI references) – UI hosts supply dispatcher & prompt services.
+/// NOTE: All ObservableCollection mutations must occur on the UI thread. Background loading operations
+/// parse/construct data then dispatch to UI via <see cref="IUiDispatcher"/>. Do NOT mutate the collections
+/// from background continuations.
 /// </summary>
 public class PolicyEditorViewModel : INotifyPropertyChanged
 {
@@ -94,11 +97,12 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
     public AdminTemplateCatalog? Catalog
     {
         get => _catalog;
-        private set { _catalog = value; OnPropertyChanged(); OnPropertyChanged(nameof(PolicyFileCount)); }
+        // Setter no longer raises notifications directly; notifications occur after full initialization.
+        private set => _catalog = value;
     }
 
     /// <summary>Number of ADMX files in catalog.</summary>
-    public int PolicyFileCount => Catalog?.AdmxDocuments.Count ?? 0;
+    public int PolicyFileCount => Catalog?.AdmxDocuments?.Count ?? 0;
 
     /// <summary>Breadcrumb path of currently selected navigation node.</summary>
     public string? Breadcrumb
@@ -184,14 +188,32 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
         catch (Exception ex) { _logger.LogError(ex, "Unexpected exception loading catalog language {LanguageTag}", languageTag); return; }
         sw.Stop();
         if (!result.Success || result.Value is null) { _logger.CatalogLoadFailed(languageTag); return; }
-        Catalog = result.Value;
+
+        // Marshal full initialization to UI thread (thread-affinity for observable collections).
+        _dispatcher.Post(() =>
+        {
+            InitializeCatalog(result.Value);
+            _logger.CatalogLoaded(languageTag, Policies.Count, sw.ElapsedMilliseconds);
+        });
+    }
+
+    /// <summary>
+    /// Fully initializes the ViewModel state from a loaded catalog before raising change notifications.
+    /// This prevents observers from seeing partially constructed state. MUST run on UI thread.
+    /// </summary>
+    /// <param name="catalog">Loaded catalog (non-null).</param>
+    private void InitializeCatalog(AdminTemplateCatalog catalog)
+    {
+        Catalog = catalog;
+
+        // Build indices & maps first (no notifications yet).
         IndexCategories();
         _policyCategoryIdMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
         Policies.Clear();
-        foreach (var s in Catalog.Summaries.OrderBy(s => s.DisplayName, StringComparer.OrdinalIgnoreCase))
-        {
+        foreach (var s in Catalog!.Summaries.OrderBy(s => s.DisplayName, StringComparer.OrdinalIgnoreCase))
             Policies.Add(s);
-        }
+
         foreach (var pol in Catalog.AdmxDocuments.SelectMany(d => d.Policies))
         {
             try
@@ -200,55 +222,31 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
                 if (!string.IsNullOrWhiteSpace(catId))
                     _policyCategoryIdMap[pol.Key.Name] = catId;
             }
-            catch { }
+            catch
+            {
+                // Swallow per original intent; malformed policy entries ignored.
+            }
         }
-        FilteredPolicies.Clear(); foreach (var p in Policies) FilteredPolicies.Add(p);
-        BuildFileGroups(); RebuildNavigation(); Breadcrumb = null;
-        _logger.CatalogLoaded(languageTag, Policies.Count, sw.ElapsedMilliseconds);
-    }
 
-    /// <summary>Apply a category filter by id (null clears).</summary>
-    public void SetCategoryFilter(string? categoryId)
-    { CategoryFilterId = string.IsNullOrWhiteSpace(categoryId) ? null : categoryId; }
+        FilteredPolicies.Clear();
+        foreach (var p in Policies) FilteredPolicies.Add(p);
 
-    /// <summary>Applies a text search filter.</summary>
-    public void ApplySearchFilter(string? query)
-    {
-        _lastSearch = query;
-        ReapplyFilters();
-    }
+        BuildFileGroups();
+        RebuildNavigation();
+        Breadcrumb = null;
 
-    private void ReapplyFilters()
-    {
-        if (Catalog == null) { FilteredPolicies.Clear(); return; }
-        IEnumerable<PolicySummary> source = Policies;
-        if (!string.IsNullOrWhiteSpace(_lastSearch))
-        {
-            var q = _lastSearch.Trim();
-            source = source.Where(p => (!string.IsNullOrEmpty(p.DisplayName) && p.DisplayName.Contains(q, StringComparison.OrdinalIgnoreCase)) ||
-                                       p.Key.Name.Contains(q, StringComparison.OrdinalIgnoreCase) ||
-                                       (!string.IsNullOrEmpty(p.CategoryPath) && p.CategoryPath.Contains(q, StringComparison.OrdinalIgnoreCase)));
-        }
-        if (!string.IsNullOrWhiteSpace(CategoryFilterId) && _categoryIndex != null && _policyCategoryIdMap != null)
-        {
-            var targetId = CategoryFilterId;
-            var allowed = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            if (_categoryIndex.TryGetValue(targetId, out var targetCat)) CollectCategoryAndChildren(targetCat, allowed);
-            source = source.Where(p => _policyCategoryIdMap.TryGetValue(p.Key.Name, out var catId) && allowed.Contains(catId));
-        }
-        FilteredPolicies.Clear(); foreach (var p in source) FilteredPolicies.Add(p);
+        // Now notify that Catalog + dependent counts changed.
+        OnPropertyChanged(nameof(Catalog));
+        OnPropertyChanged(nameof(PolicyFileCount));
+
+        // Also ensure filters/groups reflect final state.
         UpdateGroupsForFilter();
-        UpdatePolicyGridFromNavigation();
     }
 
-    private void CollectCategoryAndChildren(Category cat, HashSet<string> set)
-    {
-        if (set.Contains(cat.Id.Value)) return; set.Add(cat.Id.Value);
-        if (Catalog == null) return;
-        foreach (var child in Catalog.AdmxDocuments.SelectMany(d => d.Categories).Where(c => c.Parent.HasValue && c.Parent.Value.Id.Value == cat.Id.Value))
-            CollectCategoryAndChildren(child, set);
-    }
-
+    /// <summary>
+    /// Builds category index and localized display map. Must execute on UI thread because it mutates
+    /// UI-bound collections (CategoryListItems). Defensive against malformed category metadata.
+    /// </summary>
     private void IndexCategories()
     {
         _categoryIndex = new Dictionary<string, Category>(StringComparer.OrdinalIgnoreCase);
@@ -257,13 +255,28 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
         Dictionary<string, string> resourceStrings = new(StringComparer.OrdinalIgnoreCase);
         foreach (var adml in Catalog.AdmlDocuments)
             foreach (var kv in adml.StringTable)
-                resourceStrings[kv.Key.Value] = kv.Value;
+                if (!string.IsNullOrEmpty(kv.Key.Value))
+                    resourceStrings[kv.Key.Value] = kv.Value;
         foreach (var doc in Catalog.AdmxDocuments)
             foreach (var cat in doc.Categories)
             {
-                _categoryIndex[cat.Id.Value] = cat;
-                var token = cat.DisplayName.Id.Value;
-                _categoryDisplayMap[cat.Id.Value] = resourceStrings.TryGetValue(token, out var display) ? display : cat.Id.Value;
+                try
+                {
+                    var catId = cat.Id.Value; // Category.Id is value type; cannot be null, but value string may be empty.
+                    if (string.IsNullOrWhiteSpace(catId)) { _logger.LogWarning("Skipping category with empty Id (source {Source})", doc.Lineage.SourceUri); continue; }
+                    _categoryIndex[catId] = cat;
+                    string? token = null;
+                    if (cat.DisplayName != null)
+                    {
+                        var resId = cat.DisplayName.Id; // value type
+                        token = resId.Value;
+                    }
+                    _categoryDisplayMap[catId] = !string.IsNullOrWhiteSpace(token) && resourceStrings.TryGetValue(token, out var display) ? display : catId;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed processing category (continuing). Source={Source}", doc.Lineage.SourceUri);
+                }
             }
         // Populate flat category list for navigation pane
         CategoryListItems.Clear();
@@ -371,7 +384,10 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
         return pol.ExplainText.Id.Value;
     }
 
-    private string LocalizedCategoryName(string id) => _categoryDisplayMap != null && _categoryDisplayMap.TryGetValue(id, out var name) ? name : id;
+    private string LocalizedCategoryName(string id)
+    {
+        return _categoryDisplayMap != null && _categoryDisplayMap.TryGetValue(id, out var name) ? name : id;
+    }
 
     private string? BuildBreadcrumb(Category? category)
     {
@@ -408,10 +424,66 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
         if (row == null) return; SelectedPolicy = row.Summary; PolicyDetailRequested?.Invoke(this, row);
     }
 
-    private void OnPropertyChanged([CallerMemberName] string? name = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+    private void OnPropertyChanged([CallerMemberName] string? name = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+    }
+
+    /// <summary>
+    /// Apply a category filter by id (null clears). Thread-affine: UI thread recommended because triggers collection updates.
+    /// </summary>
+    /// <param name="categoryId">Category identifier or null/empty to clear.</param>
+    public void SetCategoryFilter(string? categoryId)
+    { CategoryFilterId = string.IsNullOrWhiteSpace(categoryId) ? null : categoryId; }
+
+    /// <summary>
+    /// Applies a text search filter (case-insensitive substring across DisplayName, Key, CategoryPath).
+    /// Safe to call from UI thread; defers actual filtering to <see cref="ReapplyFilters"/>.
+    /// </summary>
+    /// <param name="query">Query text (null/empty clears search filter).</param>
+    public void ApplySearchFilter(string? query)
+    {
+        _lastSearch = query;
+        ReapplyFilters();
+    }
+
+    /// <summary>
+    /// Recomputes the <see cref="FilteredPolicies"/> collection according to current search and category filters.
+    /// Must execute on UI thread (mutates observable collections).
+    /// </summary>
+    public void ReapplyFilters()
+    {
+        if (Catalog == null) { FilteredPolicies.Clear(); return; }
+        IEnumerable<PolicySummary> source = Policies;
+        if (!string.IsNullOrWhiteSpace(_lastSearch))
+        {
+            var q = _lastSearch.Trim();
+            source = source.Where(p => (!string.IsNullOrEmpty(p.DisplayName) && p.DisplayName.Contains(q, StringComparison.OrdinalIgnoreCase)) ||
+                                       p.Key.Name.Contains(q, StringComparison.OrdinalIgnoreCase) ||
+                                       (!string.IsNullOrEmpty(p.CategoryPath) && p.CategoryPath.Contains(q, StringComparison.OrdinalIgnoreCase)));
+        }
+        if (!string.IsNullOrWhiteSpace(CategoryFilterId) && _categoryIndex != null && _policyCategoryIdMap != null)
+        {
+            var targetId = CategoryFilterId;
+            var allowed = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            if (_categoryIndex.TryGetValue(targetId, out var targetCat)) CollectCategoryAndChildren(targetCat, allowed);
+            source = source.Where(p => _policyCategoryIdMap.TryGetValue(p.Key.Name, out var catId) && allowed.Contains(catId));
+        }
+        FilteredPolicies.Clear(); foreach (var p in source) FilteredPolicies.Add(p);
+        UpdateGroupsForFilter();
+        UpdatePolicyGridFromNavigation();
+    }
+
+    private void CollectCategoryAndChildren(Category cat, HashSet<string> set)
+    {
+        if (set.Contains(cat.Id.Value)) return; set.Add(cat.Id.Value);
+        if (Catalog == null) return;
+        foreach (var child in Catalog.AdmxDocuments.SelectMany(d => d.Categories).Where(c => c.Parent.HasValue && c.Parent.Value.Id.Value == cat.Id.Value))
+            CollectCategoryAndChildren(child, set);
+    }
 }
 
-#region Helper Types
+
 
 /// <summary>Column visibility flags for policy grid.</summary>
 public sealed class PolicyGridColumnVisibility : INotifyPropertyChanged
@@ -431,7 +503,10 @@ public sealed class PolicyGridColumnVisibility : INotifyPropertyChanged
     public bool SupportedOn { get => _supportedOn; set { if (_supportedOn != value) { _supportedOn = value; OnPropertyChanged(); } } }
     /// <inheritdoc />
     public event PropertyChangedEventHandler? PropertyChanged;
-    private void OnPropertyChanged([CallerMemberName] string? n = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n));
+    private void OnPropertyChanged([CallerMemberName] string? n = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n));
+    }
 }
 
 /// <summary>Navigation level (column) in hierarchical category navigation.</summary>
@@ -448,7 +523,10 @@ public sealed class CategoryNavLevel : INotifyPropertyChanged
     public CategoryNavLevel(int depth) { Depth = depth; }
     /// <inheritdoc />
     public event PropertyChangedEventHandler? PropertyChanged;
-    private void OnPropertyChanged([CallerMemberName] string? n = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n));
+    private void OnPropertyChanged([CallerMemberName] string? n = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n));
+    }
 }
 
 /// <summary>Navigation option for a single category.</summary>
@@ -476,4 +554,3 @@ public sealed class PolicyGridRow
 /// <summary>Simple list item for root category listing.</summary>
 public sealed record CategoryListItem(string Id, string Name);
 
-#endregion#endregion

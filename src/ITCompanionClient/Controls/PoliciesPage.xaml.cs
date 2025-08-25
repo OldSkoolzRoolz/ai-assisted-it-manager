@@ -22,6 +22,7 @@ public sealed partial class PoliciesPage : UserControl
         _groupedPanel = (Grid)FindName("GroupedPanel");
         _flatScroll = (ScrollViewer)FindName("FlatScroll");
         ViewModel = (PolicyEditorViewModel)App.Services.GetService(typeof(PolicyEditorViewModel))!;
+        DataContext = this; // expose ViewModel.* to XAML bindings referencing ViewModel
         ViewModel.ColumnVisibility.PropertyChanged += OnColumnVisibilityChanged;
         Loaded += OnLoaded;
     }
@@ -140,8 +141,6 @@ public sealed partial class PoliciesPage : UserControl
         RefreshEmptyState();
         UpdateColumnVisibility();
     }
-
-    // Category filtering integration pending: category list currently bound to CategoryPolicyRows for display only.
 }
 
 internal static class VisualTreeHelpers

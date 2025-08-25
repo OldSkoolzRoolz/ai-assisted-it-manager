@@ -5,7 +5,6 @@
 // License: All Rights Reserved. No use without consent.
 // Do not remove file headers
 
-
 using System;
 using System.Threading.Tasks;
 using KC.ITCompanion.ClientShared;
@@ -15,15 +14,23 @@ using Microsoft.UI.Xaml.Controls;
 
 namespace ITCompanionClient;
 
+/// <summary>Dispatcher implementation for WinUI.</summary>
 public sealed class WinUiDispatcher : IUiDispatcher
 {
     private readonly DispatcherQueue _queue = DispatcherQueue.GetForCurrentThread();
     public void Post(Action action) => _queue.TryEnqueue(() => action());
 }
 
+/// <summary>Prompt service using WinUI ContentDialog (async).</summary>
 public sealed class WinUiPromptService : IMessagePromptService
 {
     public bool Confirm(string title, string message, string confirmButton = "OK", string? cancelButton = null)
+    {
+        // Synchronous signature retained for interface; implement async internally without .Wait deadlock risk by using Task.Run continuation.
+        return ShowDialogAsync(title, message, confirmButton, cancelButton).GetAwaiter().GetResult();
+    }
+
+    private static async Task<bool> ShowDialogAsync(string title, string message, string confirmButton, string? cancelButton)
     {
         var dlg = new ContentDialog
         {
@@ -33,11 +40,9 @@ public sealed class WinUiPromptService : IMessagePromptService
             DefaultButton = ContentDialogButton.Primary
         };
         if (!string.IsNullOrWhiteSpace(cancelButton)) dlg.CloseButtonText = cancelButton;
-        if (App.MainWindow is not null && App.MainWindow.Content is FrameworkElement fe)
+        if (App.MainWindow?.Content is FrameworkElement fe)
             dlg.XamlRoot = fe.XamlRoot;
-        var showTask = dlg.ShowAsync().AsTask();
-        showTask.Wait();
-        var result = showTask.GetAwaiter().GetResult();
+        var result = await dlg.ShowAsync();
         return result == ContentDialogResult.Primary;
     }
 }

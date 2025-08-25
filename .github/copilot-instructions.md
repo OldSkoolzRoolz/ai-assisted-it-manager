@@ -1,39 +1,43 @@
+| 🗂️ **Field**           | **Value**                                   |
+|-------------------------|---------------------------------------------|
+| **Date**                | 2025-08-25                                  |
+| **Modified By**         | @KyleC69                                    |
+| **Last Modified**       | 2025-08-25                                  |
+| **Title**               | *Copilot Coding Agent Operational Guide*   |
+| **Author**              | Repository CODEOWNER                        |
+| **Document ID**         | COPILOT-INSTR-001                           |
+| **Document Authority**  | @KyleC69                                    |
+| **Version**             | 2025-08-25.v4                               |
+
+---
+
 # Copilot Coding Agent 
 
 **Repository CODEOWNER**: @KyleC69
 
-Version: 3.3
-Date: 2025-08-23
 ---
 
-## Copilot Language Guidelines:
- ### clarity:
-    - Avoid academic jargon, theoretical abstractions, or overly formal phrasing.
-    - Prefer plain English and real-world analogies over textbook definitions.
-    - Use short, direct sentences with clear intent.
-    - Explain acronyms and technical terms only when necessary.
+## 0. Operational Directives (Enforced)
+These directives override any prior ambiguity. The assistant MUST:
+- Execute requested engineering tasks end-to-end without asking for confirmation once the user has stated or re-stated intent ("proceed" / explicit instruction).
+- Avoid speculative prompts or meta-questions; only ask if a critical blocker (missing file, ambiguous target) prevents safe implementation.
+- Prefer direct implementation (edit, create, remove) over advisory prose when changes are required.
+- Never reintroduce removed technologies (SQLite, deprecated repositories) unless explicitly re-approved by CODEOWNER.
+- Treat build warnings (analyzers, CS1591) as failures: fix or apply narrowly-scoped suppression with justification comment.
+- Keep answers concise, in the prescribed tone (peer, practical, no fluff). No marketing language.
+- When user mandates completion of enumerated tasks (e.g., Policy Viewer, Log Viewer), do not defer—produce concrete code changes until functional baseline exists (UI wired + data binding active, empty states handled, error surfacing, interaction commands).
+- For UI components: ensure DataContext set, bindings resolved, and feature toggles (grouping, filtering, search) connected to underlying view models.
+- For test coverage directives: add or extend tests without prompting until coverage for targeted public surface is present or limitations (e.g., platform UI constraints) are documented inline in test class comments.
+- Use reflection-based smoke tests only as supplementary; prefer behavior/assertion tests for core logic.
+- Do not downgrade framework targets or platform-specific properties without explicit instruction.
+- When removing code (e.g., legacy stores), also purge related docs, stray references, and comments mentioning the removed component.
+- Maintain Logging Event ID schema stability; adding IDs requires updating the schema table.
+- Ensure each edit batch ends with a verification build (run_build) unless only documentation changed.
+- APPLY ASYNC GUIDELINES: Prefer async/await for all I/O, DB, file, network, and long-running operations; never block with .Result, .Wait(), Task.Run() on async call chains; propagate CancellationToken; avoid async void (except event handlers). Refactor synchronous wrappers to delegate to async core methods.
 
- ### tone for self taught:
-    - Write as if explaining to a smart, curious developer who learned by doing—not by sitting through lectures.
-    - Assume practical experience, not formal training.
-    - Celebrate resourcefulness and hands-on problem solving.
-    - Avoid condescending or overly pedantic explanations.
-
- ### examples and explanation:
-    - Use relatable examples (e.g., “like organizing folders on your desktop”).
-    - Break down complex ideas into digestible steps.
-    - Prioritize actionable advice over theoretical depth.
-    - When introducing a concept, explain *why it matters* before *how it works*.
-
-  ### formatting:
-    - Use bullet points, headings, and code blocks to improve readability.
-    - Avoid dense paragraphs or verbose technical exposition.
-    - Highlight key takeaways or “what you actually need to know.”
-
-  ### personality alignment:
-    - Sound like a helpful peer, not a professor.
-    - Inject light humor or empathy when appropriate.
-    - Respect the user’s time, experience, and autonomy.
+Escalation Guidelines:
+- If a required dependency or file is truly absent, perform a targeted search (code/text) first; only then notify with exact missing artifact name.
+- If a request conflicts with security/integrity (e.g., logging secrets), refuse and cite policy succinctly.
 
 ---
 
@@ -54,14 +58,12 @@ Current emphasis (Phase 1) = Core Policy Manager & foundational modules, minimal
 
 - Primary language: C# (.NET 9 target as per README – expect preview SDK until GA).
 - Solution file: ITCompanion.sln at repo root (multi-project structure).
-- Platform focus: Windows 10/11 (WPF UI; registry / WMI interactions).
+- Platform focus: Windows 10/11 (WinUI; registry / WMI interactions).
 - Database: SQL Server (local developer instance likely required for DB-related features).
-- AI Layer (future / scaffolding): ONNX runtime integration (not necessarily active yet).
+- AI Layer (ure / scaffolding): ONNX runtime integration (not necessarily active yet).
 - Scripts & Docs:
-  - docs/ (architecture drafts, versioned documentation with audit trails via DOCUMENTATION_VERSION_MANIFEST.md).
+  - docs/ (architecture drafts, versioned documentation with audit trails via DOCUMENTATION_VERSION_MANIFEST.md, Internal setting standards `ConfigSettings.md`).
   - onboarding/ (module descriptions, setup guide, workspace-presets.ps1).
-- Tests directory: tests/ (dotnet test entry per README).
-- Additional engines / future: Blazor Server (Phase 3), WinUI 3 migration path, security integrations.
 
 ---
 
@@ -89,52 +91,99 @@ Module references (from onboarding/README.md):
 Expect each implementation project to reside under src/<ProjectName>/ with a corresponding *.csproj and be included in ITCompanion.sln. The SelfHealingPolicyEngine currently sits at root (historic or experimental placement); when modifying it, ensure it remains properly referenced in the solution.
 
 ---
-## 4. Module Logging
-- Use Microsoft.Extensions.Logging for all logging.
-- Configure logging in the `Program.cs` or `Startup.cs` file of each module.
-- Use Static LoggerMessages for high-frequency log entries to improve performance.
-- Use appropriate log levels (Trace, Debug, Information, Warning, Error, Critical) based on the severity of the event.
-- Avoid logging sensitive information (e.g., passwords, personal data).
-- Log strings should be resource-based for localization support.
 
-### 4.1 Logging Event ID Schema (REINSTATED)
-Each subsystem owns a numeric EventId range. Do NOT overlap ranges. When adding new events, append within the allocated block; reserve gaps for expansion. If a new subsystem emerges, allocate a fresh contiguous block and document it here.
+## 4. Module Logging
+
+### 4.0 Localization Enforcement (Global)
+ALL user-facing or diagnostically meaningful log message text MUST originate from resource templates to enable full localization and word-order flexibility. Performance-sensitive, high-frequency debug/trace messages MAY retain invariant structured templates via `LoggerMessage` only if they do NOT need localization (internal-only) — otherwise switch to resource-based formatting as per PolicyEditor refactor.
+
+### 4.1 Resource Template Rules
+- Store full sentence templates in `.resx` with key suffix `_Template` (e.g., `CatalogLoaded_Template`).
+- Use indexed placeholders `{0}`, `{1}`, ... (no named placeholders) to simplify translator workflow and maintain ordering freedom per culture.
+- Provide satellite `.resx` files for each supported culture (e.g., `fr-FR`, `qps-PLOC` pseudo). Pseudo locale required for early layout issues detection.
+- Never concatenate localized fragments at call sites; compose entire sentence within resource template.
+- Add tests that:
+  - Ensure every neutral `*_Template` key appears in each satellite.
+  - Validate sequential placeholder indexes (0..n-1) and balanced braces.
+
+### 4.2 Logging API Patterns
+Preferred two patterns:
+1. Resource Template Logger (localized):
+```csharp
+var tmpl = Res.GetString("CatalogLoaded_Template", culture);
+logger.LogInformation(EventIds.CatalogLoaded, string.Format(culture, tmpl, lang, count, elapsedMs));
+```
+2. High-Frequency Invariant (non-localized internal only):
+```csharp
+[LoggerMessage(EventId = 3101, Level = LogLevel.Debug, Message = "ADMX parse fragment {File} bytes={Bytes}")]
+internal static partial void AdmxParseFragment(this ILogger logger, string File, long Bytes);
+```
+IF at any point an invariant event becomes user-visible, migrate it to pattern 1.
+
+### 4.3 Structured Context + Localization
+- When using resource templates, include structured context via scopes when needed:
+```csharp
+using (logger.BeginScope(new { PolicyKey = key, Count = count }))
+    logger.PolicySelected(key, count); // localized message already created
+```
+- Do NOT duplicate large payloads in both message text and properties.
+
+### 4.4 EventId Allocation
+(Schema retained) — add new ranges to table below when needed; preserve stability.
 
 | Range | Subsystem / Purpose | Notes |
 |-------|---------------------|-------|
-| 1000–1099 | Security (authZ / access evaluation) | Already implemented in Security.Logging.Logger |
+| 1000–1099 | Security (authZ / access evaluation) | Implemented |
 | 1100–1199 | Security (future integrity / tamper) | Reserved |
-| 2000–2099 | Client UI Policy Editor (search, selection, catalog load) | Implemented in PolicyEditorLog |
-| 2100–2199 | Client UI Log Viewer & Diagnostics | To be added |
-| 3000–3099 | ADMX/ADML Parsing / Catalog Loader | Add source‑generated logger before extending |
-| 3100–3199 | Validation Engine (rules execution) | Pending implementation |
-| 4000–4099 | Deployment / Registry application | DeploymentService future |
-| 5000–5099 | Versioning / Snapshot / Diff | Future phase |
-| 6000–6099 | Storage / Repository operations (SQL / persistence) | Optional, keep low-noise |
-| 7000–7099 | Self-Healing / Drift detection | Future phase |
-| 9000–9099 | Critical / Fallback / Fatal recoverable states | Use sparingly, page operators |
+| 2000–2099 | Client UI Policy Editor | Localized resource templates implemented |
+| 2100–2199 | Client UI Log Viewer & Diagnostics | To be added (use *_Template) |
+| 3000–3099 | ADMX/ADML Parsing / Catalog Loader | Add localized wrappers |
+| 3100–3199 | Validation Engine | Planned localized templates |
+| 4000–4099 | Deployment / Registry application | Planned |
+| 5000–5099 | Versioning / Snapshot / Diff | Planned |
+| 6000–6099 | Storage / Repository operations | Low-noise localized/invariant hybrid |
+| 7000–7099 | Self-Healing / Drift detection | Future |
+| 9000–9099 | Critical / Fallback / Fatal | Always localized + invariant scope props |
 
-Guidelines:
-- EventId ranges stable; do not renumber after release.
-- One LoggerMessage method per semantic event (avoid dynamic template changes).
-- Prefer structured properties over string concatenation.
-- Use source-generated partial static logger classes named `<Area>Log` or `Logger` in the subsystem namespace.
-- For CA1848 compliance: avoid direct `LogInformation($"...")` in new code unless one-off / low frequency (and justify in PR).
+### 4.5 Implementation Checklist (Log Entry Additions)
+1. Reserve/EventId in correct range.
+2. Add resource key `<Name>_Template` to neutral `.resx` + all satellites.
+3. Add or update tests validating key presence & placeholders.
+4. Implement extension or helper that formats using `CultureInfo.CurrentUICulture`.
+5. If high-frequency & internal-only: justify invariant LoggerMessage usage in code comment (`// Perf: invariant, not user visible`).
+6. Update documentation (this file and architecture if new subsystem introduced).
 
-### 4.2 Adding a New LoggerMessage
-1. Pick the next unused EventId in the appropriate range.
-2. Add a partial static class (or extend existing) with `[LoggerMessage]` attribute.
-3. Keep parameter names descriptive (they become structured log field names).
-4. Update this table if a new range or category is needed.
-5. Include XML docs summarizing intent; mention EventId in summary when useful.
+### 4.6 Forbidden Practices
+- NO hard-coded English sentences in `logger.Log*` calls.
+- NO string interpolation in localized logger wrappers (use `string.Format(culture, template, ...)`).
+- NO partial localization (previous `{Msg}` prefix pattern is deprecated).
+- NO mixing of localized text with raw user input without sanitization (log injection risk).
 
-Example:
+### 4.7 Migration Notes
+Existing legacy LoggerMessage usages MUST be migrated when: (a) surfaced in UI; (b) exported to user-consumable logs; (c) needed for localization QA. PolicyEditor already migrated — use it as reference baseline.
+
+### 4.8 Testing Requirements
+- Unit tests fail if any new `*_Template` key missing in any satellite culture committed to repo.
+- Add pseudo-locale pass test ensuring bracket markers (`[!!` if used) appear for every template (signals correct satellite load).
+- Optional: analyzer/test scanning for disallowed hard-coded color hex codes and hard-coded log English phrases using regex heuristics.
+
+### 4.9 High Contrast Considerations
+Logging itself does not render directly; UI log viewers must use theme resources for foreground/background brushes (no inline colors). Ensure viewer binds to theme brushes only.
+
+---
+
+## 4.10 Example (Localized + Structured)
 ```csharp
-[LoggerMessage(EventId = 3000, Level = LogLevel.Debug, Message = "ADMX file discovered {File} size={Bytes}")]
-internal static partial void AdmxFileDiscovered(this ILogger logger, string File, long Bytes);
+// Resource key: PolicySelected_Template = "Policy selected: {0} settings={1}" (neutral)
+public static void PolicySelected(this ILogger logger, string policyKey, int settingCount)
+{
+    var tmpl = Res.GetString("PolicySelected_Template", CultureInfo.CurrentUICulture) ?? "Policy selected: {0} settings={1}";
+    logger.LogInformation(EventIds.PolicySelected, string.Format(CultureInfo.CurrentUICulture, tmpl, policyKey, settingCount));
+}
 ```
 
 ---
+
 ## 5. Build Instructions
 
 Canonical build sequence (ALWAYS in this order after bootstrap):
@@ -161,133 +210,17 @@ DOTNET_NOLOGO=1 dotnet build ITCompanion.sln -c Debug -warnaserror /p:TreatWarni
 ```
 
 ---
-## 7. Testing
-
-Standard test invocation (from README):
-  dotnet test tests/
-
-Preferred verbose form (surface all results, skip build duplicates):
-  dotnet test ITCompanion.sln --no-build --configuration Debug
-
-ALWAYS run dotnet build (with -warnaserror) first for deterministic behavior; dotnet test will otherwise restore & build implicitly, which can mask incremental issues.
-
-If integration tests (e.g., DB or WMI) exist and are slow/flaky:
-- Look for traits/categories (e.g., [Category("Integration")]) and optionally filter:
-  dotnet test --filter TestCategory!=Integration
-
-Add new tests in corresponding test project mirroring source project naming:
-- src/CorePolicyEngine/ -> tests/CorePolicyEngine.Tests/
-Ensure new test project is referenced in solution and uses the standard test framework (likely xUnit or MSTest; inspect existing test project for conventions before adding).
-
-## 9. Database / Migrations (If ITCompanionDB Active)
-
-Look for a project (e.g., src/ITCompanionDB or database project). Typical patterns:
-- EF Core migrations: dotnet ef migrations add <Name> --project src/ITCompanionDB
-- Apply locally via application startup or:
-  dotnet ef database update --project src/ITCompanionDB
-
-ALWAYS update the solution + build before generating migrations to avoid stale model issues.
-Always test migration application on a fresh local database instance to verify correctness.
-Always document migration procedures to outline steps for applying in production environments. migrations should be idempotent and reversible if possible. outlined in docs/migrations.md if it exists- create if it doesn't.
-
----
-
-## 11. Adding New Code / Features
-
-ALWAYS:
-1. Identify correct module (e.g., parsing logic → CorePolicyEngine; UI interaction → ClientApp).
-2. Add new classes with cohesive namespaces mirroring folder structure.
-3. Update DI registration (if a central Startup/Program or composition root exists—search for Program.cs under each host project).
-4. Add unit tests in corresponding test project before or alongside implementation.
-5. Run full validation sequence (Section 14).
-6. Ensure performance considerations (avoid blocking UI threads with heavy I/O).
-7. Respect existing abstractions; prefer extension over modification for shared logic.
-
-XML DOCUMENTATION MANDATORY:
-- Every new class, struct, interface, enum, delegate, method (public/internal/private), property, event, and field MUST include an XML documentation header (///) summarizing purpose.
-- Methods: document <summary>, each <param>, <returns> (if non-void), and <exception> tags for any thrown exceptions.
-- Properties/fields: concise intent, units/ranges if applicable.
-- Update or add docs when modifying a signature or behavior materially.
-- No PR should introduce undocumented members. Treat missing docs as a build blocker (enforced manually until automated rule added).
-
----
-
-
-
-## 13. Docs & Onboarding Resources
-
-- docs/ (architecture drafts) – ALWAYS inspect docs/ for design decisions when making changes.
-- onboarding/README.md – lists module definitions; onboarding/setup-guide.md (consult for detailed environment prerequisites).
-If you update architecture, reflect changes consistently across:
-1. docs/ architecture diagrams/text
-2. onboarding/ module overview
-3. This instructions file (only if foundational process changes—avoid churn for minor refactors)
-
-S
-
----
-
-## 19. File & Directory Quick Reference (Current Observed)
-
-Root:
-- ITCompanion.sln (multi-project solution – edit via dotnet sln commands)
-- README.md (high-level roadmap)
-- docs/ (architecture drafts; treat as authoritative for design)
-- onboarding/ (module overview, setup guide, workspace-presets.ps1)
-- src/ (primary implementation projects – enumerate before modifying)
-- tests/ (test projects – ensure new tests land here)
-- SelfHealingPolicyEngine/ (special-case module, root-level)
-- .gitignore / .gitattributes (respect line endings & attribute normalization)
-
----
-
-
-## 21. Minimal Quick Start (Copy/Paste)
-
-```
-git clone https://github.com/OldSkoolzRoolz/ai-assisted-it-manager.git
-cd ai-assisted-it-manager
-pwsh onboarding/workspace-presets.ps1
-dotnet restore ITCompanion.sln
-dotnet build ITCompanion.sln -c Debug -warnaserror /p:TreatWarningsAsErrors=true /p:AnalysisLevel=latest /p:EnforceCodeStyleInBuild=true
-dotnet test ITCompanion.sln --no-build
-dotnet run --project src/ITCompanionClient/ITCompanionClient.csproj
-```
-
-If any path differs, list src/ to identify correct project and adjust only that line.
-
----
-
-## 23. Documentation Management & Versioning
-
-**Documentation Authority**: @KyleC69 (Repository CODEOWNER) has final approval for all documentation changes.
-
-**Version Control**: All documentation in `/docs` folder is versioned and tracked via `docs/DOCUMENTATION_VERSION_MANIFEST.md`:
-- Review manifest before modifying any documentation
-- Update manifest with change log entries for all documentation updates
-- Follow version format: YYYY-MM-DD.vX
-- Include technical accuracy reviews and framework version updates
-
-**Automation Guidelines for Documentation**:
-- Always reference the version manifest for current document versions
-- Ensure technical references (e.g., .NET versions) match repository standards
-- Update manifest when making any documentation changes
-- Tag @KyleC69 for review approval on documentation PRs
-
----
-
-## 24. Quality Bar
-
-A change is "ready" ONLY if:
-- Builds cleanly (no warnings: enforced by -warnaserror / TreatWarningsAsErrors=true).
-- Resolves IntelliSense issues.
-- All tests pass (and new tests cover new logic).
-- No hard-coded environment-only paths or credentials.
-- UI or service still starts successfully after change.
-- Documentation changes include manifest updates and maintain technical accuracy.
-- Analyzer + code style passes: dotnet format analyzers/style --verify-no-changes.
-- XML documentation headers exist for all new or modified members (see Section 11).
-
----
+## 6. Coding Standards
+- Follow .NET naming conventions (PascalCase for types/methods, camelCase for parameters/locals).
+- Use async/await for any potentially blocking operation (disk, network, IPC, DB, process, heavy CPU offload). Never introduce new sync-over-async patterns.
+- Always provide a CancellationToken on public async APIs; pass through to lower layers.
+- Avoid async void (except UI/event handlers). Library/internal logic uses Task / Task<T>.
+- Do not wrap synchronous work in Task.Run just to appear async; only offload CPU-bound work that would otherwise block UI thread.
+- Avoid fire-and-forget; if unavoidable (telemetry), capture/log exceptions safely.
+- Propagate ConfigureAwait(false) ONLY in pure library code not touching UI; omit in UI-layer code to keep context.
+- Prefer ValueTask/ValueTask<T> only when profiling proves allocation benefit and method frequently returns synchronously.
+- Use SemaphoreSlim (async) not lock for awaiting asynchronous critical sections.
+- Stream large payloads instead of buffering whole content in memory.
+- Validate arguments early; throw ArgumentException derivatives with nameof().
 
 

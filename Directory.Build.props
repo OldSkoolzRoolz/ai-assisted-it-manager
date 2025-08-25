@@ -8,4 +8,5 @@
     <WarningsAsErrors>$(WarningsAsErrors);CA*</WarningsAsErrors>
     -->
   </PropertyGroup>
+ <PropertyGroup Condition="'$(IsTestProject)'=='true'"> <BuildProjectReferences>false</BuildProjectReferences> </PropertyGroup>
 </Project>

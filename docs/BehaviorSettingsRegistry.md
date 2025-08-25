@@ -1,3 +1,16 @@
+| ??? **Field**           | **Value**                                         |
+|-------------------------|---------------------------------------------------|
+| **Date**                | 2025-08-25                                        |
+| **Modified By**         | @copilot                                          |
+| **Last Modified**       | 2025-08-25                                        |
+| **Title**               | *Behavior Settings Registry & ADMX Mapping*       |
+| **Author**              | Configuration Team                                |
+| **Document ID**         | BEHAV-SET-REF-001                                 |
+| **Document Authority**  | @KyleC69                                          |
+| **Version**             | 2025-08-25.v3                                     |
+
+---
+
 # Behavior Settings Registry & ADMX Mapping
 
 ## 1. Terminology Clarification
@@ -21,8 +34,8 @@ The future ADMX file will define each exposed behavior setting using these same 
 1. LocalDefault (DB seeded / first run defaults)
 2. OrgBaseline (centrally distributed baseline)
 3. SiteOverride
-4. MachineOverride (HKLM Policies values – when surfaced via ADMX or manually configured)
-5. UserOverride (HKCU Policies values – when surfaced via ADMX or manually configured)
+4. MachineOverride (HKLM Policies values ? when surfaced via ADMX or manually configured)
+5. UserOverride (HKCU Policies values ? when surfaced via ADMX or manually configured)
 
 Missing values at a higher layer inherit from lower layers. The merged result becomes `BehaviorPolicySnapshot.Effective`.
 
@@ -130,4 +143,4 @@ Windows Registry Editor Version 5.00
 ## 12. Summary
 "Policy" in this project = **ADMX administrative policy** (future distributable template). The entries above are **behavior settings** that will be surfaced *as* policies by generating a companion ADMX file targeting the standardized Policies registry roots. This document is the authoritative mapping reference for all collaborators and future ADMX generation tooling.
 
-(End of document)
+<!-- End Document -->
