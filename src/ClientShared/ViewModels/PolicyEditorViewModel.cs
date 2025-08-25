@@ -193,7 +193,11 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
         catch (Exception ex) { _logger.PolicyGroupsLoadFailed(ex); }
     }
 
-    private async Task LoadDefaultSubsetAsync() { await EnsureCatalogLoadedAsync().ConfigureAwait(false); await LoadPolicyGroupsAsync(). ConfigureAwait(false); }
+    private async Task LoadDefaultSubsetAsync()
+    {
+        await EnsureCatalogLoadedAsync().ConfigureAwait(false);
+        await LoadPolicyGroupsAsync().ConfigureAwait(false);
+    }
 
     private async Task LoadEntireCatalogAsync(string languageTag, CancellationToken token)
     {
