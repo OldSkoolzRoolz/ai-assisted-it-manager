@@ -1,13 +1,13 @@
 | 🗂️ **Field**           | **Value**                          |
 |-------------------------|------------------------------------|
-| **Date**                | 2025-08-25                         |
+| **Date**                | 2025-10-26                         |
 | **Modified By**         | @copilot                           |
-| **Last Modified**       | 2025-08-25                         |
+| **Last Modified**       | 2025-10-26                         |
 | **Title**               | *Security Hardening Guide*         |
 | **Author**              | Security Team                      |
 | **Document ID**         | SEC-HARDEN-001                     |
 | **Document Authority**  | @KyleC69                           |
-| **Version**             | 2025-08-25.v3                      |
+| **Version**             | 2025-10-26.v4                      |
 
 ---
 
@@ -94,7 +94,14 @@ When implementing release branches (`release/*` pattern):
 
 ### Secret Scanning
 
-Enable via GitHub Settings → Security & analysis:
+**Automated Workflows Implemented:**
+- ✅ **Gitleaks Secret Scanning** - Automated workflow scans repository for hardcoded secrets
+  - Workflow: `.github/workflows/secret-scanning.yml`
+  - Runs on: Push, Pull Requests, and Daily Schedule
+  - Configuration: `.gitleaks.toml` with custom rules for this project
+  - Detects: Passwords, API keys, tokens, connection strings, private keys
+
+**GitHub Native Features (Configure via Settings → Security & analysis):**
 - ✅ **Secret scanning** - Detect secrets committed to repository
 - ✅ **Secret scanning push protection** - Prevent secrets from being committed
 - ✅ **Secret scanning validity checks** - Verify if detected secrets are active
@@ -108,9 +115,16 @@ Configure via GitHub Settings → Security & analysis:
 
 ### Code Scanning
 
-Enable via GitHub Settings → Security & analysis:
+**Automated Workflows Implemented:**
+- ✅ **CodeQL Security Analysis** - Comprehensive code security scanning
+  - Workflow: `.github/workflows/codeql.yml`
+  - Runs on: Push, Pull Requests, and Weekly Schedule (Mondays)
+  - Languages: C# (with security-and-quality query pack)
+  - Detects: SQL injection, XSS, hardcoded credentials, and other vulnerabilities
+  - Results: Uploaded to GitHub Security tab
+
+**GitHub Native Features (Configure via Settings → Security & analysis):**
 - ✅ **Code scanning** - Automated security analysis with CodeQL
-- ✅ **Default setup** - Use CodeQL workflow for C# analysis
 - ✅ **Required checks** - Include CodeQL in branch protection rules
 
 ## Workflow Security
