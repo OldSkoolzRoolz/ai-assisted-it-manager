@@ -22,8 +22,6 @@ jobs:
           dotnet-version: 8.0.100
       - name: Display SDK version
         run: dotnet --info
-      - name: Install Windows App SDK workload
-        run: dotnet workload install windowsappsdk
       - name: Restore (solution)
         run: dotnet restore ITCompanion.sln
       - name: Build (selected projects)
