@@ -65,7 +65,7 @@ This directory contains automated workflows for the AI-Assisted IT Manager repos
 Current workflows use only `GITHUB_TOKEN` which is automatically provided by GitHub Actions.
 
 Optional:
-- `GITLEAKS_LICENSE` - Only required for Gitleaks enterprise features (not needed for basic scanning)
+- `GITLEAKS_LICENSE` - Only required for Gitleaks enterprise features. The workflow is designed to work with or without this secret. If not provided, Gitleaks will use the free version with all standard features.
 
 ## Branch Protection
 
@@ -83,8 +83,8 @@ The following workflows are recommended as required status checks:
 
 ## Monitoring
 
-- **CodeQL**: Weekly scans catch new vulnerability patterns
-- **Gitleaks**: Daily scans catch recently committed secrets
+- **CodeQL**: Weekly scans (Mondays 9 AM UTC) catch new vulnerability patterns
+- **Gitleaks**: Daily scans (2 AM UTC) perform comprehensive repository scanning for secrets
 - **Build**: Every push ensures code compiles and tests pass
 
 ## Documentation
@@ -102,9 +102,12 @@ For detailed information about security scanning:
 - Verify Windows App SDK workload is installed
 
 ### Gitleaks False Positives
-- Update allowlist in `.gitleaks.toml`
-- Add regex patterns to exclude specific cases
+- Update allowlist in `.gitleaks.toml`:
+  - **[allowlist.paths]**: Add file paths or glob patterns to exclude
+  - **[allowlist.regexes]**: Add regex patterns to exclude specific strings
+  - **[allowlist.stopwords]**: Add words that indicate test/example data
 - Document why it's a false positive in PR
+- Example: To exclude a test file, add `"**/tests/fixtures/example-config.json"` to the paths array
 
 ### Build Failures
 - Check .NET SDK version compatibility
