@@ -1,0 +1,44 @@
+# Gitleaks configuration file
+# Customizes secret detection patterns for the ai-assisted-it-manager repository
+# For more information: https://github.com/gitleaks/gitleaks
+
+title = "AI-Assisted IT Manager Secret Scanning Configuration"
+
+[extend]
+# Use the default Gitleaks rules as a baseline
+useDefault = true
+
+# Allowlist patterns - files and paths to exclude from scanning
+[allowlist]
+description = "Allowlisted files and patterns"
+paths = [
+    "**/bin/",
+    "**/obj/",
+    "**/packages/",
+    "**/node_modules/",
+    "**/tests/**/*.Tests/TestData/",
+    "**/docs/examples/",
+    "**/package-lock.json",
+    "**/yarn.lock",
+    "**/*.Designer.cs",
+    "**/*.generated.cs",
+]
+
+regexes = [
+    "example.*password",
+    "your.*api.*key.*here",
+    "insert.*token.*here",
+    "xxxxx",
+    "12345",
+]
+
+[allowlist.stopwords]
+stopwords = [
+    "example",
+    "sample",
+    "test",
+    "placeholder",
+    "dummy",
+    "fake",
+]
+

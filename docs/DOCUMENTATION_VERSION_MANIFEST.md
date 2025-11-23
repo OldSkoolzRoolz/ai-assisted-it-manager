@@ -2,11 +2,11 @@
 
 | **Field** | **Value** |
 |-----------|-----------|
-| **Version** | 2025-08-25.v11 |
+| **Version** | 2025-10-26.v12 |
 
 **Purpose**: This document maintains version control and audit trails for all documentation files in the `/docs` folder.
 
-**Last Updated**: 2025-08-25  
+**Last Updated**: 2025-10-26  
 **Maintained By**: @KyleC69 (Repository CODEOWNER)  
 **Version Format**: YYYY-MM-DD.vX (e.g., 2025-08-25.v1)
 
@@ -19,8 +19,9 @@
 | `ARCHITECTURE.md` | v5.0 | 2025-08-25 | Active | Architecture + async & localization strategies |
 | `PhaseOne.md` | v3.0 | 2025-08-25 | Active | Phase 1 scope, feature list, and implementation planning |
 | `BehaviorSettingsRegistry.md` | v3.0 | 2025-08-25 | Active | Registry mapping and ADMX behavior settings documentation |
-| `DOCUMENTATION_VERSION_MANIFEST.md` | v11.0 | 2025-08-25 | Active | This versioning manifest document |
-| `SECURITY-HARDENING.md` | v3.0 | 2025-08-25 | Active | Repository security hardening and branch protection guidance |
+| `DOCUMENTATION_VERSION_MANIFEST.md` | v12.0 | 2025-10-26 | Active | This versioning manifest document |
+| `SECURITY-HARDENING.md` | v4.0 | 2025-10-26 | Active | Repository security hardening and branch protection guidance |
+| `SECURITY-SCANNING.md` | v1.0 | 2025-10-26 | Active | Security scanning workflows and configuration guide |
 | `ConfigSettings.md` | v3.0 | 2025-08-25 | Active | Client application configurable settings and registry mappings |
 | `.github/copilot-instructions.md` | v3.9 | 2025-08-25 | Active | Instructions for AI code generation and behavior |
 | `WinUITheming.md` | v2.0 | 2025-08-25 | Active | WinUI theming standards for AI code generation |
@@ -29,6 +30,12 @@
 ---
 
 ## Change Log
+
+### 2025-10-26.v12
+**Modified By**: @copilot
+**Change Type**: Major - Security scanning workflows implementation
+**Files Affected**: `SECURITY-HARDENING.md`, `SECURITY-SCANNING.md` (new), `.github/SECURITY.md`, `.github/workflows/codeql.yml` (new), `.github/workflows/secret-scanning.yml` (new), `.gitleaks.toml` (new), `.gitignore`
+**Description**: Implemented automated security scanning workflows including CodeQL for code analysis and Gitleaks for secret detection. Added comprehensive documentation for security scanning setup and configuration. Updated security hardening guide to reflect implemented workflows.
 
 ### 2025-08-25.v12
 **Modified By**: @KyleC69

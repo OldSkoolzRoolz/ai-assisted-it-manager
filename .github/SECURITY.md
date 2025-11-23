@@ -50,6 +50,15 @@ Please provide the following information in your security report:
 ### Code Analysis
 
 - **CodeQL**: Automated security code analysis on all pull requests
+  - Workflow runs on push, pull requests, and weekly schedule
+  - Scans for SQL injection, XSS, hardcoded credentials, and other vulnerabilities
+  - Results available in GitHub Security tab
+  - Workflow file: `.github/workflows/codeql.yml`
+- **Secret Scanning**: Automated Gitleaks workflow detects hardcoded secrets
+  - Scans for passwords, API keys, tokens, and connection strings
+  - Runs on push, pull requests, and daily schedule
+  - Custom rules in `.gitleaks.toml`
+  - Workflow file: `.github/workflows/secret-scanning.yml`
 - **Branch Protection**: Required status checks include security analysis
 - **CODEOWNERS**: Critical security files require approval from @KyleC69
 

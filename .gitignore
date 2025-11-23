@@ -5,6 +5,22 @@
 
 # dotenv files
 .env
+.env.*
+!.env.example
+
+# Security and sensitive files
+*.key
+*.pem
+*.cer
+*.crt
+*.p12
+*.keystore
+secrets.json
+appsettings.*.json
+!appsettings.json
+!appsettings.Development.json
+credentials.json
+*.credentials
 
 # User-specific files
 *.rsuser
