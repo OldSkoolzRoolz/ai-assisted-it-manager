@@ -1,17 +1,42 @@
 ﻿| 🗂️ **Field**           | **Value**                                         |
 |-------------------------|---------------------------------------------------|
-| **Date**                | 2025-08-25                                        |
-| **Modified By**         | @KyleC69                                          |
-| **Last Modified**       | 2025-08-25                                        |
+| **Date**                | 2025-12-17                                        |
+| **Modified By**         | @copilot                                          |
+| **Last Modified**       | 2025-12-17                                        |
 | **Title**               | *AI copilot instructions*  |
 | **Author**              | @KyleC69                          |
 | **Document ID**         | AI-CODING-STD-001                                 |
 | **Document Authority**  | @KyleC69                                          |
-| **Version**             | 2025-08-25.v3.9                                   |
+| **Version**             | 2025-12-17.v4.0                                   |
 
+---
 
+## **0. Repository Overview**
 
-## ** 1. Build Instructions**
+**Project**: AI-Assisted Policy Manager & IT Companion (ITCompanion)
+
+This is a multi-phase Windows enterprise toolkit for Group Policy management, system monitoring, and AI-assisted automation:
+- **Phase 1** (Current): Core Policy Manager - ADMX/ADML parsing, validation, deployment, and rollback
+- **Phase 2**: AI Monitoring Layer - anomaly detection, predictive alerts, self-healing
+- **Phase 3**: Enterprise Dashboard - Blazor-based remote control with RBAC
+- **Phase 4**: Monetization - free local edition, paid cloud-connected version
+
+**Tech Stack**:
+- Language: C# .NET 9
+- UI: WinUI 3 (modern Windows desktop)
+- Database: SQL Server
+- AI: ONNX runtime integration
+- Platform: Windows 10/11, Server 2019+
+
+**Solution**: `ITCompanion.sln` (multi-project structure)
+- `src/` - implementation projects
+- `tests/` - test projects
+- `docs/` - architecture and design docs with version tracking
+- `onboarding/` - setup guides and module descriptions
+
+---
+
+## **1. Build Instructions (ENFORCED)**
 Canonical build sequence (ALWAYS in this order after bootstrap):
 
 1. `dotnet restore ITCompanion.sln`  
@@ -22,9 +47,15 @@ Canonical build sequence (ALWAYS in this order after bootstrap):
 - Always ensure **zero warnings**.  
 - If an upstream package triggers unavoidable warnings, add a **targeted** suppression with justification (never blanket disable without CODEOWNER approval).
 
+**Manual quick build (local):**
+```powershell
+dotnet clean ITCompanion.sln
+DOTNET_NOLOGO=1 dotnet build ITCompanion.sln -c Debug -warnaserror /p:TreatWarningsAsErrors=true /p:AnalysisLevel=latest /p:EnforceCodeStyleInBuild=true
+```
+
 ---
 
-## **(ENFORCED) – 2. Warning / Analyzer Enforcement Policy**
+## **2. Analyzer Enforcement Policy (ENFORCED)**
 - Fail fast on any compiler/analyzer warning (treat as error).  
 - Prefer code fixes over suppressions; suppress only with linked issue + rationale comment.  
 - `.editorconfig` is authoritative for style; inline suppressions only if rule conflicts with generated code.
@@ -37,7 +68,7 @@ DOTNET_NOLOGO=1 dotnet build ITCompanion.sln -c Debug -warnaserror /p:TreatWarni
 
 ---
 
-## **(ENFORCED) – 3. Coding Standards**
+## **3. Coding Standards (ENFORCED)**
 - Follow .NET naming conventions.  
 - Use `async`/`await` for any potentially blocking op; no sync‑over‑async.  
 - Public async APIs must take and pass through a `CancellationToken`.  
@@ -55,14 +86,14 @@ DOTNET_NOLOGO=1 dotnet build ITCompanion.sln -c Debug -warnaserror /p:TreatWarni
 
 ---
 
-## **(ENFORCED) – 4. Testing**
+## **4. Testing (ENFORCED)**
 - Build first with `-warnaserror` before running tests.  
 - Preferred: `dotnet test ITCompanion.sln --no-build --configuration Debug`  
 - Mirror test project names/structure with source — see Adding New Code.
 
 ---
 
-## **(FLEXIBLE) – 5. Database / Migrations**
+## **5. Database / Migrations (FLEXIBLE)**
 - Check for `src/ITCompanionDB` or equivalent.  
 - Create migration: `dotnet ef migrations add <Name> --project src/ITCompanionDB`  
 - Apply: via app startup or `dotnet ef database update --project src/ITCompanionDB`  
@@ -72,7 +103,7 @@ DOTNET_NOLOGO=1 dotnet build ITCompanion.sln -c Debug -warnaserror /p:TreatWarni
 
 ---
 
-## **(ENFORCED) – 6. Adding New Code / Features**
+## **6. Adding New Code / Features (ENFORCED)**
 1. Identify correct module.  
 2. Match namespace to folder structure.  Ensure RootNamespace in .csproj follows pattern `KC.ITCompanion.<Module>`.  
    - New modules need a new .csproj in `src/` and solution update.  
@@ -86,7 +117,7 @@ DOTNET_NOLOGO=1 dotnet build ITCompanion.sln -c Debug -warnaserror /p:TreatWarni
 
 ---
 
-## **(FLEXIBLE) – 7. Docs & Onboarding Resources**
+## **7. Documentation & Onboarding (FLEXIBLE)**
 - `docs/` has solution‑wide docs: architecture, design decisions, coding standards, build/test instructions.
 - `onboarding/README.md` + `onboarding/setup-guide.md` cover module definitions and prerequisites.  
 - Reflect architecture changes consistently across all documentation.
@@ -100,7 +131,7 @@ DOTNET_NOLOGO=1 dotnet build ITCompanion.sln -c Debug -warnaserror /p:TreatWarni
 
 ---
 
-## **(ENFORCED) – 8. File & Directory Quick Reference**
+## **8. File & Directory Structure (ENFORCED)**
 ```
 Root:
 - ITCompanion.sln
@@ -116,7 +147,7 @@ Root:
 
 ---
 
-## **(ENFORCED) – 9. Module Logging**
+## **9. Module Logging (ENFORCED)**
 - Use Microsoft.Extensions.Logging for all logging.
 - Configure logging in `Program.cs` or `Startup.cs` of each module.
 - Use static LoggerMessages for high‑frequency logs to improve performance.
@@ -152,7 +183,7 @@ Guidelines:
 
 ---
 
-## **(FLEXIBLE) – 10. Adding a New LoggerMessage**
+## **10. Adding New LoggerMessage (FLEXIBLE)**
 1. Pick next unused EventId in range.
 2. Create/extend partial static class with `[LoggerMessage]`.
 3. Descriptive parameter names.
@@ -161,7 +192,7 @@ Guidelines:
 
 ---
 
-## ** 11. Copilot Language Guidelines**
+## **11. Copilot Language Guidelines (ENFORCED)**
 ### clarity:
   - Avoid academic jargon; prefer plain English and analogies.
   - Short, direct sentences.
@@ -187,7 +218,7 @@ Guidelines:
   - Respect time, experience, and autonomy.
 
 
-## 12. **Change Validation Checklist (ENFORCED)**
+## **12. Change Validation Checklist (ENFORCED)**
 
 A change is "ready" ONLY if:
 [ ] Documentation changes include manifest updates and maintain technical accuracy.
@@ -203,28 +234,26 @@ A change is "ready" ONLY if:
 
 ---
 
-## 13. **Localization & Globalization**
-
-### **(ENFORCED) – 13.1 Localization & Globalization Standards**
-	- All user-facing strings must be resource-based for localization.
-	- Use `IStringLocalizer<T>` for dependency-injected localization.
-	- Avoid hard-coded strings in UI, logs, exceptions, or messages.
-	- Follow .NET globalization best practices for date, time, number formatting.
-	- Test UI in different cultures to ensure layout and text fit.
+## **13. Localization & Globalization (ENFORCED)**
+- All user-facing strings must be resource-based for localization.
+- Use `IStringLocalizer<T>` for dependency-injected localization.
+- Avoid hard-coded strings in UI, logs, exceptions, or messages.
+- Follow .NET globalization best practices for date, time, number formatting.
+- Test UI in different cultures to ensure layout and text fit.
 
 ---
 
-### **Theming & UI Consistency** (ENFORCED)
-	- Follow established theming guidelines for colors, fonts, and styles.
-	- Use shared styles and resources to ensure consistency across modules.
-	- Test UI changes in both light and dark modes if applicable.
-	- Ensure accessibility standards are met (e.g., contrast ratios, keyboard navigation).
-	- Refer to `docs/winuitheming.md` for detailed theming and accessibility standards. **(REFERENCE)**
-	---
+## **14. Theming & UI Consistency (ENFORCED)**
+- Follow established theming guidelines for colors, fonts, and styles.
+- Use shared styles and resources to ensure consistency across modules.
+- Test UI changes in both light and dark modes if applicable.
+- Ensure accessibility standards are met (e.g., contrast ratios, keyboard navigation).
+- Refer to `docs/WinUITheming.md` for detailed theming and accessibility standards.
+
+---
 
 ## **Redundancy & Conflict Notes**
 - XML doc rule stated once in Coding Standards; referenced in Adding New Code.
 - Test placement rule stated in Testing; referenced in Adding New Code.
 - Build flags only in Build Instructions; Testing references them.
 - No conflicting intent detected — all sections aligned.
-- 

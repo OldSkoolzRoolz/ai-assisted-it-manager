@@ -2,11 +2,11 @@
 
 | **Field** | **Value** |
 |-----------|-----------|
-| **Version** | 2025-10-26.v12 |
+| **Version** | 2025-12-17.v13 |
 
 **Purpose**: This document maintains version control and audit trails for all documentation files in the `/docs` folder.
 
-**Last Updated**: 2025-10-26  
+**Last Updated**: 2025-12-17  
 **Maintained By**: @KyleC69 (Repository CODEOWNER)  
 **Version Format**: YYYY-MM-DD.vX (e.g., 2025-08-25.v1)
 
@@ -19,17 +19,23 @@
 | `ARCHITECTURE.md` | v5.0 | 2025-08-25 | Active | Architecture + async & localization strategies |
 | `PhaseOne.md` | v3.0 | 2025-08-25 | Active | Phase 1 scope, feature list, and implementation planning |
 | `BehaviorSettingsRegistry.md` | v3.0 | 2025-08-25 | Active | Registry mapping and ADMX behavior settings documentation |
-| `DOCUMENTATION_VERSION_MANIFEST.md` | v12.0 | 2025-10-26 | Active | This versioning manifest document |
+| `DOCUMENTATION_VERSION_MANIFEST.md` | v13.0 | 2025-12-17 | Active | This versioning manifest document |
 | `SECURITY-HARDENING.md` | v4.0 | 2025-10-26 | Active | Repository security hardening and branch protection guidance |
 | `SECURITY-SCANNING.md` | v1.0 | 2025-10-26 | Active | Security scanning workflows and configuration guide |
 | `ConfigSettings.md` | v3.0 | 2025-08-25 | Active | Client application configurable settings and registry mappings |
-| `.github/copilot-instructions.md` | v3.9 | 2025-08-25 | Active | Instructions for AI code generation and behavior |
+| `.github/copilot-instructions.md` | v4.0 | 2025-12-17 | Active | GitHub Copilot coding agent instructions following best practices |
 | `WinUITheming.md` | v2.0 | 2025-08-25 | Active | WinUI theming standards for AI code generation |
 | `Log-file-interface-design.md` | v1.0 | 2025-08-25 | Draft | Log file interface design specification |
 
 ---
 
 ## Change Log
+
+### 2025-12-17.v13
+**Modified By**: @copilot
+**Change Type**: Major - Copilot instructions setup and cleanup
+**Files Affected**: `.github/copilot-instructions.md` (updated), `obsolete-copilot-instructions.md` (removed), `DOCUMENTATION_VERSION_MANIFEST.md`
+**Description**: Set up and optimized GitHub Copilot instructions following official best practices. Added repository overview section, standardized section numbering and formatting, improved consistency in section markers (ENFORCED/FLEXIBLE). Removed obsolete instructions file to eliminate confusion. Updated instructions to v4.0 with comprehensive coverage of build, testing, coding standards, logging, localization, and theming guidelines.
 
 ### 2025-10-26.v12
 **Modified By**: @copilot
