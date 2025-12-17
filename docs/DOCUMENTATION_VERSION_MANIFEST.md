@@ -2,11 +2,11 @@
 
 | **Field** | **Value** |
 |-----------|-----------|
-| **Version** | 2025-10-26.v12 |
+| **Version** | 2025-12-17.v13 |
 
 **Purpose**: This document maintains version control and audit trails for all documentation files in the `/docs` folder.
 
-**Last Updated**: 2025-10-26  
+**Last Updated**: 2025-12-17  
 **Maintained By**: @KyleC69 (Repository CODEOWNER)  
 **Version Format**: YYYY-MM-DD.vX (e.g., 2025-08-25.v1)
 
@@ -19,17 +19,25 @@
 | `ARCHITECTURE.md` | v5.0 | 2025-08-25 | Active | Architecture + async & localization strategies |
 | `PhaseOne.md` | v3.0 | 2025-08-25 | Active | Phase 1 scope, feature list, and implementation planning |
 | `BehaviorSettingsRegistry.md` | v3.0 | 2025-08-25 | Active | Registry mapping and ADMX behavior settings documentation |
-| `DOCUMENTATION_VERSION_MANIFEST.md` | v12.0 | 2025-10-26 | Active | This versioning manifest document |
+| `DOCUMENTATION_VERSION_MANIFEST.md` | v13.0 | 2025-12-17 | Active | This versioning manifest document |
 | `SECURITY-HARDENING.md` | v4.0 | 2025-10-26 | Active | Repository security hardening and branch protection guidance |
 | `SECURITY-SCANNING.md` | v1.0 | 2025-10-26 | Active | Security scanning workflows and configuration guide |
 | `ConfigSettings.md` | v3.0 | 2025-08-25 | Active | Client application configurable settings and registry mappings |
 | `.github/copilot-instructions.md` | v3.9 | 2025-08-25 | Active | Instructions for AI code generation and behavior |
 | `WinUITheming.md` | v2.0 | 2025-08-25 | Active | WinUI theming standards for AI code generation |
 | `Log-file-interface-design.md` | v1.0 | 2025-08-25 | Draft | Log file interface design specification |
+| `BRANCH_PROTECTION.md` | v1.0 | 2025-12-17 | Active | Branch protection rules and collaboration guidelines |
+| `CONTRIBUTING.md` | v1.0 | 2025-12-17 | Active | Contributor guidelines with coding standards and workflow |
 
 ---
 
 ## Change Log
+
+### 2025-12-17.v13
+**Modified By**: @copilot
+**Change Type**: Major - Branch protection and collaboration framework
+**Files Affected**: `BRANCH_PROTECTION.md` (new), `CONTRIBUTING.md` (new), `DOCUMENTATION_VERSION_MANIFEST.md`, `.github/settings.yml` (new), `.github/workflows/pr-validation.yml` (new), `.github/PULL_REQUEST_TEMPLATE.md` (new), `.github/ISSUE_TEMPLATE/*` (new), `.github/README.md` (new), `.github/BRANCH_PROTECTION_SETUP.md` (new), `README.md`
+**Description**: Implemented comprehensive branch protection and collaboration framework with mandatory code owner approval for master branch (release-ready). Added automated PR validation workflow, comprehensive contributor guidelines, PR/issue templates, and detailed documentation for branch protection setup. Updated all build commands to match canonical build sequence with full analyzer enforcement.
 
 ### 2025-10-26.v12
 **Modified By**: @copilot

@@ -64,7 +64,7 @@ Before contributing, ensure you have:
 
 4. **Build the solution**
    ```bash
-   dotnet build ITCompanion.sln -c Debug -warnaserror
+   dotnet build ITCompanion.sln -c Debug -warnaserror /p:TreatWarningsAsErrors=true /p:AnalysisLevel=latest /p:EnforceCodeStyleInBuild=true
    ```
 
 5. **Run tests**
@@ -153,7 +153,7 @@ git checkout -b refactor/what-youre-refactoring
 
 ```bash
 # Build with warnings as errors
-dotnet build ITCompanion.sln -c Debug -warnaserror
+dotnet build ITCompanion.sln -c Debug -warnaserror /p:TreatWarningsAsErrors=true /p:AnalysisLevel=latest /p:EnforceCodeStyleInBuild=true
 
 # Run all tests
 dotnet test ITCompanion.sln --no-build --configuration Debug
@@ -321,7 +321,7 @@ All code must:
 
 ```bash
 # Verify your code meets requirements
-dotnet build ITCompanion.sln -c Debug -warnaserror /p:TreatWarningsAsErrors=true
+dotnet build ITCompanion.sln -c Debug -warnaserror /p:TreatWarningsAsErrors=true /p:AnalysisLevel=latest /p:EnforceCodeStyleInBuild=true
 dotnet format analyzers --verify-no-changes
 dotnet format style --verify-no-changes
 ```

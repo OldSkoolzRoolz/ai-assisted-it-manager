@@ -82,7 +82,7 @@ jobs:
           
           # Check branch follows naming conventions
           # Allowed patterns: feature/*, bugfix/*, hotfix/*, release/*, docs/*, refactor/*
-          if [[ ! "$BRANCH_NAME" =~ ^(feature|bugfix|hotfix|release|docs|refactor|copilot)/[a-z0-9-]+$ ]]; then
+          if [[ ! "$BRANCH_NAME" =~ ^(feature|bugfix|hotfix|release|docs|refactor|copilot)/[a-zA-Z0-9-]+$ ]]; then
             echo "⚠️ Branch name '$BRANCH_NAME' doesn't follow recommended convention"
             echo "⚠️ Recommended: feature/*, bugfix/*, hotfix/*, release/*, docs/*, refactor/*, copilot/*"
             echo "branch_valid=warning" >> $GITHUB_OUTPUT
@@ -132,7 +132,7 @@ jobs:
           # Check for files larger than 1MB
           LARGE_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | while read file; do
             if [ -f "$file" ]; then
-              SIZE=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file" 2>/dev/null || echo 0)
+              SIZE=$(stat -c%s "$file" 2>/dev/null || stat -f%z "$file" 2>/dev/null || echo 0)
               if [ $SIZE -gt 1048576 ]; then
                 echo "$file ($SIZE bytes)"
               fi
