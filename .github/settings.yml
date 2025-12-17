@@ -1,0 +1,239 @@
+# GitHub Repository Settings
+# This file documents the recommended repository settings for branch protection
+# Note: These settings must be applied manually via GitHub UI or GitHub API
+# Reference: https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository
+
+repository:
+  # Repository basic settings
+  name: ai-assisted-it-manager
+  description: Enterprise-grade toolkit for policy management, system monitoring, and AI-assisted automation
+  homepage: https://github.com/OldSkoolzRoolz/ai-assisted-it-manager
+  topics:
+    - policy-management
+    - it-automation
+    - enterprise-toolkit
+    - admx-parser
+    - windows-administration
+    - ai-monitoring
+  
+  # Enable/Disable features
+  has_issues: true
+  has_projects: true
+  has_wiki: false
+  has_downloads: true
+  
+  # Security and analysis features
+  security:
+    secret_scanning: true
+    secret_scanning_push_protection: true
+    dependabot_security_updates: true
+    advanced_security: true
+    
+  # Default branch
+  default_branch: master
+  
+  # Allow merge options
+  allow_squash_merge: true
+  allow_merge_commit: true
+  allow_rebase_merge: true
+  delete_branch_on_merge: true
+  
+  # Automatically delete head branches after merge
+  auto_delete_head_branches: true
+
+# Branch protection rules for 'master' branch
+# IMPORTANT: Master branch is treated as RELEASE-READY at all times
+# All code merged to master must be production-quality and code owner approved
+branches:
+  - name: master
+    protection:
+      # Require pull request reviews before merging
+      required_pull_request_reviews:
+        # Require at least 1 approval
+        required_approving_review_count: 1
+        # Dismiss stale pull request approvals when new commits are pushed
+        dismiss_stale_reviews: true
+        # Require review from Code Owners (CRITICAL: Ensures code owner approval for release-ready code)
+        require_code_owner_reviews: true
+        # Allow specified actors to bypass pull request requirements
+        bypass_pull_request_allowances:
+          users: []
+          teams: []
+          apps: []
+      
+      # Require status checks to pass before merging
+      required_status_checks:
+        # Require branches to be up to date before merging
+        strict: true
+        # List of required status checks (workflow job names)
+        contexts:
+          - "build-and-test"           # From dotnet-ci.yml
+          - "Analyze Code"             # From codeql.yml (job name, not display name)
+          - "validate-doc-versions"    # From doc-version-validation.yml
+      
+      # Enforce all configured restrictions above for administrators
+      enforce_admins: true
+      
+      # Require linear history (no merge commits)
+      required_linear_history: false
+      
+      # Allow force pushes
+      allow_force_pushes: false
+      
+      # Allow deletions
+      allow_deletions: false
+      
+      # Block creations (block users from creating matching branches)
+      block_creations: false
+      
+      # Require conversation resolution before merging
+      required_conversation_resolution: true
+      
+      # Lock branch (read-only)
+      lock_branch: false
+      
+      # Require signed commits
+      required_signatures: false
+
+# Additional branch protection for feature branches
+  - name: "feature/*"
+    protection:
+      # Lighter protection for feature branches
+      required_pull_request_reviews:
+        required_approving_review_count: 1
+        dismiss_stale_reviews: false
+        require_code_owner_reviews: false
+      
+      required_status_checks:
+        strict: false
+        contexts:
+          - "build-and-test"
+      
+      enforce_admins: false
+      allow_force_pushes: true
+      allow_deletions: true
+      required_conversation_resolution: false
+
+# Collaborators and teams
+# Note: Actual permissions are managed through GitHub UI
+collaborators:
+  - username: KyleC69
+    permission: admin
+  - username: OldSkoolzRoolz
+    permission: admin
+
+# Labels for issues and pull requests
+labels:
+  # Priority labels
+  - name: "priority: critical"
+    color: "d73a4a"
+    description: "Critical priority - must be addressed immediately"
+  
+  - name: "priority: high"
+    color: "ff6b6b"
+    description: "High priority - should be addressed soon"
+  
+  - name: "priority: medium"
+    color: "ffa500"
+    description: "Medium priority - normal timeline"
+  
+  - name: "priority: low"
+    color: "90ee90"
+    description: "Low priority - can be addressed when time permits"
+  
+  # Type labels
+  - name: "type: bug"
+    color: "d73a4a"
+    description: "Something isn't working"
+  
+  - name: "type: feature"
+    color: "0e8a16"
+    description: "New feature or request"
+  
+  - name: "type: enhancement"
+    color: "a2eeef"
+    description: "Improvement to existing functionality"
+  
+  - name: "type: documentation"
+    color: "0075ca"
+    description: "Documentation changes or additions"
+  
+  - name: "type: refactoring"
+    color: "fbca04"
+    description: "Code refactoring without changing functionality"
+  
+  - name: "type: security"
+    color: "d73a4a"
+    description: "Security-related changes or fixes"
+  
+  # Status labels
+  - name: "status: in progress"
+    color: "fbca04"
+    description: "Work is currently in progress"
+  
+  - name: "status: blocked"
+    color: "d73a4a"
+    description: "Blocked by dependencies or other issues"
+  
+  - name: "status: needs review"
+    color: "0e8a16"
+    description: "Ready for code review"
+  
+  - name: "status: needs testing"
+    color: "ffa500"
+    description: "Needs testing before merge"
+  
+  # Component labels
+  - name: "component: core"
+    color: "bfdadc"
+    description: "Core policy engine"
+  
+  - name: "component: client"
+    color: "bfdadc"
+    description: "Client application"
+  
+  - name: "component: security"
+    color: "bfdadc"
+    description: "Security module"
+  
+  - name: "component: dashboard"
+    color: "bfdadc"
+    description: "Enterprise dashboard"
+  
+  - name: "component: ci/cd"
+    color: "bfdadc"
+    description: "CI/CD and workflows"
+  
+  # Dependencies
+  - name: "dependencies"
+    color: "0366d6"
+    description: "Dependency updates"
+  
+  - name: "nuget"
+    color: "0366d6"
+    description: "NuGet package updates"
+  
+  - name: "github-actions"
+    color: "0366d6"
+    description: "GitHub Actions updates"
+  
+  # Special labels
+  - name: "good first issue"
+    color: "7057ff"
+    description: "Good for newcomers"
+  
+  - name: "help wanted"
+    color: "008672"
+    description: "Extra attention is needed"
+  
+  - name: "question"
+    color: "d876e3"
+    description: "Further information is requested"
+  
+  - name: "wontfix"
+    color: "ffffff"
+    description: "This will not be worked on"
+  
+  - name: "duplicate"
+    color: "cfd3d7"
+    description: "This issue or pull request already exists"

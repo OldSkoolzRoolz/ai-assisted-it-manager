@@ -26,6 +26,8 @@
 | `.github/copilot-instructions.md` | v4.0 | 2025-12-17 | Active | GitHub Copilot coding agent instructions following best practices |
 | `WinUITheming.md` | v2.0 | 2025-08-25 | Active | WinUI theming standards for AI code generation |
 | `Log-file-interface-design.md` | v1.0 | 2025-08-25 | Draft | Log file interface design specification |
+| `BRANCH_PROTECTION.md` | v1.0 | 2025-12-17 | Active | Branch protection rules and collaboration guidelines |
+| `CONTRIBUTING.md` | v1.0 | 2025-12-17 | Active | Contributor guidelines with coding standards and workflow |
 
 ---
 

@@ -1,0 +1,284 @@
+name: Pull Request Validation
+
+on:
+  pull_request:
+    branches:
+      - master
+      - 'feature/*'
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write
+  statuses: write
+
+jobs:
+  pr-validation:
+    name: Validate Pull Request
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Validate PR title
+        id: pr-title
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          # Check PR title is not empty and has minimum length
+          if [ ${#PR_TITLE} -lt 10 ]; then
+            echo "❌ PR title is too short (minimum 10 characters)"
+            echo "title_valid=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+          
+          # Check PR title doesn't start with lowercase (except for conventional commits)
+          if [[ ! "$PR_TITLE" =~ ^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert).*$ ]]; then
+            if [[ "$PR_TITLE" =~ ^[a-z] ]]; then
+              echo "⚠️ PR title should start with uppercase or use conventional commit format"
+            fi
+          fi
+          
+          echo "✅ PR title validation passed"
+          echo "title_valid=true" >> $GITHUB_OUTPUT
+      
+      - name: Validate PR description
+        id: pr-description
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          # Check PR has a description
+          if [ -z "$PR_BODY" ] || [ ${#PR_BODY} -lt 20 ]; then
+            echo "❌ PR description is required (minimum 20 characters)"
+            echo "description_valid=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+          
+          echo "✅ PR description validation passed"
+          echo "description_valid=true" >> $GITHUB_OUTPUT
+      
+      - name: Check for breaking changes indicator
+        id: breaking-changes
+        continue-on-error: true
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          # Look for BREAKING CHANGE or breaking changes indicators
+          if echo "$PR_BODY" | grep -qi "breaking change"; then
+            echo "⚠️ Breaking changes detected in PR description"
+            echo "has_breaking=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_breaking=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Validate branch name
+        id: branch-name
+        run: |
+          BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
+          
+          # Check branch follows naming conventions
+          # Allowed patterns: feature/*, bugfix/*, hotfix/*, release/*, docs/*, refactor/*
+          if [[ ! "$BRANCH_NAME" =~ ^(feature|bugfix|hotfix|release|docs|refactor|copilot)/[a-zA-Z0-9-]+$ ]]; then
+            echo "⚠️ Branch name '$BRANCH_NAME' doesn't follow recommended convention"
+            echo "⚠️ Recommended: feature/*, bugfix/*, hotfix/*, release/*, docs/*, refactor/*, copilot/*"
+            echo "branch_valid=warning" >> $GITHUB_OUTPUT
+          else
+            echo "✅ Branch name follows convention"
+            echo "branch_valid=true" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Check for CODEOWNERS file changes
+        id: codeowners-check
+        run: |
+          # Check if CODEOWNERS file is modified
+          if git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -q "^.github/CODEOWNERS$"; then
+            echo "⚠️ CODEOWNERS file has been modified - requires careful review"
+            echo "codeowners_changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "codeowners_changed=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Check for workflow file changes
+        id: workflow-check
+        run: |
+          # Check if workflow files are modified
+          if git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -q "^.github/workflows/"; then
+            echo "⚠️ GitHub Actions workflow files have been modified - requires careful review"
+            echo "workflows_changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "workflows_changed=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Count changed files
+        id: file-count
+        run: |
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | wc -l)
+          echo "changed_files=$CHANGED_FILES" >> $GITHUB_OUTPUT
+          
+          if [ $CHANGED_FILES -gt 50 ]; then
+            echo "⚠️ Large PR detected: $CHANGED_FILES files changed"
+            echo "⚠️ Consider breaking this into smaller PRs for easier review"
+          else
+            echo "✅ PR size is reasonable: $CHANGED_FILES files changed"
+          fi
+      
+      - name: Check for large file additions
+        id: large-files
+        run: |
+          # Check for files larger than 1MB
+          LARGE_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | while read file; do
+            if [ -f "$file" ]; then
+              SIZE=$(stat -c%s "$file" 2>/dev/null || stat -f%z "$file" 2>/dev/null || echo 0)
+              if [ $SIZE -gt 1048576 ]; then
+                echo "$file ($SIZE bytes)"
+              fi
+            fi
+          done)
+          
+          if [ -n "$LARGE_FILES" ]; then
+            echo "⚠️ Large files detected (>1MB):"
+            echo "$LARGE_FILES"
+            echo "has_large_files=true" >> $GITHUB_OUTPUT
+          else
+            echo "✅ No large files detected"
+            echo "has_large_files=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Generate validation summary
+        if: always()
+        run: |
+          echo "## 📋 Pull Request Validation Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "### Basic Checks" >> $GITHUB_STEP_SUMMARY
+          echo "- **PR Title**: ${{ steps.pr-title.outputs.title_valid == 'true' && '✅ Valid' || '❌ Invalid' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **PR Description**: ${{ steps.pr-description.outputs.description_valid == 'true' && '✅ Valid' || '❌ Invalid' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch Name**: ${{ steps.branch-name.outputs.branch_valid == 'true' && '✅ Valid' || '⚠️ Warning' }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "### Change Analysis" >> $GITHUB_STEP_SUMMARY
+          echo "- **Files Changed**: ${{ steps.file-count.outputs.changed_files }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Breaking Changes**: ${{ steps.breaking-changes.outputs.has_breaking == 'true' && '⚠️ Yes' || '✅ No' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **CODEOWNERS Modified**: ${{ steps.codeowners-check.outputs.codeowners_changed == 'true' && '⚠️ Yes' || '✅ No' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Workflows Modified**: ${{ steps.workflow-check.outputs.workflows_changed == 'true' && '⚠️ Yes' || '✅ No' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Large Files**: ${{ steps.large-files.outputs.has_large_files == 'true' && '⚠️ Yes' || '✅ No' }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          echo "### 📌 Reminder" >> $GITHUB_STEP_SUMMARY
+          echo "- Ensure all CI checks pass before requesting review" >> $GITHUB_STEP_SUMMARY
+          echo "- Code must follow .NET coding standards" >> $GITHUB_STEP_SUMMARY
+          echo "- Update documentation if needed" >> $GITHUB_STEP_SUMMARY
+          echo "- Add tests for new functionality" >> $GITHUB_STEP_SUMMARY
+          echo "- Review CODEOWNERS requirements" >> $GITHUB_STEP_SUMMARY
+
+  pr-size-check:
+    name: Check PR Size
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Calculate additions/deletions
+        run: |
+          git diff --shortstat origin/${{ github.base_ref }}...HEAD
+          
+          ADDITIONS=$(git diff --numstat origin/${{ github.base_ref }}...HEAD | awk '{sum+=$1} END {print sum}')
+          DELETIONS=$(git diff --numstat origin/${{ github.base_ref }}...HEAD | awk '{sum+=$2} END {print sum}')
+          TOTAL_CHANGES=$((ADDITIONS + DELETIONS))
+          
+          echo "📊 Changes: +$ADDITIONS -$DELETIONS (total: $TOTAL_CHANGES lines)"
+          
+          # Provide feedback based on PR size
+          if [ $TOTAL_CHANGES -lt 100 ]; then
+            echo "✅ Small PR - Easy to review"
+            SIZE_LABEL="size: small"
+          elif [ $TOTAL_CHANGES -lt 500 ]; then
+            echo "✅ Medium PR - Reasonable size"
+            SIZE_LABEL="size: medium"
+          elif [ $TOTAL_CHANGES -lt 1000 ]; then
+            echo "⚠️ Large PR - Consider breaking into smaller chunks"
+            SIZE_LABEL="size: large"
+          else
+            echo "❌ Very Large PR - Should be broken into multiple PRs"
+            SIZE_LABEL="size: extra-large"
+          fi
+          
+          echo "size_label=$SIZE_LABEL" >> $GITHUB_ENV
+
+  label-pr:
+    name: Auto-label PR
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    needs: [pr-validation, pr-size-check]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Detect changed components
+        id: components
+        run: |
+          LABELS=""
+          
+          # Check which components are affected
+          if git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -q "^src/CorePolicyEngine/"; then
+            LABELS="$LABELS,component: core"
+          fi
+          
+          if git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -q "^src/ITCompanionClient/\|^src/ClientShared/"; then
+            LABELS="$LABELS,component: client"
+          fi
+          
+          if git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -q "^src/Security/"; then
+            LABELS="$LABELS,component: security"
+          fi
+          
+          if git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -q "^src/EnterpriseDashboard/"; then
+            LABELS="$LABELS,component: dashboard"
+          fi
+          
+          if git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -q "^.github/workflows/\|^.github/settings.yml"; then
+            LABELS="$LABELS,component: ci/cd"
+          fi
+          
+          if git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -q "^docs/\|\.md$"; then
+            LABELS="$LABELS,type: documentation"
+          fi
+          
+          if git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -q "^tests/"; then
+            LABELS="$LABELS,type: testing"
+          fi
+          
+          # Remove leading comma if present
+          LABELS="${LABELS#,}"
+          
+          echo "Detected labels: $LABELS"
+          echo "labels=$LABELS" >> $GITHUB_OUTPUT
+      
+      - name: Comment on PR
+        if: steps.components.outputs.labels != ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const labels = '${{ steps.components.outputs.labels }}'.split(',').filter(l => l.trim());
+            
+            if (labels.length > 0) {
+              const comment = `### 🏷️ Auto-detected Components\n\nThis PR affects the following components:\n${labels.map(l => `- \`${l}\``).join('\n')}\n\n_Suggested labels for this PR_`;
+              
+              github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: comment
+              });
+            }
