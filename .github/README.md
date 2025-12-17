@@ -89,8 +89,9 @@ Configures issue template options and contact links:
 
 The repository uses branch protection rules documented in `settings.yml`:
 
-### Master Branch
-- **Required reviews**: 1 approval from code owners
+### Master Branch (Release-Ready)
+**The master branch is treated as release-ready at all times.**
+- **Required reviews**: 1 approval from code owners (@KyleC69 or @OldSkoolzRoolz) - **MANDATORY**
 - **Required status checks**: build-and-test, CodeQL, doc-validation
 - **Additional rules**: Dismiss stale reviews, require conversation resolution, enforce for admins
 - **Restrictions**: No force pushes, no deletions

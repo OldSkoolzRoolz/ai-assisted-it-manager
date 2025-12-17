@@ -16,15 +16,17 @@ This document describes the branch protection rules and collaboration guidelines
 
 Branch protection rules help maintain code quality and ensure that all changes go through proper review and validation before being merged into the main codebase. These rules apply to both internal team members and external contributors.
 
+**Important**: The `master` branch is treated as **release-ready** at all times. All code merged to master must be production-quality, fully tested, and approved by code owners.
+
 ## Branch Protection Rules
 
 ### Master Branch Protection
 
-The `master` branch is the primary development branch and has the following protections:
+The `master` branch is the primary development branch and is **treated as release-ready**. All code merged to master must be production-quality and has the following strict protections:
 
 #### Required Reviews
 - **Minimum 1 approval** required before merging
-- **Code Owner review required** - At least one code owner must approve
+- **Code Owner review required** - At least one code owner (@KyleC69 or @OldSkoolzRoolz) **must** approve all changes to master
 - **Stale review dismissal** - Approvals are dismissed when new commits are pushed
 - **Conversation resolution** - All review comments must be resolved before merging
 

@@ -42,6 +42,8 @@ repository:
   auto_delete_head_branches: true
 
 # Branch protection rules for 'master' branch
+# IMPORTANT: Master branch is treated as RELEASE-READY at all times
+# All code merged to master must be production-quality and code owner approved
 branches:
   - name: master
     protection:
@@ -51,7 +53,7 @@ branches:
         required_approving_review_count: 1
         # Dismiss stale pull request approvals when new commits are pushed
         dismiss_stale_reviews: true
-        # Require review from Code Owners
+        # Require review from Code Owners (CRITICAL: Ensures code owner approval for release-ready code)
         require_code_owner_reviews: true
         # Allow specified actors to bypass pull request requirements
         bypass_pull_request_allowances:

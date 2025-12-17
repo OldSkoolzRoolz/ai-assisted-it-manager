@@ -199,12 +199,14 @@ git push origin your-branch-name
 
 ### 8. Create a Pull Request
 
+**Important**: All pull requests to `master` require approval from a code owner (@KyleC69 or @OldSkoolzRoolz). The master branch is treated as **release-ready** at all times.
+
 1. Go to your fork on GitHub
 2. Click "New Pull Request"
 3. Select your branch
 4. Fill out the PR template completely
 5. Link related issues
-6. Request review from maintainers
+6. Request review from code owners (@KyleC69 or @OldSkoolzRoolz)
 
 ## Coding Standards
 

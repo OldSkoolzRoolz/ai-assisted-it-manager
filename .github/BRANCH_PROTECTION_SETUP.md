@@ -17,7 +17,9 @@ This guide provides step-by-step instructions for repository administrators to a
 3. In the left sidebar, click **Branches**
 4. Find the "Branch protection rules" section
 
-### Step 2: Protect Master Branch
+### Step 2: Protect Master Branch (Release-Ready)
+
+**Important**: The master branch is treated as **release-ready**. All merges require code owner approval.
 
 Click **Add branch protection rule** and configure:
 
@@ -30,7 +32,7 @@ Click **Add branch protection rule** and configure:
 - ✅ Require a pull request before merging
 - ✅ Require approvals: `1`
 - ✅ Dismiss stale pull request approvals when new commits are pushed
-- ✅ Require review from Code Owners
+- ✅ **Require review from Code Owners** ⚠️ **CRITICAL - Must be enabled**
 - ❌ Restrict who can dismiss pull request reviews (leave unchecked)
 - ❌ Allow specified actors to bypass required pull requests (leave unchecked)
 - ✅ Require approval of the most recent reviewable push
@@ -188,7 +190,7 @@ After applying settings, verify:
 
 - [ ] Master branch has protection enabled
 - [ ] Pull requests require 1 approval
-- [ ] Code owner review is required for master
+- [ ] **Code owner review is required for master** ⚠️ **CRITICAL - Must be verified**
 - [ ] Status checks are required before merging
 - [ ] Stale reviews are dismissed on new commits
 - [ ] Conversation resolution is required
@@ -196,6 +198,7 @@ After applying settings, verify:
 - [ ] Branch deletions are disabled on master
 - [ ] All repository labels are created
 - [ ] Test PR validates rules correctly
+- [ ] Master branch is treated as release-ready (no direct commits allowed)
 
 ## Testing Branch Protection
 
