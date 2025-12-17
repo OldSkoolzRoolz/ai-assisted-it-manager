@@ -14,7 +14,7 @@
 
 # Documentation - Repository CODEOWNER has final approval
 /docs/ @KyleC69 @OldSkoolzRoolz
-/docs/DOCUMENTATION_VERSION_MANIFEST.md @KyleC69
+/docs/DOCUMENTATION_VERSION_MANIFEST.md @KyleC69 @OldSkoolzRoolz
 
 # GitHub Configuration - Critical for repository security
 /.github/ @KyleC69 @OldSkoolzRoolz
