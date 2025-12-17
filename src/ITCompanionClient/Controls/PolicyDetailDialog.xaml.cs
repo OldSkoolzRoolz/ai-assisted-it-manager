@@ -13,7 +13,8 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using KC.ITCompanion.CorePolicyEngine.Storage;
-using KC.ITCompanion.ClientShared; // shared VM types
+using KC.ITCompanion.ClientShared;
+using KC.ITCompanion.ClientShared.ViewModels; // shared VM types
 
 namespace ITCompanionClient.Controls;
 

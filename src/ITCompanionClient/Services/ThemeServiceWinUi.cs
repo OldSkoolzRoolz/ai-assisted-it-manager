@@ -15,11 +15,30 @@ namespace ITCompanionClient;
 public sealed class ThemeServiceWinUi : IThemeService
 {
     private AppTheme _explicit = AppTheme.Auto;
+
+    /// <summary>
+    /// Gets the currently selected application theme.
+    /// </summary>
     public AppTheme Current { get; private set; } = AppTheme.Light;
+
+    /// <summary>
+    /// Occurs when the application's theme has changed.
+    /// </summary>
+    /// <remarks>Subscribe to this event to be notified when the theme changes, allowing you to update UI
+    /// elements or resources accordingly. The event provides a <see cref="ThemeChangedEventArgs"/> instance containing
+    /// details about the new theme.</remarks>
     public event EventHandler<ThemeChangedEventArgs>? ThemeChanged;
 
-    public void Initialize() => Apply(AppTheme.Auto, force: true);
 
+    /// <summary>
+    /// 
+    /// </summary>
+    public void Initialize() => Apply(AppTheme.Auto, force: true);
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="theme"></param>
+    /// <param name="force"></param>
     public void Apply(AppTheme theme, bool force = false)
     {
         _explicit = theme;

@@ -9,9 +9,13 @@ public class ThemeServiceTests
     private sealed class DummyThemeService : IThemeService
     {
         public AppTheme Current { get; private set; } = AppTheme.Light;
-        public event EventHandler<AppTheme>? ThemeChanged;
+        public event EventHandler<ThemeChangedEventArgs>? ThemeChanged;
         public void Initialize() { }
-        public void Apply(AppTheme theme, bool force = false) { Current = theme == AppTheme.Auto ? AppTheme.Light : theme; ThemeChanged?.Invoke(this, Current); }
+        public void Apply(AppTheme theme, bool force = false)
+        {
+            Current = theme == AppTheme.Auto ? AppTheme.Light : theme;
+            ThemeChanged?.Invoke(this, new ThemeChangedEventArgs(Current));
+        }
     }
 
     [Fact]
@@ -19,7 +23,7 @@ public class ThemeServiceTests
     {
         var svc = new DummyThemeService();
         AppTheme changed = AppTheme.Light;
-        svc.ThemeChanged += (_, t) => changed = t;
+        svc.ThemeChanged += (_, e) => changed = e.Theme;
         svc.Apply(AppTheme.Dark);
         Assert.Equal(AppTheme.Dark, svc.Current);
         Assert.Equal(AppTheme.Dark, changed);

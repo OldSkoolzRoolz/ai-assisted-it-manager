@@ -2,10 +2,10 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml;
 using System;
 using System.Linq;
-using KC.ITCompanion.ClientShared;
 using KC.ITCompanion.CorePolicyEngine.AdminTemplates;
 using System.ComponentModel;
 using Microsoft.UI.Xaml.Media;
+using KC.ITCompanion.ClientShared.ViewModels;
 
 namespace ITCompanionClient.Controls;
 

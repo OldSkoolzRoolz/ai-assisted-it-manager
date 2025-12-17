@@ -5,9 +5,9 @@
     <UseWinUI>true</UseWinUI>
   </PropertyGroup>
 	<PropertyGroup>
-		<!-- Optional: if you're using Windows App SDK features -->
+		<!-- Optional: if you're using Windows App SDK features 
 		<EnableMsixTooling>false</EnableMsixTooling>
-		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>-->
 
 		<!-- Ensure Windows-specific APIs are available -->
 		<EnableWindowsTargetPlatform>true</EnableWindowsTargetPlatform>

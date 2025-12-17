@@ -6,6 +6,7 @@ using KC.ITCompanion.CorePolicyEngine.Storage;
 using KC.ITCompanion.CorePolicyEngine.Storage.Sql;
 using KC.ITCompanion.ClientShared;
 using KC.ITCompanion.ClientShared.Localization;
+using KC.ITCompanion.ClientShared.ViewModels;
 
 namespace ITCompanionClient;
 /// <summary>
@@ -48,7 +49,7 @@ public partial class App : Application
         sc.AddLogging(b =>
         {
             b.AddDebug();
-            b.SetMinimumLevel(LogLevel.Information);
+            b.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Information);
         });
         // Core services
         sc.AddSingleton<IAdminTemplateLoader, AdmxAdmlParser>();

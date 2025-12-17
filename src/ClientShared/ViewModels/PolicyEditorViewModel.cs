@@ -25,8 +25,14 @@ using Microsoft.Extensions.Logging;
 using KC.ITCompanion.ClientShared.Logging;
 using KC.ITCompanion.ClientShared.Localization;
 
-namespace KC.ITCompanion.ClientShared;
+namespace KC.ITCompanion.ClientShared.ViewModels;
 
+
+
+/// <summary>
+/// Event arguments fired when a policy row asks for its detail panel.
+/// Provides access to the originating grid row for downstream handlers.
+/// </summary>
 public sealed class PolicyDetailRequestedEventArgs : EventArgs
 {
     /// <summary>Create event args for a policy detail request.</summary>
@@ -190,7 +196,6 @@ public class PolicyEditorViewModel : INotifyPropertyChanged
         catch (OperationCanceledException) { }
         catch (IOException ex) { _logger.PolicyGroupsLoadFailed(ex); }
         catch (UnauthorizedAccessException ex) { _logger.PolicyGroupsLoadFailed(ex); }
-        catch (Exception ex) { _logger.PolicyGroupsLoadFailed(ex); }
     }
 
     private async Task LoadDefaultSubsetAsync()

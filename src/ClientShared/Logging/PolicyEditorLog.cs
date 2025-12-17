@@ -30,7 +30,7 @@ internal static partial class PolicyEditorLog
     {
         var raw = Res.GetString(key, C) ?? key;
         if (args.Length == 0) return raw;
-        var cacheKey = C.Name + "|" + key + "|" + raw.GetHashCode();
+        var cacheKey = C.Name + "|" + key + "|" + raw.GetHashCode(StringComparison.Ordinal);
         var cf = FormatCache.GetOrAdd(cacheKey, static (_, state) => CompositeFormat.Parse(state), raw);
         return string.Format(C, cf, args);
     }
