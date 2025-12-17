@@ -66,8 +66,8 @@ branches:
         # List of required status checks (workflow job names)
         contexts:
           - "build-and-test"           # From dotnet-ci.yml
-          - "Analyze Code (csharp)"    # From codeql.yml
-          - "validate-documentation"   # From doc-version-validation.yml
+          - "Analyze Code"             # From codeql.yml (job name, not display name)
+          - "validate-doc-versions"    # From doc-version-validation.yml
       
       # Enforce all configured restrictions above for administrators
       enforce_admins: true

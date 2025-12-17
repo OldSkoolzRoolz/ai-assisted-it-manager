@@ -40,8 +40,8 @@ Click **Add branch protection rule** and configure:
 - ✅ Require branches to be up to date before merging
 - **Status checks that are required:**
   - `build-and-test` (from dotnet-ci.yml)
-  - `Analyze Code (csharp)` (from codeql.yml)
-  - `validate-documentation` (from doc-version-validation.yml)
+  - `Analyze Code` (from codeql.yml)
+  - `validate-doc-versions` (from doc-version-validation.yml)
 
 **Additional Rules:**
 - ✅ Require conversation resolution before merging
@@ -164,8 +164,8 @@ gh api repos/OldSkoolzRoolz/ai-assisted-it-manager/branches/master/protection \
   --field required_pull_request_reviews[require_code_owner_reviews]=true \
   --field required_status_checks[strict]=true \
   --field required_status_checks[contexts][]=build-and-test \
-  --field required_status_checks[contexts][]=Analyze\ Code\ \(csharp\) \
-  --field required_status_checks[contexts][]=validate-documentation \
+  --field required_status_checks[contexts][]=Analyze\ Code \
+  --field required_status_checks[contexts][]=validate-doc-versions \
   --field enforce_admins=true \
   --field required_conversation_resolution=true \
   --field allow_force_pushes[enabled]=false \

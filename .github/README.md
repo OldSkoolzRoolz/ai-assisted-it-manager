@@ -110,12 +110,12 @@ All pull requests must pass these automated checks before merging:
 - Purpose: Build solution and run tests
 - Configuration: Release mode with warnings as errors
 
-### Analyze Code (csharp)
+### Analyze Code
 - Workflow: `codeql.yml`
 - Purpose: Security vulnerability scanning
 - Configuration: Security and quality queries
 
-### validate-documentation
+### validate-doc-versions
 - Workflow: `doc-version-validation.yml`
 - Purpose: Validate documentation version manifest
 - Configuration: Checks for outdated docs

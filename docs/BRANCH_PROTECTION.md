@@ -31,8 +31,8 @@ The `master` branch is the primary development branch and has the following prot
 #### Status Checks
 The following CI checks must pass before merging:
 - **build-and-test** - .NET CI build and test suite (from `dotnet-ci.yml`)
-- **Analyze Code (csharp)** - CodeQL security analysis (from `codeql.yml`)
-- **validate-documentation** - Documentation version validation (from `doc-version-validation.yml`)
+- **Analyze Code** - CodeQL security analysis (from `codeql.yml`)
+- **validate-doc-versions** - Documentation version validation (from `doc-version-validation.yml`)
 
 #### Branch Requirements
 - **Up-to-date branch required** - Branch must be updated with latest master before merging
@@ -160,7 +160,7 @@ All status checks must pass before merging. These run automatically on every pus
 - Runs weekly and on every PR
 - Must not introduce new critical issues
 
-### Documentation Validation (`validate-documentation`)
+### Documentation Validation (`validate-doc-versions`)
 - Validates documentation version manifest
 - Ensures documentation is up-to-date
 - Checks for broken links
