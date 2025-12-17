@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 💬 General Discussion
+    url: https://github.com/OldSkoolzRoolz/ai-assisted-it-manager/discussions
+    about: Ask questions, share ideas, or discuss the project
+  - name: 🔒 Security Issue
+    url: https://github.com/OldSkoolzRoolz/ai-assisted-it-manager/security/advisories/new
+    about: Report a security vulnerability privately
+  - name: 📖 Documentation
+    url: https://github.com/OldSkoolzRoolz/ai-assisted-it-manager/tree/master/docs
+    about: Browse project documentation

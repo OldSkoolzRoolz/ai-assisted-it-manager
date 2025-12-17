@@ -95,7 +95,21 @@ dotnet test tests/
 
 ## 🤝 Contributing
 
-We welcome contributors of all skill levels. See [`docs/contributing.md`](docs/contributing.md) for guidelines. Stick with us through Phase 1 and you may be invited to join the paid release team.
+We welcome contributors of all skill levels! This project follows standard branch protection rules and collaboration practices.
+
+### Quick Links
+- 📖 [Contributing Guidelines](docs/CONTRIBUTING.md) - How to contribute
+- 🔒 [Branch Protection](docs/BRANCH_PROTECTION.md) - Branch rules and PR requirements
+- 🐛 [Issue Templates](.github/ISSUE_TEMPLATE/) - Report bugs or request features
+- 🔧 [Security Policy](.github/SECURITY.md) - Report security vulnerabilities
+
+### Getting Started
+1. Fork the repository
+2. Create a feature branch (`feature/your-feature-name`)
+3. Make your changes following our [coding standards](docs/CONTRIBUTING.md#coding-standards)
+4. Submit a pull request with a clear description
+
+**Incentive**: Stick with us through Phase 1 and you may be invited to join the paid release team.
 
 ---
 
