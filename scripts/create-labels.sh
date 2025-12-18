@@ -114,3 +114,5 @@ echo ""
 echo "Or visit:"
 echo "  https://github.com/OldSkoolzRoolz/ai-assisted-it-manager/labels"
 echo "=============================================="
+
+exit 0

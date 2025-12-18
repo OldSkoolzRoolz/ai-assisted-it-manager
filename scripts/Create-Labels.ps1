@@ -121,3 +121,5 @@ Write-Host ""
 Write-Host "Or visit:" -ForegroundColor Cyan
 Write-Host "  https://github.com/OldSkoolzRoolz/ai-assisted-it-manager/labels"
 Write-Host "=============================================="
+
+exit 0
