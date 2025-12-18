@@ -51,8 +51,12 @@ jobs:
         env:
           PR_BODY: ${{ github.event.pull_request.body }}
         run: |
+          # Write PR body to file to safely handle special characters
+          echo "$PR_BODY" > /tmp/pr_body.txt
+          PR_BODY_LENGTH=$(wc -c < /tmp/pr_body.txt)
+          
           # Check PR has a description
-          if [ -z "$PR_BODY" ] || [ ${#PR_BODY} -lt 20 ]; then
+          if [ -z "$PR_BODY" ] || [ $PR_BODY_LENGTH -lt 20 ]; then
             echo "❌ PR description is required (minimum 20 characters)"
             echo "description_valid=false" >> $GITHUB_OUTPUT
             exit 1
@@ -68,7 +72,9 @@ jobs:
           PR_BODY: ${{ github.event.pull_request.body }}
         run: |
           # Look for BREAKING CHANGE or breaking changes indicators
-          if echo "$PR_BODY" | grep -qi "breaking change"; then
+          # Write to file to safely handle special characters
+          echo "$PR_BODY" > /tmp/pr_body_breaking.txt
+          if grep -qi "breaking change" /tmp/pr_body_breaking.txt; then
             echo "⚠️ Breaking changes detected in PR description"
             echo "has_breaking=true" >> $GITHUB_OUTPUT
           else
