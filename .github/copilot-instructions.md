@@ -22,7 +22,7 @@ This is a multi-phase Windows enterprise toolkit for Group Policy management, sy
 - **Phase 4**: Monetization - free local edition, paid cloud-connected version
 
 **Tech Stack**:
-- Language: C# .NET 9
+- Language: C# .NET 8
 - UI: WinUI 3 (modern Windows desktop)
 - Database: SQL Server
 - AI: ONNX runtime integration
