@@ -20,13 +20,10 @@
 | `PhaseOne.md` | v3.0 | 2025-08-25 | Active | Phase 1 scope, feature list, and implementation planning |
 | `BehaviorSettingsRegistry.md` | v3.0 | 2025-08-25 | Active | Registry mapping and ADMX behavior settings documentation |
 | `DOCUMENTATION_VERSION_MANIFEST.md` | v13.0 | 2025-12-17 | Active | This versioning manifest document |
-| `SECURITY-HARDENING.md` | v4.0 | 2025-10-26 | Active | Repository security hardening and branch protection guidance |
-| `SECURITY-SCANNING.md` | v1.0 | 2025-10-26 | Active | Security scanning workflows and configuration guide |
 | `ConfigSettings.md` | v3.0 | 2025-08-25 | Active | Client application configurable settings and registry mappings |
 | `.github/copilot-instructions.md` | v4.0 | 2025-12-17 | Active | GitHub Copilot coding agent instructions following best practices |
 | `WinUITheming.md` | v2.0 | 2025-08-25 | Active | WinUI theming standards for AI code generation |
 | `Log-file-interface-design.md` | v1.0 | 2025-08-25 | Draft | Log file interface design specification |
-| `BRANCH_PROTECTION.md` | v1.0 | 2025-12-17 | Active | Branch protection rules and collaboration guidelines |
 | `CONTRIBUTING.md` | v1.0 | 2025-12-17 | Active | Contributor guidelines with coding standards and workflow |
 
 ---
