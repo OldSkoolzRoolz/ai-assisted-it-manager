@@ -1,3 +1,16 @@
+| 🗂️ **Field**           | **Value**                          |
+|-------------------------|------------------------------------|
+| **Date**                | 2025-10-26                         |
+| **Modified By**         | @copilot                           |
+| **Last Modified**       | 2025-10-26                         |
+| **Title**               | *Collaborators Contributing Guide* |
+| **Author**              | CodeOwners                         |
+| **Document ID**         | SEC-CONTRIB-001                     |
+| **Document Authority**  | @KyleC69                           |
+| **Version**             | 2025-10-26.v4                      |
+---
+
+
 # Contributing to AI-Assisted IT Manager
 
 Thank you for your interest in contributing to the AI-Assisted IT Manager project! We welcome contributions from developers of all skill levels.
