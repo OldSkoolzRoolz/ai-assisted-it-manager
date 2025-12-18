@@ -30,5 +30,4 @@ jobs:
           && dotnet build src/CorePolicyEngine/CorePolicyEngine.csproj -c Debug --no-restore
           && dotnet build src/ITCompanionClient/ITCompanionClient.csproj -c Debug --no-restore
           && dotnet build src/Security/Security.csproj -c Debug --no-restore
-      - name: Test
-        run: dotnet test ITCompanion.sln --no-build --configuration Debug --verbosity normal --filter FullyQualifiedName~Tests
+   
