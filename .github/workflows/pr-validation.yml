@@ -52,34 +52,42 @@ jobs:
           PR_BODY: ${{ github.event.pull_request.body }}
         run: |
           # Write PR body to file to safely handle special characters
-          echo "$PR_BODY" > /tmp/pr_body.txt
-          PR_BODY_LENGTH=$(wc -c < /tmp/pr_body.txt)
+          # Use printf to avoid adding trailing newline that would affect length calculation
+          TEMP_FILE=$(mktemp)
+          printf '%s' "$PR_BODY" > "$TEMP_FILE"
+          PR_BODY_LENGTH=$(wc -c < "$TEMP_FILE")
           
           # Check PR has a description
           if [ -z "$PR_BODY" ] || [ $PR_BODY_LENGTH -lt 20 ]; then
             echo "❌ PR description is required (minimum 20 characters)"
             echo "description_valid=false" >> $GITHUB_OUTPUT
+            rm -f "$TEMP_FILE"
             exit 1
           fi
           
           echo "✅ PR description validation passed"
           echo "description_valid=true" >> $GITHUB_OUTPUT
+          
+          # Save temp file path for reuse in subsequent steps
+          echo "pr_body_file=$TEMP_FILE" >> $GITHUB_OUTPUT
       
       - name: Check for breaking changes indicator
         id: breaking-changes
         continue-on-error: true
-        env:
-          PR_BODY: ${{ github.event.pull_request.body }}
         run: |
           # Look for BREAKING CHANGE or breaking changes indicators
-          # Write to file to safely handle special characters
-          echo "$PR_BODY" > /tmp/pr_body_breaking.txt
-          if grep -qi "breaking change" /tmp/pr_body_breaking.txt; then
+          # Reuse the temp file created in the previous step
+          TEMP_FILE="${{ steps.pr-description.outputs.pr_body_file }}"
+          
+          if [ -f "$TEMP_FILE" ] && grep -qi "breaking change" "$TEMP_FILE"; then
             echo "⚠️ Breaking changes detected in PR description"
             echo "has_breaking=true" >> $GITHUB_OUTPUT
           else
             echo "has_breaking=false" >> $GITHUB_OUTPUT
           fi
+          
+          # Clean up temp file
+          rm -f "$TEMP_FILE"
       
       - name: Validate branch name
         id: branch-name
