@@ -1,3 +1,16 @@
+| 🗂️ **Field**           | **Value**                                         |
+|-------------------------|---------------------------------------------------|
+| **Date**                | 2025-12-18                                        |
+| **Modified By**         | @copilot                                          |
+| **Last Modified**       | 2025-12-18                                        |
+| **Title**               | *Branch Protection and Collaboration Rules*       |
+| **Author**              | @KyleC69                                          |
+| **Document ID**         | BRANCH-PROTECTION-001                             |
+| **Document Authority**  | @KyleC69                                          |
+| **Version**             | 2025-12-18.v2.0                                   |
+
+---
+
 # Branch Protection and Collaboration Rules
 
 This document describes the branch protection rules and collaboration guidelines for the AI-Assisted IT Manager repository.
@@ -27,6 +40,7 @@ The `master` branch is the primary development branch and is **treated as releas
 #### Required Reviews
 - **Minimum 1 approval** required before merging
 - **Code Owner review required** - At least one code owner (@KyleC69 or @OldSkoolzRoolz) **must** approve all changes to master
+  - **Owner Bypass Allowance** - In single-owner scenarios, the owner (@KyleC69) is allowed to bypass the code owner review requirement to enable merging their own PRs when they are the sole contributor
 - **Stale review dismissal** - Approvals are dismissed when new commits are pushed
 - **Conversation resolution** - All review comments must be resolved before merging
 
@@ -146,6 +160,12 @@ The CODEOWNERS file specifies who must approve changes to specific areas:
 - All changes require approval from at least one code owner
 - Critical files (workflows, CODEOWNERS, security) require extra scrutiny
 
+**Special Note on Single-Owner Repositories**:
+- When the repository has only one owner/collaborator, that owner (@KyleC69) is granted bypass permission for code owner reviews
+- This is necessary because GitHub does not allow owners to approve their own PRs under standard code owner rules
+- The bypass allowance is configured in `.github/settings.yml` under `bypass_pull_request_allowances`
+- All other protections (status checks, conversation resolution, etc.) remain in effect to maintain code quality
+
 ## Status Checks
 
 All status checks must pass before merging. These run automatically on every push.
@@ -250,6 +270,7 @@ Consider using:
 - Request review from code owners (@KyleC69, @OldSkoolzRoolz)
 - Wait for approval from at least one code owner
 - Address any feedback from code owners
+- **Note**: In single-owner scenarios, the owner can bypass this requirement as configured in settings.yml
 
 ## References
 
@@ -269,5 +290,5 @@ If you have questions about branch protection or collaboration:
 
 ---
 
-**Last Updated**: 2025-12-17  
+**Last Updated**: 2025-12-18  
 **Maintained By**: @KyleC69, @OldSkoolzRoolz

@@ -2,11 +2,11 @@
 
 | **Field** | **Value** |
 |-----------|-----------|
-| **Version** | 2025-12-17.v13 |
+| **Version** | 2025-12-18.v14 |
 
 **Purpose**: This document maintains version control and audit trails for all documentation files in the `/docs` folder.
 
-**Last Updated**: 2025-12-17  
+**Last Updated**: 2025-12-18  
 **Maintained By**: @KyleC69 (Repository CODEOWNER)  
 **Version Format**: YYYY-MM-DD.vX (e.g., 2025-08-25.v1)
 
@@ -26,12 +26,18 @@
 | `.github/copilot-instructions.md` | v4.0 | 2025-12-17 | Active | GitHub Copilot coding agent instructions following best practices |
 | `WinUITheming.md` | v2.0 | 2025-08-25 | Active | WinUI theming standards for AI code generation |
 | `Log-file-interface-design.md` | v1.0 | 2025-08-25 | Draft | Log file interface design specification |
-| `BRANCH_PROTECTION.md` | v1.0 | 2025-12-17 | Active | Branch protection rules and collaboration guidelines |
+| `BRANCH_PROTECTION.md` | v2.0 | 2025-12-18 | Active | Branch protection rules and collaboration guidelines |
 | `CONTRIBUTING.md` | v1.0 | 2025-12-17 | Active | Contributor guidelines with coding standards and workflow |
 
 ---
 
 ## Change Log
+
+### 2025-12-18.v14
+**Modified By**: @copilot
+**Change Type**: Minor - Branch protection configuration update
+**Files Affected**: `.github/settings.yml`, `BRANCH_PROTECTION.md`, `DOCUMENTATION_VERSION_MANIFEST.md`
+**Description**: Updated branch protection rules to allow repository owner (@KyleC69) to bypass code owner review requirements in single-owner scenarios. This change enables the owner to merge their own PRs when they are the sole collaborator, which GitHub normally prevents. All other protections (status checks, conversation resolution, etc.) remain in effect. Documentation updated to reflect this configuration with rationale.
 
 ### 2025-12-17.v13
 **Modified By**: @copilot

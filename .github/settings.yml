@@ -56,8 +56,9 @@ branches:
         # Require review from Code Owners (CRITICAL: Ensures code owner approval for release-ready code)
         require_code_owner_reviews: true
         # Allow specified actors to bypass pull request requirements
+        # Note: Owner bypass is necessary when owner is the sole collaborator
         bypass_pull_request_allowances:
-          users: []
+          users: ["KyleC69"]
           teams: []
           apps: []
       
