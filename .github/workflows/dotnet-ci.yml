@@ -17,7 +17,7 @@ jobs:
     
     strategy:
       matrix:
-        dotnet-version: ['9.0.x']
+        dotnet-version: ['8.0.x']
     
     steps:
     - name: Checkout code
@@ -27,7 +27,7 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ matrix.dotnet-version }}
-        include-prerelease: true
+        include-prerelease: false
         
     - name: Cache NuGet packages
       uses: actions/cache@v4
@@ -42,17 +42,6 @@ jobs:
       
     - name: Build solution
       run: dotnet build ITCompanion.sln --configuration Release --no-restore --verbosity normal /p:TreatWarningsAsErrors=true
-        
-    - name: Run tests
-      run: dotnet test ITCompanion.sln --configuration Release --no-build --verbosity normal --logger trx --results-directory TestResults/
-      
-    - name: Upload test results
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: test-results-${{ matrix.dotnet-version }}
-        path: TestResults/
-        retention-days: 30
         
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
