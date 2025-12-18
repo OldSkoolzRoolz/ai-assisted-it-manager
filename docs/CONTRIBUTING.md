@@ -131,10 +131,13 @@ We welcome various types of contributions:
 Before starting work on a significant change:
 1. Search for existing issues
 2. Create a new issue describing the change
-3. Discuss the approach with maintainers
-4. Wait for approval before starting work
+3. Apply appropriate labels (see [Label Guide](../.github/LABELS.md))
+4. Discuss the approach with maintainers
+5. Wait for approval before starting work
 
 For small fixes (typos, minor bugs), you can skip this step.
+
+**Note**: If you're unable to find labels when creating an issue, they may not be created in the repository yet. See the [Labels Guide](../.github/LABELS.md) for instructions on creating them or contact maintainers.
 
 ### 2. Create a Branch
 
