@@ -21,6 +21,7 @@ This directory contains GitHub-specific configuration files for the AI-Assisted 
 ├── CODEOWNERS               # Code ownership definitions
 ├── PULL_REQUEST_TEMPLATE.md # Template for pull requests
 ├── SECURITY.md              # Security policy and vulnerability reporting
+├── LABELS.md                # Label management guide (NEW)
 ├── copilot-instructions.md  # GitHub Copilot configuration
 ├── dependabot.yml           # Dependabot configuration
 └── settings.yml             # Repository settings and branch protection (NEW)
@@ -37,6 +38,17 @@ Documents the recommended repository settings including:
 - Collaborator permissions
 
 **Note**: This file documents the desired settings but must be applied manually via GitHub UI or API.
+
+### LABELS.md (NEW)
+Comprehensive guide to the repository label system:
+- Complete list of all labels with descriptions and colors
+- Instructions on where labels are defined
+- Multiple methods for creating labels (UI, CLI, API)
+- Automated scripts for bulk label creation
+- Best practices for using labels
+- Troubleshooting guide for common label issues
+
+**See Also**: `scripts/create-labels.sh` and `scripts/Create-Labels.ps1` for automated label creation.
 
 ### workflows/pr-validation.yml (NEW)
 Automated validation workflow that runs on pull requests to:
@@ -148,6 +160,34 @@ Defines code ownership for different parts of the repository:
 ### Documentation
 - **doc-version-validation.yml**: Validate documentation versions
 
+## Labels
+
+The repository uses a comprehensive labeling system documented in `LABELS.md`:
+
+### Priority Labels
+- `priority: critical`, `priority: high`, `priority: medium`, `priority: low`
+
+### Type Labels
+- `type: bug`, `type: feature`, `type: enhancement`, `type: documentation`
+- `type: refactoring`, `type: security`
+
+### Status Labels
+- `status: in progress`, `status: blocked`, `status: needs review`, `status: needs testing`
+
+### Component Labels
+- `component: core`, `component: client`, `component: security`
+- `component: dashboard`, `component: ci/cd`
+
+### Special Labels
+- `dependencies`, `nuget`, `github-actions`
+- `good first issue`, `help wanted`, `question`
+
+**Important**: Labels defined in `settings.yml` must be manually created in GitHub. Use the automated scripts:
+- **Bash**: `./scripts/create-labels.sh`
+- **PowerShell**: `.\scripts\Create-Labels.ps1`
+
+For detailed information, see [LABELS.md](LABELS.md).
+
 ## Applying Settings
 
 ### Via GitHub UI
@@ -175,25 +215,20 @@ Consider using automation apps:
 
 ## Labels
 
-The repository uses a comprehensive labeling system:
+The repository uses a comprehensive labeling system documented in [LABELS.md](LABELS.md).
 
-### Priority Labels
-- `priority: critical`, `priority: high`, `priority: medium`, `priority: low`
+**Quick reference**:
+- Priority: `priority: critical/high/medium/low`
+- Type: `type: bug/feature/enhancement/documentation/refactoring/security`
+- Status: `status: in progress/blocked/needs review/needs testing`
+- Component: `component: core/client/security/dashboard/ci/cd`
+- Special: `dependencies`, `nuget`, `github-actions`, `good first issue`, `help wanted`
 
-### Type Labels
-- `type: bug`, `type: feature`, `type: enhancement`, `type: documentation`
-- `type: refactoring`, `type: security`
+**Creating labels**: Labels must be manually created in GitHub. Use automated scripts:
+- Bash: `./scripts/create-labels.sh`
+- PowerShell: `.\scripts\Create-Labels.ps1`
 
-### Status Labels
-- `status: in progress`, `status: blocked`, `status: needs review`, `status: needs testing`
-
-### Component Labels
-- `component: core`, `component: client`, `component: security`
-- `component: dashboard`, `component: ci/cd`
-
-### Special Labels
-- `dependencies`, `nuget`, `github-actions`
-- `good first issue`, `help wanted`, `question`
+For complete information including colors, descriptions, best practices, and troubleshooting, see [LABELS.md](LABELS.md).
 
 ## Contributing
 

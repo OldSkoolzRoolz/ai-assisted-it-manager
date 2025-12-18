@@ -101,6 +101,7 @@ We welcome contributors of all skill levels! This project follows standard branc
 ### Quick Links
 - 📖 [Contributing Guidelines](docs/CONTRIBUTING.md) - How to contribute
 - 🔒 [Branch Protection](docs/BRANCH_PROTECTION.md) - Branch rules and PR requirements
+- 🏷️ [Labels Guide](.github/LABELS.md) - Repository label system and creation
 - 🐛 [Issue Templates](.github/ISSUE_TEMPLATE/) - Report bugs or request features
 - 🔧 [Security Policy](.github/SECURITY.md) - Report security vulnerabilities
 
